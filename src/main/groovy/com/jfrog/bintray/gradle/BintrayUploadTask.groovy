@@ -8,6 +8,7 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.Upload
 
 class BintrayUploadTask extends DefaultTask {
 
@@ -46,57 +47,48 @@ class BintrayUploadTask extends DefaultTask {
     @Input
     String[] packageLabels
 
-    File[] configurationFiles
-    File[] publicationFiles
+    File[] configurationUploads
+    File[] publicationUploads
 
     @TaskAction
     void bintrayUpload() {
-        //Extract from convention so that we don't need to use getters
-        apiUrl = getApiUrl()
-        user = getUser()
-        apiKey = getApiKey()
-        configurations = getConfigurations()
-        publications = getPublications()
-        userOrg = getUserOrg()
-        repoName = getRepoName()
-        packageName = getPackageName()
-        packageDesc = getPackageDesc()
-        packageLabels = getPackageLabels()
-
         logger.info("Found {} configuration(s) to publish.", configurations?.length ?: 0);
-        configurations * {
+        configurationUploads = configurations.collect {
             if (it instanceof CharSequence) {
                 Configuration configuration = project.configurations.findByName(it)
                 if (configuration != null) {
-                    collectFiles(configuration)
+                    return collectFiles(configuration)
                 } else {
                     logger.error("{}: Could not find configuration: {}.", path, it)
                 }
             } else if (conf instanceof Configuration) {
-                configurationFiles = collectFiles((Configuration) it)
+                return collectFiles((Configuration) it)
             } else {
                 logger.error("{}: Unsupported configuration type: {}.", path, it.class)
             }
-        }
+            null
+        }.flatten() as File[]
 
-        publications * {
+        publicationUploads = publications.each {
+            //TODO: [by yl] Mak sure we colllect the files right here + rename to maven publications
             if (it instanceof CharSequence) {
                 Publication publication = project.extensions.getByType(PublishingExtension).publications.findByName(it)
                 if (publication != null) {
-                    collectFiles(publication)
+                    return collectFiles((MavenPublication) publication)
                 } else {
                     logger.error("{}: Could not find publication: {}.", path, it);
                 }
-            } else if (conf instanceof Configuration) {
-                publicationFiles = collectFiles((Configuration) it)
+            } else if (conf instanceof MavenPublication) {
+                return collectFiles((Configuration) it)
             } else {
                 logger.error("{}: Unsupported publication type: {}.", path, it.class)
             }
-        }
+            null
+        }.flatten() as File[]
     }
 
     File[] collectFiles(Configuration config) {
-        config.allArtifacts*.findResults {
+        def files = config.allArtifacts.findResults {
             File file = it.getFile();
             if (!file.exists()) {
                 logger.error("{}: file {} could not be found.", path, file.getAbsolutePath())
@@ -104,10 +96,19 @@ class BintrayUploadTask extends DefaultTask {
             }
             file
         }.unique();
+
+        //Add pom file per config
+        Upload installTask = project.tasks.withType(Upload).findByName('install');
+        if (!installTask) {
+            logger.warn "maven plugin is not applied, no pom will be uploaded."
+        } else {
+            files << new File(project.convention.plugins['maven'].mavenPomDir, "pom-default.xml")
+        }
+        files
     }
 
     File[] collectFiles(MavenPublication publication) {
-        def files = publication.artifacts*.findResults {
+        def files = publication.artifacts.findResults {
             File file = it.getFile();
             if (!file.exists()) {
                 logger.error("{}: file {} could not be found.", path, file.getAbsolutePath())

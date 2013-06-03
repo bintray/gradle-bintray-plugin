@@ -28,8 +28,8 @@ class BintrayPluginSpec extends Specification {
     def populateDsl() {
         when: "plugin applied to project"
         project.evaluate()
-        def gradle = project.getGradle()
         //Notify evaluation listeners
+        def gradle = project.getGradle()
         gradle.listenerManager.allListeners*.projectsEvaluated gradle
 
         then: "project is properly configured with ${BintrayUploadTask.NAME} task"
@@ -50,8 +50,8 @@ class BintrayPluginSpec extends Specification {
     def upload() {
         when: "plugin applied to project"
         project.evaluate()
-        def gradle = project.getGradle()
         //Notify evaluation listeners
+        def gradle = project.getGradle()
         gradle.listenerManager.allListeners*.projectsEvaluated gradle
 
         then: "Invoke the ${BintrayUploadTask.NAME} task"
