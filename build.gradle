@@ -1,0 +1,82 @@
+import org.gradle.api.publish.maven.MavenPublication
+
+apply plugin: 'groovy'
+apply plugin: 'maven-publish'
+apply plugin: 'idea'
+
+group = 'com.jfrog.bintray.gradle'
+version = '0.1-SNAPSHOT'
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+repositories {
+    //bintray.jcenter()
+    maven { url 'http://jcenter.bintray.com' }
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    //testCompile 'cglib:cglib-nodep:2.2.2'
+    testCompile 'org.spockframework:spock-core:0.7-groovy-1.8'
+}
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+
+def javaApiUrl = 'http://docs.oracle.com/javase/1.7.0/docs/api/'
+def groovyApiUrl = 'http://groovy.codehaus.org/gapi/'
+tasks.withType(Javadoc) {
+    options.links(javaApiUrl, groovyApiUrl)
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            id "yoav"
+            name "Yoav Landman"
+            email "yoavl@jfrog.com"
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'A simple plugin for publishing to Bintray')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+task install(dependsOn: 'publishMavenJavaPublicationToMavenLocal') << {
+    echo "Installing $project.name"
+}
+
+task wrapper(type: Wrapper, description: 'Gradle Wrapper task') {
+    gradleVersion = '1.6'
+}

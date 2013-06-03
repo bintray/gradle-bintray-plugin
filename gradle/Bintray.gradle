@@ -1,0 +1,123 @@
+/*
+ * Copyright 2013 David M. Carr
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is
+ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and limitations under the License.
+ */
+
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.internal.Actions
+import org.gradle.api.internal.ClosureBackedAction
+
+class BintrayRepositoriesExtension {
+    static final String REPO_OWNER_ARG_NAME = 'repoOwner'
+    static final String REPO_NAME_ARG_NAME = 'repoName'
+    static final String URL_ARG_NAME = 'url'
+    static final String NAME_ARG_NAME = 'name'
+
+    Project project
+    RepositoryHandler repositories
+
+    BintrayRepositoriesExtension(Project project, RepositoryHandler repositories) {
+        this.project = project
+        this.repositories = repositories
+    }
+
+    MavenArtifactRepository jcenter() {
+        return repositories.maven { MavenArtifactRepository repository ->
+            repository.name = 'BintrayJCenter'
+            repository.url = 'http://jcenter.bintray.com'
+        }
+    }
+
+    MavenArtifactRepository repo(Map<String, ?> args) {
+        return repo(args, Actions.doNothing())
+    }
+
+    @SuppressWarnings("unchecked")
+    MavenArtifactRepository repo(Map<String, ?> args, Closure closure) {
+        return repo(args, new ClosureBackedAction(closure))
+    }
+
+    MavenArtifactRepository repo(Map<String, ?> args, Action<? super MavenArtifactRepository> action) {
+        Map<String, Object> modifiedArgs = new HashMap<String, Object>(args)
+        String repoOwner = pullRequiredArg(modifiedArgs, REPO_OWNER_ARG_NAME)
+        String repoName = pullRequiredArg(modifiedArgs, REPO_NAME_ARG_NAME)
+        if (!modifiedArgs.containsKey(URL_ARG_NAME)) {
+            modifiedArgs.put(URL_ARG_NAME, determineRepositoryUrl(repoOwner, repoName))
+        }
+        if (!modifiedArgs.containsKey(NAME_ARG_NAME)) {
+            modifiedArgs.put(NAME_ARG_NAME, determineRepositoryName(repoOwner, repoName))
+        }
+        return repositories.maven { MavenArtifactRepository repository ->
+            repository.credentials.conventionMapping.username = {
+                if (!project.hasProperty('bintrayUserName')) {
+                    throw new InvalidUserDataException("Bintray repositories require authentication.  Please configure the credentials either directly in the repository definition, or with 'bintrayUserName' and 'bintrayApiKey' properties in your gradle.properties.file.")
+                }
+                return project.bintrayUserName
+            }
+            repository.credentials.conventionMapping.password = {
+                if (!project.hasProperty('bintrayApiKey')) {
+                    throw new InvalidUserDataException("Bintray repositories require authentication.  Please configure the credentials either directly in the repository definition, or with 'bintrayUserName' and 'bintrayApiKey' properties in your gradle.properties.file.")
+                }
+                project.bintrayApiKey
+            }
+            ConfigureUtil.configureByMap(modifiedArgs, repository)
+            action.execute(repository)
+        }
+    }
+
+    String pullRequiredArg(Map<String, ?> args, String argName) {
+        Object objectValue = args.remove(argName)
+        if (objectValue == null) {
+            throw new InvalidUserDataException("'${argName}' must be specified")
+        }
+        String stringValue = objectValue.toString()
+        if (stringValue.isEmpty()) {
+            throw new InvalidUserDataException("'${argName}' must be non-empty")
+        }
+        return stringValue
+    }
+
+    String determineRepositoryName(String repoOwner, String repoName) {
+        return "Bintray${toTitleCase(separatorsToCaps(repoOwner))}${toTitleCase(separatorsToCaps(repoName))}"
+    }
+
+    String determineRepositoryUrl(String repoOwner, String repoName) {
+        return "http://dl.bintray.com/content/${repoOwner}/${repoName}"
+    }
+
+    String separatorsToCaps(String string) {
+        StringBuilder stringBuilder = new StringBuilder(string)
+        int pos = 0
+        while (pos < stringBuilder.length()) {
+            char curChar = stringBuilder.charAt(pos)
+            if (curChar == '-') {
+                if (pos + 1 < stringBuilder.length()) {
+                    stringBuilder.setCharAt(pos + 1, Character.toUpperCase(stringBuilder.charAt(pos + 1)))
+                }
+                stringBuilder.deleteCharAt(pos)
+            }
+            pos++
+        }
+        return stringBuilder.toString()
+    }
+
+    String toTitleCase(String string) {
+        if (string.isEmpty()) {
+            return string
+        }
+        StringBuilder stringBuilder = new StringBuilder(string)
+        stringBuilder.setCharAt(0, Character.toUpperCase(stringBuilder.charAt(0)))
+        return stringBuilder.toString()
+    }
+}
+
+project.buildscript.repositories.extensions.create('bintray', BintrayRepositoriesExtension, project, project.buildscript.repositories)
+project.repositories.extensions.create('bintray', BintrayRepositoriesExtension, project, project.repositories)

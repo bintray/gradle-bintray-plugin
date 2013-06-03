@@ -1,0 +1,41 @@
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
+group = 'grp'
+version = '1'
+
+repositories {
+    //bintray.jcenter()
+    maven { url 'http://jcenter.bintray.com' }
+}
+
+//Test "old style" configurations
+configurations {
+    deployables
+}
+
+artifacts {
+    deployables new File("${project.projectDir}/../files/art1.txt")
+}
+
+publishing {
+    publications {
+        mavenStuff(MavenPublication) {
+            artifact new File("${project.projectDir}/../files/art2.txt")
+        }
+    }
+}
+
+bintray {
+    user = 'yoavl'
+    key = 'key'
+    configurations = ['deployables']
+    publications = ['mavenStuff']
+    pkg {
+        repo = 'myrepo'
+        userOrg = 'myorg'
+        name = 'mypkg'
+        desc = 'what a fantastic package indeed'
+        labels = ['gear', 'gore', 'gorilla']
+    }
+}

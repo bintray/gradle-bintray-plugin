@@ -1,2 +1,0 @@
-bintray-gradle-plugin
-=====================
