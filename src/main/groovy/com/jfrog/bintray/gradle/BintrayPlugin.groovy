@@ -5,7 +5,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.invocation.Gradle
-import org.gradle.api.tasks.GradleBuild
+import org.gradle.api.publish.Publication
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.Upload
 
 class BintrayPlugin implements Plugin<Project> {
@@ -28,7 +30,6 @@ class BintrayPlugin implements Plugin<Project> {
                 dependsOn(subTask)
             }
         }
-        bintrayUpload.dependsOn(GradleBuild)
 
         def projectAdapter = [
                 bintrayUpload: bintrayUpload,
@@ -39,6 +40,7 @@ class BintrayPlugin implements Plugin<Project> {
                         apiKey = extension.key
                         configurations = extension.configurations
                         publications = extension.publications
+                        dryRun = extension.dryRun
                         userOrg = extension.pkg.userOrg
                         repoName = extension.pkg.repo
                         packageName = extension.pkg.name ?: extension.user
@@ -53,9 +55,16 @@ class BintrayPlugin implements Plugin<Project> {
                     }
                     if (extension.publications?.length) {
                         extension.publications.each {
-                            def taskName = "publish${it[0].toUpperCase()}${it.substring(1)}PublicationToMavenLocal"
-                            Task publishToLocalTask = project.tasks.findByName(taskName)
-                            bintrayUpload.dependsOn(publishToLocalTask)
+                            Publication publication = project.extensions.getByType(PublishingExtension).publications.findByName(it)
+                            if (publication instanceof MavenPublication) {
+                                def taskName = "generatePomFileFor${it[0].toUpperCase()}${it.substring(1)}Publication"
+                                Task publishToLocalTask = project.tasks.findByName(taskName)
+                                bintrayUpload.dependsOn(publishToLocalTask)
+                                /*bintrayUpload.dependsOn(publication.publishableFiles)*/
+                            } else {
+                                project.logger.warn "{} can only use maven publications - skipping {}.",
+                                        bintrayUpload.path, publication.name
+                            }
                         }
                     }
                 }

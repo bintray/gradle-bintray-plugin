@@ -19,6 +19,8 @@ class BintrayExtension {
 
     String[] publications
 
+    String dryRun
+
     BintrayExtension(Project project) {
         this.project = project
     }

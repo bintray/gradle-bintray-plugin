@@ -1,6 +1,7 @@
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'java'
+apply plugin: 'bintray'
 
 group = 'grp'
 version = '1'
@@ -16,16 +17,18 @@ configurations {
 }
 
 artifacts {
-    deployables new File("${project.projectDir}/../files/art1.txt")
+    deployables new File("${projectDir}/../files/art1.txt")
 }
 
 publishing {
     publications {
         mavenStuff(MavenPublication) {
-            artifact new File("${project.projectDir}/../files/art2.txt")
+            artifact new File("${projectDir}/../files/art2.txt")
         }
     }
 }
+
+ext.dry = true
 
 bintray {
     user = 'yoavl'
@@ -39,4 +42,5 @@ bintray {
         desc = 'what a fantastic package indeed'
         labels = ['gear', 'gore', 'gorilla']
     }
+    dryRun = dry
 }

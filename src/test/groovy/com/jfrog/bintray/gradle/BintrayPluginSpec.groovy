@@ -1,6 +1,8 @@
 package com.jfrog.bintray.gradle
 
+import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
 
@@ -15,8 +17,6 @@ class BintrayPluginSpec extends Specification {
 
         project = ProjectBuilder.builder().withProjectDir(projDir).build()
         //project.setProperty('testUserName', 'user1')
-
-        project.apply(plugin: BintrayPlugin)
     }
 
 
@@ -40,6 +40,7 @@ class BintrayPluginSpec extends Specification {
         'key' == bintrayUploadTask.apiKey
         ['deployables'] == bintrayUploadTask.configurations
         ['mavenStuff'] == bintrayUploadTask.publications
+        bintrayUploadTask.dryRun
         'myrepo' == bintrayUploadTask.repoName
         'myorg' == bintrayUploadTask.userOrg
         'mypkg' == bintrayUploadTask.packageName
@@ -48,15 +49,37 @@ class BintrayPluginSpec extends Specification {
     }
 
     def upload() {
-        when: "plugin applied to project"
+        when: "Invoke the ${BintrayUploadTask.NAME} task"
         project.evaluate()
         //Notify evaluation listeners
         def gradle = project.getGradle()
         gradle.listenerManager.allListeners*.projectsEvaluated gradle
-
-        then: "Invoke the ${BintrayUploadTask.NAME} task"
         BintrayUploadTask bintrayUploadTask = project.tasks.findByName(BintrayUploadTask.NAME)
-        bintrayUploadTask.execute()
+        execute bintrayUploadTask
+        def configurationUploadPaths = bintrayUploadTask.configurationUploads*.absolutePath
+        def publicationUploadPaths = bintrayUploadTask.publicationUploads*.absolutePath
+
+        then: "Uploaded artifact"
+        2 == bintrayUploadTask.configurationUploads.length
+        2 == bintrayUploadTask.publicationUploads.length
+
+
+        configurationUploadPaths.grep(~/.*files\/art1.txt/)
+        configurationUploadPaths.grep ~/.*build\/poms\/pom-default.xml/
+
+        publicationUploadPaths.grep ~/.*files\/art2.txt/
+        publicationUploadPaths.grep ~/.*build\/publications\/mavenStuff\/pom-default.xml/
+    }
+
+    private void execute(Task task) {
+        for (Task dep : task.taskDependencies.getDependencies(task)) {
+            for (Action action : dep.actions) {
+                action.execute(dep)
+            }
+        }
+        for (Action action : task.actions) {
+            action.execute(task)
+        }
     }
 
     /* def "lessCompileSite task is registered when site plugin is present"() {

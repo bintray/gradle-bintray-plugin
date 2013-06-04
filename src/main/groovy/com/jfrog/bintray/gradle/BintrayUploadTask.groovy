@@ -32,6 +32,9 @@ class BintrayUploadTask extends DefaultTask {
     Object[] publications
 
     @Input
+    boolean dryRun
+
+    @Input
     @Optional
     String userOrg
 
@@ -69,12 +72,11 @@ class BintrayUploadTask extends DefaultTask {
             null
         }.flatten() as File[]
 
-        publicationUploads = publications.each {
-            //TODO: [by yl] Mak sure we colllect the files right here + rename to maven publications
+        publicationUploads = publications.collect {
             if (it instanceof CharSequence) {
                 Publication publication = project.extensions.getByType(PublishingExtension).publications.findByName(it)
                 if (publication != null) {
-                    return collectFiles((MavenPublication) publication)
+                    return collectFiles(publication)
                 } else {
                     logger.error("{}: Could not find publication: {}.", path, it);
                 }
@@ -107,94 +109,18 @@ class BintrayUploadTask extends DefaultTask {
         files
     }
 
-    File[] collectFiles(MavenPublication publication) {
-        def files = publication.artifacts.findResults {
-            File file = it.getFile();
-            if (!file.exists()) {
-                logger.error("{}: file {} could not be found.", path, file.getAbsolutePath())
+    File[] collectFiles(Publication publication) {
+        if (!publication instanceof MavenPublication) {
+            logger.warn "{} can only use maven publications - skipping {}.", path, publication.name
+            return []
+        }
+        def files = publication.publishableFiles.files.findResults {
+            if (!it.exists()) {
+                logger.error("{}: file {} could not be found.", path, it.getAbsolutePath())
                 return null
             }
-            file
+            it
         }.unique()
-        //files << mavenNormalizedPublication.getPomFile();
         files
-
-        /*for (MavenPublication mavenPublication : mavenPublications) {
-            String publicationName = mavenPublication.getName();
-            if (!(mavenPublication instanceof MavenPublicationInternal)) {
-                // TODO: Check how the descriptor file can be extracted without using asNormalisedPublication
-                log.warn("Maven publication name '{}' is of unsupported type '{}'!",
-                        publicationName, mavenPublication.getClass());
-                continue;
-            }
-            MavenPublicationInternal mavenPublicationInternal = (MavenPublicationInternal) mavenPublication;
-            MavenNormalizedPublication mavenNormalizedPublication = mavenPublicationInternal.asNormalisedPublication();
-            MavenProjectIdentity projectIdentity = mavenNormalizedPublication.getProjectIdentity();
-
-            // First adding the descriptor
-            File file = mavenNormalizedPublication.getPomFile();
-            DeployDetails.Builder builder = createBuilder(processedFiles, file, publicationName);
-            if (builder != null) {
-                PublishArtifactInfo artifactInfo = new PublishArtifactInfo(
-                        projectIdentity.getArtifactId(), "pom", "pom", null, file);
-                addMavenArtifactToDeployDetails(deployDetails, publicationName, projectIdentity, builder, artifactInfo);
-            }
-            MavenArtifactSet artifacts = mavenPublication.getArtifacts();
-            for (MavenArtifact artifact : artifacts) {
-                file = artifact.getFile();
-                builder = createBuilder(processedFiles, file, publicationName);
-                if (builder == null) continue;
-                PublishArtifactInfo artifactInfo = new PublishArtifactInfo(
-                        projectIdentity.getArtifactId(), artifact.getExtension(),
-                        artifact.getExtension(), artifact.getClassifier(),
-                        file);
-                addMavenArtifactToDeployDetails(deployDetails, publicationName, projectIdentity, builder, artifactInfo);
-            }
-        }*/
     }
-
-    /*
-        public void publications(Object... publications) {
-                if (publications == null) {
-                    return;
-                }
-                for (Object publication : publications) {
-                    if (publication instanceof CharSequence) {
-                        Publication publicationObj = getProject().getExtensions()
-                                .getByType(PublishingExtension.class).getPublications().findByName(publication.toString());
-                        if (publicationObj != null) {
-                            addPublication(publicationObj);
-                        } else {
-                            log.error("Publication named '{}' does not exist for project '{}' in task '{}'.",
-                                    publication, getProject().getPath(), getPath());
-                        }
-                    } else if (publication instanceof Publication) {
-                        addPublication((Publication) publication);
-                    } else {
-                        log.error("Publication type '{}' not supported in task '{}'.",
-                                new Object[]{publication.getClass().getName(), getPath()});
-                    }
-                }
-                publishPublicationsSpecified = true;
-            }
-
-            private void addPublication(Publication publicationObj) {
-                if (publicationObj instanceof IvyPublication) {
-                    ivyPublications.add((IvyPublication) publicationObj);
-                } else if (publicationObj instanceof MavenPublication) {
-                    mavenPublications.add((MavenPublication) publicationObj);
-                } else {
-                    log.warn("Publication named '{}' in project '{}' is of unknown type '{}'",
-                            publicationObj.getName(), getProject().getPath(), publicationObj.getClass());
-                }
-            }
-
-            public Set<IvyPublication> getIvyPublications() {
-                return ivyPublications;
-            }
-
-            public Set<MavenPublication> getMavenPublications() {
-                return mavenPublications;
-            }
-         */
 }
