@@ -31,7 +31,8 @@ publishing {
 ext.dry = true
 
 bintray {
-    user = 'yoavl'
+    //apiUrl = "https://api.bintray.net"
+    user = 'landman'
     key = 'key'
     configurations = ['deployables']
     publications = ['mavenStuff']
@@ -39,7 +40,8 @@ bintray {
         repo = 'myrepo'
         userOrg = 'myorg'
         name = 'mypkg'
-        desc = 'what a fantastic package indeed'
+        desc = 'what a fantastic package indeed!'
+        //license = 'Apache-2.0'
         labels = ['gear', 'gore', 'gorilla']
     }
     dryRun = dry

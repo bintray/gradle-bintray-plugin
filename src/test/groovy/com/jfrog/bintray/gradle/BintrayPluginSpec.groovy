@@ -21,7 +21,9 @@ class BintrayPluginSpec extends Specification {
 
 
     def "no BintrayUpload tasks are registered by default"() {
-        expect: "there is a BintrayUpload tasks registered"
+        when: "plugin applied to project"
+        project.evaluate()
+        then: "there is a BintrayUpload tasks registered"
         project.tasks.withType(BintrayUploadTask)
     }
 
@@ -36,7 +38,7 @@ class BintrayPluginSpec extends Specification {
         BintrayUploadTask bintrayUploadTask = project.tasks.findByName(BintrayUploadTask.NAME)
         //!bintrayUploadTask.publishConfigurations.isEmpty()
         API_URL_DEFAULT == bintrayUploadTask.apiUrl
-        'yoavl' == bintrayUploadTask.user
+        'landman' == bintrayUploadTask.user
         'key' == bintrayUploadTask.apiKey
         ['deployables'] == bintrayUploadTask.configurations
         ['mavenStuff'] == bintrayUploadTask.publications
@@ -44,7 +46,7 @@ class BintrayPluginSpec extends Specification {
         'myrepo' == bintrayUploadTask.repoName
         'myorg' == bintrayUploadTask.userOrg
         'mypkg' == bintrayUploadTask.packageName
-        'what a fantastic package indeed' == bintrayUploadTask.packageDesc
+        'what a fantastic package indeed!' == bintrayUploadTask.packageDesc
         ['gear', 'gore', 'gorilla'] == bintrayUploadTask.packageLabels
     }
 
@@ -56,13 +58,12 @@ class BintrayPluginSpec extends Specification {
         gradle.listenerManager.allListeners*.projectsEvaluated gradle
         BintrayUploadTask bintrayUploadTask = project.tasks.findByName(BintrayUploadTask.NAME)
         execute bintrayUploadTask
-        def configurationUploadPaths = bintrayUploadTask.configurationUploads*.absolutePath
-        def publicationUploadPaths = bintrayUploadTask.publicationUploads*.absolutePath
+        def configurationUploadPaths = bintrayUploadTask.configurationUploads*.file.absolutePath
+        def publicationUploadPaths = bintrayUploadTask.publicationUploads*.file.absolutePath
 
         then: "Uploaded artifact"
         2 == bintrayUploadTask.configurationUploads.length
         2 == bintrayUploadTask.publicationUploads.length
-
 
         configurationUploadPaths.grep(~/.*files\/art1.txt/)
         configurationUploadPaths.grep ~/.*build\/poms\/pom-default.xml/

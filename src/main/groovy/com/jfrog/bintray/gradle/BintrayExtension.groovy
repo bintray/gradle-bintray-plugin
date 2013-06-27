@@ -19,7 +19,7 @@ class BintrayExtension {
 
     String[] publications
 
-    String dryRun
+    boolean dryRun
 
     BintrayExtension(Project project) {
         this.project = project
@@ -35,7 +35,18 @@ class BintrayExtension {
         //An alternative user for the package
         String name
         String desc
+        String license
         String[] labels
+
+        VersionConfig version = new VersionConfig()
+
+        def version(Closure closure) {
+            ConfigureUtil.configure(closure, version)
+        }
     }
 
+    class VersionConfig {
+        String name
+        String desc
+    }
 }
