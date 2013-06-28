@@ -5,7 +5,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'idea'
 
 group = 'com.jfrog.bintray.gradle'
-version = '0.1-SNAPSHOT'
+version = '0.1'
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 repositories {
@@ -43,6 +43,8 @@ task sourcesJar(type: Jar) {
     classifier = 'sources'
 }
 
+//jar.dependsOn sourcesJar
+
 def pomConfig = {
     licenses {
         license {
@@ -77,7 +79,7 @@ publishing {
 }
 
 task install(dependsOn: 'publishMavenJavaPublicationToMavenLocal') << {
-    echo "Installing $project.name"
+    logger.info "Installing $project.name"
 }
 
 task wrapper(type: Wrapper, description: 'Gradle Wrapper task') {
