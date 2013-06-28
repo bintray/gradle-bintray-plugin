@@ -1,6 +1,3 @@
-gradle-bintray-plugin
-=====================
-
 # Overview
 This plugin allows you to publish artifacts to a repository on [bintray](https://bintray.com/). 
 
