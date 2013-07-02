@@ -9,8 +9,7 @@ version = '0.1'
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 repositories {
-    //jcenter()
-    maven { url 'http://jcenter.bintray.com' }
+    jcenter()
 }
 
 dependencies {
@@ -83,5 +82,5 @@ task install(dependsOn: 'publishMavenJavaPublicationToMavenLocal') << {
 }
 
 task wrapper(type: Wrapper, description: 'Gradle Wrapper task') {
-    gradleVersion = '1.6'
+    gradleVersion = '1.7-rc-1'
 }
