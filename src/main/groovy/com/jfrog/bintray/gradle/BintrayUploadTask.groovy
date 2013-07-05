@@ -26,9 +26,9 @@ import static groovyx.net.http.Method.*
 class BintrayUploadTask extends DefaultTask {
 
     static final String NAME = 'bintrayUpload'
+    static final String GROUP = 'publishing'
+    static final String DESCRIPTION = 'Publishes artifacts to bintray.com.'
     static final String API_URL_DEFAULT = 'https://api.bintray.com'
-
-    //TODO: [by yl] Mark this as a publishing task
 
     @Input
     @Optional
@@ -79,6 +79,11 @@ class BintrayUploadTask extends DefaultTask {
 
     Artifact[] configurationUploads
     Artifact[] publicationUploads
+
+    {
+        group = GROUP
+        description = DESCRIPTION
+    }
 
     @TaskAction
     void bintrayUpload() {

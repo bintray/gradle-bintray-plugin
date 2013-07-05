@@ -6,7 +6,7 @@ import org.gradle.api.Task
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
 
-import static com.jfrog.bintray.gradle.BintrayUploadTask.getAPI_URL_DEFAULT
+import static com.jfrog.bintray.gradle.BintrayUploadTask.*
 
 class BintrayPluginSpec extends Specification {
     Project project
@@ -34,10 +34,12 @@ class BintrayPluginSpec extends Specification {
         def gradle = project.getGradle()
         gradle.listenerManager.allListeners*.projectsEvaluated gradle
 
-        then: "project is properly configured with ${BintrayUploadTask.NAME} task"
-        BintrayUploadTask bintrayUploadTask = project.tasks.findByName(BintrayUploadTask.NAME)
+        then: "project is properly configured with ${NAME} task"
+        BintrayUploadTask bintrayUploadTask = project.tasks.findByName(NAME)
         //!bintrayUploadTask.publishConfigurations.isEmpty()
         API_URL_DEFAULT == bintrayUploadTask.apiUrl
+        GROUP == bintrayUploadTask.group
+        DESCRIPTION == bintrayUploadTask.description
         'landman' == bintrayUploadTask.user
         'key' == bintrayUploadTask.apiKey
         ['deployables'] == bintrayUploadTask.configurations
@@ -51,12 +53,12 @@ class BintrayPluginSpec extends Specification {
     }
 
     def upload() {
-        when: "Invoke the ${BintrayUploadTask.NAME} task"
+        when: "Invoke the ${NAME} task"
         project.evaluate()
         //Notify evaluation listeners
         def gradle = project.getGradle()
         gradle.listenerManager.allListeners*.projectsEvaluated gradle
-        BintrayUploadTask bintrayUploadTask = project.tasks.findByName(BintrayUploadTask.NAME)
+        BintrayUploadTask bintrayUploadTask = project.tasks.findByName(NAME)
         execute bintrayUploadTask
         def configurationUploadPaths = bintrayUploadTask.configurationUploads*.file.absolutePath
         def publicationUploadPaths = bintrayUploadTask.publicationUploads*.file.absolutePath

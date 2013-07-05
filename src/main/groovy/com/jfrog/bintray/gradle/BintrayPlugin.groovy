@@ -17,12 +17,13 @@ class BintrayPlugin implements Plugin<Project> {
     public void apply(Project project) {
         this.project = project;
         def extension = project.extensions.create("bintray", BintrayExtension, project)
+
         extension.with {
             apiUrl = BintrayUploadTask.API_URL_DEFAULT
         }
 
         //Create and configure the task
-        BintrayUploadTask bintrayUpload = project.tasks.create(BintrayUploadTask.NAME, BintrayUploadTask)
+        BintrayUploadTask bintrayUpload = project.task(type: BintrayUploadTask, BintrayUploadTask.NAME)
         //Depend on tasks in sub-projects
         project.subprojects.each {
             def subTask = project.tasks.withType(BintrayUploadTask)
