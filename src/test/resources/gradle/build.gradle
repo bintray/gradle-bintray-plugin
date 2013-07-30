@@ -41,7 +41,7 @@ bintray {
         userOrg = 'myorg'
         name = 'mypkg'
         desc = 'what a fantastic package indeed!'
-        //license = 'Apache-2.0'
+        licenses = ['Apache-2.0']
         labels = ['gear', 'gore', 'gorilla']
     }
     dryRun = dry

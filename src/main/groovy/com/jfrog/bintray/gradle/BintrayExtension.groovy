@@ -35,7 +35,7 @@ class BintrayExtension {
         //An alternative user for the package
         String name
         String desc
-        String license
+        String[] licenses
         String[] labels
 
         VersionConfig version = new VersionConfig()

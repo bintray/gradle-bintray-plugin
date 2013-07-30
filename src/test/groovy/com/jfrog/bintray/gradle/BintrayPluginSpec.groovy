@@ -49,6 +49,7 @@ class BintrayPluginSpec extends Specification {
         'myorg' == bintrayUploadTask.userOrg
         'mypkg' == bintrayUploadTask.packageName
         'what a fantastic package indeed!' == bintrayUploadTask.packageDesc
+        ['Apache-2.0'] == bintrayUploadTask.packageLicenses
         ['gear', 'gore', 'gorilla'] == bintrayUploadTask.packageLabels
     }
 
@@ -84,61 +85,4 @@ class BintrayPluginSpec extends Specification {
             action.execute(task)
         }
     }
-
-    /* def "lessCompileSite task is registered when site plugin is present"() {
-         when: "the less and site plugins are applied to a project"
-         project.apply(plugin: com.jfrog.bintray.gradle.bintray.BintrayPlugin)
-         project.apply(plugin: SitePlugin)
-
-         then: "the lessCompile task is registered with the project with appropriate configuration"
-         project.tasks.getByName('lessCompileSite') instanceof LessCompile
-         lessCompileSiteTask.description == 'Compiles the site LESS files to CSS.'
-         lessCompileSiteTask.group == null
-         'lessCompileSite' in publishSiteTask.dependsOn
-         lessCompileSiteTask.sourceDir == project.file('src/site/less')
-         lessCompileSiteTask.destinationDir == project.file('build/resources/site/css')
-         lessCompileSiteTask.compress == null
-         lessCompileSiteTask.encoding == null
-     }
-
-     def "lessCompileSite task defaults to site extension values"() {
-         when: "the less and site plugins are applied to a project"
-         project.apply(plugin: com.jfrog.bintray.gradle.bintray.BintrayPlugin)
-         project.apply(plugin: SitePlugin)
-
-         and: "the site extension is configured with non-default values"
-         // Source dir isn't currently configurable at the site extension
-         //project.site.sourceDir = 'site'
-         project.site.sourceSet.output.resourcesDir = 'target'
-
-         then: "the lessCompile task bases its configuration on the site extension values"
-         //lessCompileSiteTask.sourceDir == project.file('less')
-         lessCompileSiteTask.destinationDir == project.file('target/css')
-     }
-
-     def "direct configuration of lessCompileSite overrides the site extension values"() {
-         when: "the less and site plugins are applied to a project"
-         project.apply(plugin: com.jfrog.bintray.gradle.bintray.BintrayPlugin)
-         project.apply(plugin: SitePlugin)
-
-         and: "the site extension is configured with non-default values"
-         project.site.sourceDir = 'site'
-         project.site.outputDir = 'target'
-
-         and: "the task is configured with non-default values"
-         lessCompileSiteTask.sourceDir = 'lessSrc'
-         lessCompileSiteTask.destinationDir = 'lessDest'
-
-         then: "the lessCompile task bases its configuration on the task values"
-         lessCompileSiteTask.sourceDir == project.file('lessSrc')
-         lessCompileSiteTask.destinationDir == project.file('lessDest')
-     }
-
-     private LessCompile getLessCompileSiteTask() {
-         return project.tasks.getByName('lessCompileSite') as LessCompile
-     }
-
-     private PublishSite getPublishSiteTask() {
-         return project.tasks.getByName('publishSite') as PublishSite
-     }*/
 }

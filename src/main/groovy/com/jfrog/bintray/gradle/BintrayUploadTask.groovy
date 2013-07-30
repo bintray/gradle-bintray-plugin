@@ -63,7 +63,7 @@ class BintrayUploadTask extends DefaultTask {
     String packageDesc
 
     @Input
-    String packageLicense
+    String[] packageLicenses
 
     @Input
     @Optional
@@ -129,7 +129,7 @@ class BintrayUploadTask extends DefaultTask {
             http.request(POST, JSON) {
                 uri.path = "/packages/$repoPath"
                 //TODO: [by yl] Add the license param once supported
-                body = [name: packageName, desc: packageDesc, license: packageLicense, labels: packageLabels]
+                body = [name: packageName, desc: packageDesc, licenses: packageLicenses, labels: packageLabels]
 
                 response.success = { resp ->
                     logger.info("Created package $packageName.")
