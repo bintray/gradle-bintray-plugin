@@ -33,6 +33,7 @@ Artifacts can be uploaded from the specified configurations or (the newly suppor
             userOrg = 'myorg' // an optional organization name when the repo belongs to one of the user's orgs
             name = 'mypkg'
             desc = 'a fantastic package, indeed!'
+            licenses = ['Apache-2.0']
             labels = ['gear', 'gore', 'gorilla']
         }
         dryRun = dry // whether to run this as dry-run, without deploying
