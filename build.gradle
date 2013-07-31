@@ -82,5 +82,5 @@ task install(dependsOn: 'publishMavenJavaPublicationToMavenLocal') << {
 }
 
 task wrapper(type: Wrapper, description: 'Gradle Wrapper task') {
-    gradleVersion = '1.7-rc-1'
+    gradleVersion = '1.7-rc-2'
 }
