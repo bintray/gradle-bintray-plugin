@@ -28,7 +28,7 @@ class BintrayPlugin implements Plugin<Project> {
         project.subprojects.each {
             def subTask = project.tasks.withType(BintrayUploadTask)
             if (subTask) {
-                dependsOn(subTask)
+                bintrayUpload.dependsOn(subTask)
             }
         }
 
