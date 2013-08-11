@@ -7,8 +7,8 @@ group = 'grp'
 version = '1'
 
 repositories {
-    //bintray.jcenter()
-    maven { url 'http://jcenter.bintray.com' }
+    jcenter()
+    //maven { url 'http://jcenter.bintray.com' }
 }
 
 //Test "old style" configurations
