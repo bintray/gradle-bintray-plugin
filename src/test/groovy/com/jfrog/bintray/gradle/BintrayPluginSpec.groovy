@@ -15,10 +15,9 @@ class BintrayPluginSpec extends Specification {
         URL resource = getClass().getResource('/gradle/build.gradle')
         def projDir = new File(resource.toURI()).getParentFile()
 
-        project = ProjectBuilder.builder().withProjectDir(projDir).build()
+        project = ProjectBuilder.builder().withName('project').withProjectDir(projDir).build()
         //project.setProperty('testUserName', 'user1')
     }
-
 
     def "no BintrayUpload tasks are registered by default"() {
         when: "plugin applied to project"
@@ -28,14 +27,17 @@ class BintrayPluginSpec extends Specification {
     }
 
     def populateDsl() {
-        when: "plugin applied to project"
+        when: "plugin applied to sub-project"
+        Project childProject = ProjectBuilder.builder().withName('childProject').withParent(project).build()
+        childProject.apply plugin: 'bintray'
         project.evaluate()
         //Notify evaluation listeners
         def gradle = project.getGradle()
         gradle.listenerManager.allListeners*.projectsEvaluated gradle
+        BintrayUploadTask bintrayUploadTask = project.tasks.findByName(NAME)
 
         then: "project is properly configured with ${NAME} task"
-        BintrayUploadTask bintrayUploadTask = project.tasks.findByName(NAME)
+        bintrayUploadTask.getTaskDependencies().values.find { BintrayUploadTask.isAssignableFrom it.class }
         //!bintrayUploadTask.publishConfigurations.isEmpty()
         API_URL_DEFAULT == bintrayUploadTask.apiUrl
         GROUP == bintrayUploadTask.group

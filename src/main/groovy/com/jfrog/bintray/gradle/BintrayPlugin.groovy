@@ -26,7 +26,7 @@ class BintrayPlugin implements Plugin<Project> {
         BintrayUploadTask bintrayUpload = project.task(type: BintrayUploadTask, BintrayUploadTask.NAME)
         //Depend on tasks in sub-projects
         project.subprojects.each {
-            def subTask = project.tasks.withType(BintrayUploadTask)
+            Task subTask = it.tasks.findByName(BintrayUploadTask.NAME)
             if (subTask) {
                 bintrayUpload.dependsOn(subTask)
             }
