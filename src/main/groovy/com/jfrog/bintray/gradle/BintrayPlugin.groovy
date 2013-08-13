@@ -57,16 +57,23 @@ class BintrayPlugin implements Plugin<Project> {
                         }
                     }
                     if (extension.publications?.length) {
-                        extension.publications.each {
-                            Publication publication = project.extensions.getByType(PublishingExtension).publications.findByName(it)
-                            if (publication instanceof MavenPublication) {
-                                def taskName = "generatePomFileFor${it[0].toUpperCase()}${it.substring(1)}Publication"
-                                Task publishToLocalTask = project.tasks.findByName(taskName)
-                                bintrayUpload.dependsOn(publishToLocalTask)
-                                /*bintrayUpload.dependsOn(publication.publishableFiles)*/
-                            } else {
-                                project.logger.warn "{} can only use maven publications - skipping {}.",
-                                        bintrayUpload.path, publication.name
+                        def publicationExt = project.extensions.findByType(PublishingExtension)
+                        if (!publicationExt) {
+                            project.logger.warn "The publication extension point does not exist in project."
+                        } else {
+                            extension.publications.each {
+                                Publication publication = publicationExt?.publications?.findByName(it)
+                                if (!publication) {
+                                    project.logger.warn "Publication {} not found in project.", publication.name
+                                } else if (publication instanceof MavenPublication) {
+                                    def taskName = "generatePomFileFor${it[0].toUpperCase()}${it.substring(1)}Publication"
+                                    Task publishToLocalTask = project.tasks.findByName(taskName)
+                                    bintrayUpload.dependsOn(publishToLocalTask)
+                                    /*bintrayUpload.dependsOn(publication.publishableFiles)*/
+                                } else {
+                                    project.logger.warn "{} can only use maven publications - skipping {}.",
+                                            bintrayUpload.path, publication.name
+                                }
                             }
                         }
                     }
