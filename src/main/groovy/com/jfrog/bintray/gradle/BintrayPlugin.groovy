@@ -51,9 +51,11 @@ class BintrayPlugin implements Plugin<Project> {
                         versionName = extension.pkg.version.name ?: project.version
                     }
                     if (extension.configurations?.length) {
-                        Upload installTask = project.tasks.withType(Upload).findByName('install')
+                        Upload installTask = project.tasks.withType(Upload)?.findByName('install')
                         if (installTask) {
                             bintrayUpload.dependsOn(installTask)
+                        } else {
+                            project.logger.warn "Configuration(s) specified but project lacks the install task."
                         }
                     }
                     if (extension.publications?.length) {
