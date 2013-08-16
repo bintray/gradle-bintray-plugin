@@ -1,12 +1,23 @@
 import org.gradle.api.publish.maven.MavenPublication
 
+group = 'com.jfrog.bintray.gradle'
+version = '0.3'
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+    }
+    dependencies {
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:0.3"
+    }
+}
+
 apply plugin: 'groovy'
 apply plugin: 'maven-publish'
 apply plugin: 'idea'
-
-group = 'com.jfrog.bintray.gradle'
-version = '0.3-SNAPSHOT'
-ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+apply plugin: 'bintray'
 
 repositories {
     jcenter()
@@ -19,7 +30,6 @@ dependencies {
         exclude(module: 'groovy')
     }
     testCompile 'org.spockframework:spock-core:0.7-groovy-1.8'
-    //testCompile 'cglib:cglib-nodep:2.2.2'
 }
 
 sourceCompatibility = 1.7
@@ -70,10 +80,22 @@ publishing {
 
             pom.withXml {
                 def root = asNode()
-                root.appendNode('description', 'A simple plugin for publishing to Bintray')
+                root.appendNode('description', 'A gradle plugin for publishing to Bintray')
                 root.children().last() + pomConfig
             }
         }
+    }
+}
+
+bintray {
+    user = bintrayUser
+    key = bintrayKey
+    publications = ['mavenJava']
+    pkg {
+        repo = 'jfrog-jars'
+        userOrg = 'jfrog'
+        name = 'gradle-bintray-plugin'
+        licenses = ['Apache-2.0']
     }
 }
 
