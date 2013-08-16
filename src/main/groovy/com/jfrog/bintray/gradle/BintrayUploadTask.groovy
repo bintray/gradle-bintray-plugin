@@ -1,5 +1,6 @@
 package com.jfrog.bintray.gradle
 
+import groovyx.net.http.EncoderRegistry
 import groovyx.net.http.HTTPBuilder
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
@@ -7,6 +8,8 @@ import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpHead
 import org.apache.http.client.methods.HttpPut
 import org.apache.http.client.methods.HttpUriRequest
+import org.apache.http.entity.InputStreamEntity
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler
 import org.apache.http.impl.client.DefaultRedirectStrategy
 import org.apache.http.protocol.HttpContext
 import org.gradle.api.DefaultTask
@@ -41,9 +44,11 @@ class BintrayUploadTask extends DefaultTask {
     String apiKey
 
     @Input
+    @Optional
     Object[] configurations
 
     @Input
+    @Optional
     Object[] publications
 
     @Input
@@ -60,6 +65,7 @@ class BintrayUploadTask extends DefaultTask {
     String packageName
 
     @Input
+    @Optional
     String packageDesc
 
     @Input
@@ -128,7 +134,6 @@ class BintrayUploadTask extends DefaultTask {
         def createPackage = {
             http.request(POST, JSON) {
                 uri.path = "/packages/$repoPath"
-                //TODO: [by yl] Add the license param once supported
                 body = [name: packageName, desc: packageDesc, licenses: packageLicenses, labels: packageLabels]
 
                 response.success = { resp ->
@@ -162,6 +167,9 @@ class BintrayUploadTask extends DefaultTask {
         def uploadArtifact = { artifact ->
             def uploadUri = "/content/$packagePath/${artifact.version}/${artifact.path}"
             artifact.file.withInputStream { is ->
+                is.metaClass.totalBytes = {
+                    artifact.file.length()
+                }
                 logger.info("Uploading to $apiUrl$uploadUri...")
                 if (dryRun) {
                     logger.info("(Dry run) Uploaded to $apiUrl$uploadUri.")
@@ -169,7 +177,8 @@ class BintrayUploadTask extends DefaultTask {
                 }
                 http.request(PUT) {
                     uri.path = uploadUri
-                    requestContentType: BINARY
+                    requestContentType = BINARY
+                    body = is
                     response.success = { resp ->
                         logger.info("Uploaded to $apiUrl$uri.path.")
                     }
@@ -229,7 +238,28 @@ class BintrayUploadTask extends DefaultTask {
 
     private HTTPBuilder createHttpClient() {
         def http = new HTTPBuilder(apiUrl)
-        http.auth.basic user, apiKey
+
+        // Must use preemptive auth for non-repeatable upload requests
+        http.headers.Authorization = "Basic ${"$user:$apiKey".toString().bytes.encodeBase64()}"
+
+        //Set an entity with a length for a stream that has the totalBytes method on it
+        def er = new EncoderRegistry() {
+            @Override
+            InputStreamEntity encodeStream(Object data, Object contentType) throws UnsupportedEncodingException {
+                if (data.metaClass.getMetaMethod("totalBytes")) {
+                    InputStreamEntity entity = new InputStreamEntity((InputStream) data, data.totalBytes())
+                    entity.setContentType(contentType.toString())
+                    entity
+                } else {
+                    super.encodeStream(data, contentType)
+                }
+            }
+        }
+        http.encoders = er
+
+        //No point in retrying non-repeatable upload requests
+        http.client.httpRequestRetryHandler = new DefaultHttpRequestRetryHandler(0, false)
+
         //Follow permanent redirects for PUTs
         http.client.setRedirectStrategy(new DefaultRedirectStrategy() {
             @Override
