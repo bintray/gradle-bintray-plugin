@@ -66,7 +66,7 @@ class BintrayPlugin implements Plugin<Project> {
                             extension.publications.each {
                                 Publication publication = publicationExt?.publications?.findByName(it)
                                 if (!publication) {
-                                    project.logger.warn "Publication {} not found in project.", publication.name
+                                    project.logger.warn 'Publication {} not found in project.', it
                                 } else if (publication instanceof MavenPublication) {
                                     def taskName = "generatePomFileFor${it[0].toUpperCase()}${it.substring(1)}Publication"
                                     Task publishToLocalTask = project.tasks.findByName(taskName)
