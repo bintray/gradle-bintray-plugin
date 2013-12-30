@@ -13,6 +13,7 @@ import org.apache.http.impl.client.DefaultHttpRequestRetryHandler
 import org.apache.http.impl.client.DefaultRedirectStrategy
 import org.apache.http.protocol.HttpContext
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.publish.Publication
 import org.gradle.api.publish.PublishingExtension
@@ -140,7 +141,7 @@ class BintrayUploadTask extends DefaultTask {
                     logger.info("Created package $packageName.")
                 }
                 response.failure = { resp ->
-                    logger.error("Could not create package $packageName: $resp.statusLine")
+                    throw new GradleException("Could not create package $packageName: $resp.statusLine")
                 }
             }
         }
@@ -183,7 +184,7 @@ class BintrayUploadTask extends DefaultTask {
                         logger.info("Uploaded to $apiUrl$uri.path.")
                     }
                     response.failure = { resp ->
-                        logger.error("Could not upload to $apiUrl$uri.path: $resp.statusLine")
+                        throw new GradleException("Could not upload to $apiUrl$uri.path: $resp.statusLine")
                     }
                 }
             }
