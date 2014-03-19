@@ -40,6 +40,22 @@ Artifacts can be uploaded from the specified configurations or (the newly suppor
     }
 ```
 
+
+
+You can use the `-P` command line option to pass user and key as command line argument:
+
+`gradle -Puser=someuser -Pkey=ASDFASDFASDF bintrayUpload`
+
+then you need to use those properties in your config:
+
+```groovy
+bintray {
+    user = property('user')
+    key = property('key')
+}
+```
+
+
 # License
 This plugin is available under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
