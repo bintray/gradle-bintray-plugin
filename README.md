@@ -1,5 +1,5 @@
 # Overview
-This plugin allows you to publish artifacts to a repository on [bintray](https://bintray.com/). 
+This plugin allows you to publish artifacts to a repository on [bintray](https://bintray.com/).
 
 # Usage
 To use the plugin, configure your `build.gradle` script and add the plugin:
@@ -35,6 +35,8 @@ Artifacts can be uploaded from the specified configurations or (the newly suppor
             desc = 'a fantastic package, indeed!'
             licenses = ['Apache-2.0']
             labels = ['gear', 'gore', 'gorilla']
+            signFiles = true // defaults to false
+            signPassphrase = 'secret' // only needed if the GPG signature you uploaded to Bintray is password protected
         }
         dryRun = dry // whether to run this as dry-run, without deploying
     }

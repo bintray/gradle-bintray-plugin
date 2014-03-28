@@ -86,6 +86,13 @@ class BintrayUploadTask extends DefaultTask {
     Artifact[] configurationUploads
     Artifact[] publicationUploads
 
+    @Input
+    boolean signFiles = false
+
+    @Input
+    @Optional
+    String signPassphrase
+
     {
         group = GROUP
         description = DESCRIPTION
@@ -190,8 +197,36 @@ class BintrayUploadTask extends DefaultTask {
         }
 
         checkAndCreatePackage()
-        configurationUploads.each { uploadArtifact it }
-        publicationUploads.each { uploadArtifact it }
+        configurationUploads.each { uploadArtifact it}
+        publicationUploads.each { uploadArtifact it}
+        if (signFiles) {
+            def injectVersion = { versions, artifact ->
+                versions << artifact.version
+                versions
+            }
+            def allVersions = configurationUploads.inject([] as Set, injectVersion)
+            allVersions = publicationUploads.inject(allVersions, injectVersion)
+
+            allVersions.each { version ->
+                def signUri = "/gpg/$packagePath/versions/$version"
+                logger.info("Signing package version with $apiUrl$signUri...")
+                if (dryRun) {
+                    logger.info("(Dry run) Signed packages with $apiUrl$signUri.")
+                    return
+                }
+                http.request(POST, JSON) {
+                    uri.path = signUri
+                    body = signPassphrase ? [passphrase: signPassphrase] : [:]
+                    response.success = { resp ->
+                        logger.info("Signed package with $apiUrl$signUri.")
+                    }
+                    response.failure = { resp ->
+                        logger.error("Could not sign packages with $apiUrl$signUri: $resp.statusLine")
+                        resp.entity.writeTo(System.out)
+                    }
+                }
+            }
+        }
     }
 
     Artifact[] collectArtifacts(Configuration config) {
