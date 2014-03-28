@@ -49,6 +49,8 @@ class BintrayPlugin implements Plugin<Project> {
                         packageLicenses = extension.pkg.licenses
                         packageLabels = extension.pkg.labels
                         versionName = extension.pkg.version.name ?: project.version
+                        signFiles = extension.signFiles
+                        signPassphrase = extension.signPassphrase
                     }
                     if (extension.configurations?.length) {
                         Upload installTask = project.tasks.withType(Upload)?.findByName('install')

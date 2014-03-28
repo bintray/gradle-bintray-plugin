@@ -19,6 +19,10 @@ class BintrayExtension {
 
     String[] publications
 
+    boolean signFiles = false
+
+    String signPassphrase
+
     boolean dryRun
 
     BintrayExtension(Project project) {
