@@ -41,6 +41,7 @@ class BintrayPlugin implements Plugin<Project> {
                         apiKey = extension.key
                         configurations = extension.configurations
                         publications = extension.publications
+                        files = extension.files
                         dryRun = extension.dryRun
                         userOrg = extension.pkg.userOrg ?: extension.user
                         repoName = extension.pkg.repo

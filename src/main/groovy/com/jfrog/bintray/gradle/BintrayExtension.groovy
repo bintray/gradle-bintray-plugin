@@ -1,6 +1,7 @@
 package com.jfrog.bintray.gradle
 
 import org.gradle.api.Project
+import org.gradle.api.file.FileCollection
 import org.gradle.util.ConfigureUtil
 
 class BintrayExtension {
@@ -18,6 +19,8 @@ class BintrayExtension {
     String[] configurations
 
     String[] publications
+
+    FileCollection files
 
     boolean dryRun
 
