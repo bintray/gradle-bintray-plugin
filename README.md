@@ -28,6 +28,7 @@ Artifacts can be uploaded from the specified configurations or (the newly suppor
         key = 'bintray_api_key'
         configurations = ['deployables'] // When uploading configuration files
         publications = ['mavenStuff'] // When uploading Maven-based publication files
+        files = files('file.txt', 'dir/data.dat) // When uploading plain files
         pkg {
             repo = 'myrepo'
             userOrg = 'myorg' // an optional organization name when the repo belongs to one of the user's orgs

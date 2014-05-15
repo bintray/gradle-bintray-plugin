@@ -14,6 +14,7 @@ import org.apache.http.impl.client.DefaultRedirectStrategy
 import org.apache.http.protocol.HttpContext
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.file.FileCollection
 import org.gradle.api.publish.Publication
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -52,6 +53,10 @@ class BintrayUploadTask extends DefaultTask {
     Object[] publications
 
     @Input
+    @Optional
+    FileCollection files
+
+    @Input
     boolean dryRun
 
     @Input
@@ -85,6 +90,7 @@ class BintrayUploadTask extends DefaultTask {
 
     Artifact[] configurationUploads
     Artifact[] publicationUploads
+    Artifact[] fileUploads
 
     {
         group = GROUP
@@ -125,6 +131,8 @@ class BintrayUploadTask extends DefaultTask {
             }
             null
         }.flatten() as Artifact[]
+
+        fileUploads = files.collect { new Artifact(name: it.name, file: it, groupId: project.group, version: project.version, plain: true) } as Artifact[]
 
         //Upload the files
         HTTPBuilder http = createHttpClient()
@@ -192,6 +200,7 @@ class BintrayUploadTask extends DefaultTask {
         checkAndCreatePackage()
         configurationUploads.each { uploadArtifact it }
         publicationUploads.each { uploadArtifact it }
+        fileUploads.each { uploadArtifact it }
     }
 
     Artifact[] collectArtifacts(Configuration config) {
@@ -292,10 +301,15 @@ class BintrayUploadTask extends DefaultTask {
         String type
         String classifier
         File file
+        boolean plain
 
         def getPath() {
-            (groupId?.replaceAll('\\.', '/') ?: "") + "/$name/$version/$name-$version" + (classifier ? "-$classifier" : "") +
+            if (plain) {
+                return name
+            } else {
+                return (groupId?.replaceAll('\\.', '/') ?: "") + "/$name/$version/$name-$version" + (classifier ? "-$classifier" : "") +
                     (extension ? ".$extension" : "")
+            }
         }
 
         boolean equals(o) {
@@ -327,6 +341,9 @@ class BintrayUploadTask extends DefaultTask {
                 return false
             }
             if (version != artifact.version) {
+                return false
+            }
+            if (plain != artifact.plain) {
                 return false
             }
 

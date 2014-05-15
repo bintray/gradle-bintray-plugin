@@ -36,6 +36,7 @@ bintray {
     key = 'key'
     configurations = ['deployables']
     publications = ['mavenStuff']
+    files = files(new File("${projectDir}/../files/art3.txt"))
     pkg {
         repo = 'myrepo'
         userOrg = 'myorg'
