@@ -19,6 +19,8 @@ class BintrayExtension {
 
     String[] publications
 
+    boolean publish
+
     boolean dryRun
 
     BintrayExtension(Project project) {
@@ -48,5 +50,6 @@ class BintrayExtension {
     class VersionConfig {
         String name
         String desc
+        String vcsTag
     }
 }

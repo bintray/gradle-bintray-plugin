@@ -41,6 +41,7 @@ class BintrayPlugin implements Plugin<Project> {
                         apiKey = extension.key
                         configurations = extension.configurations
                         publications = extension.publications
+                        publish = extension.publish
                         dryRun = extension.dryRun
                         userOrg = extension.pkg.userOrg ?: extension.user
                         repoName = extension.pkg.repo
@@ -49,6 +50,8 @@ class BintrayPlugin implements Plugin<Project> {
                         packageLicenses = extension.pkg.licenses
                         packageLabels = extension.pkg.labels
                         versionName = extension.pkg.version.name ?: project.version
+                        versionDesc = extension.pkg.version.desc
+                        versionVcsTag = extension.pkg.version.vcsTag ?: project.version
                     }
                     if (extension.configurations?.length) {
                         Upload installTask = project.tasks.withType(Upload)?.findByName('install')
@@ -68,7 +71,8 @@ class BintrayPlugin implements Plugin<Project> {
                                 if (!publication) {
                                     project.logger.warn 'Publication {} not found in project.', it
                                 } else if (publication instanceof MavenPublication) {
-                                    def taskName = "generatePomFileFor${it[0].toUpperCase()}${it.substring(1)}Publication"
+                                    def taskName =
+                                            "publish${it[0].toUpperCase()}${it.substring(1)}PublicationToMavenLocal"
                                     Task publishToLocalTask = project.tasks.findByName(taskName)
                                     bintrayUpload.dependsOn(publishToLocalTask)
                                     /*bintrayUpload.dependsOn(publication.publishableFiles)*/

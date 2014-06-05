@@ -1,17 +1,6 @@
 package com.jfrog.bintray.gradle
 
-import groovyx.net.http.EncoderRegistry
 import groovyx.net.http.HTTPBuilder
-import org.apache.http.HttpRequest
-import org.apache.http.HttpResponse
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.methods.HttpHead
-import org.apache.http.client.methods.HttpPut
-import org.apache.http.client.methods.HttpUriRequest
-import org.apache.http.entity.InputStreamEntity
-import org.apache.http.impl.client.DefaultHttpRequestRetryHandler
-import org.apache.http.impl.client.DefaultRedirectStrategy
-import org.apache.http.protocol.HttpContext
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
@@ -53,6 +42,9 @@ class BintrayUploadTask extends DefaultTask {
     Object[] publications
 
     @Input
+    boolean publish
+
+    @Input
     boolean dryRun
 
     @Input
@@ -82,7 +74,11 @@ class BintrayUploadTask extends DefaultTask {
 
     @Input
     @Optional
-    String versionDescriptor
+    String versionDesc
+
+    @Input
+    @Optional
+    String versionVcsTag
 
     Artifact[] configurationUploads
     Artifact[] publicationUploads
@@ -128,40 +124,68 @@ class BintrayUploadTask extends DefaultTask {
         }.flatten() as Artifact[]
 
         //Upload the files
-        HTTPBuilder http = createHttpClient()
+        HTTPBuilder http = BintrayHttpClientFactory.create(apiUrl, user, apiKey)
         def repoPath = "${userOrg ?: user}/$repoName"
         def packagePath = "$repoPath/$packageName"
 
-        def createPackage = {
-            http.request(POST, JSON) {
-                uri.path = "/packages/$repoPath"
-                body = [name: packageName, desc: packageDesc, licenses: packageLicenses, labels: packageLabels]
-
-                response.success = { resp ->
-                    logger.info("Created package $packageName.")
-                }
-                response.failure = { resp ->
-                    throw new GradleException("Could not create package $packageName: $resp.statusLine")
-                }
-            }
-        }
-
-        //Check package existence
-        //TODO: [by yl] Change this to head once bintray supports anon resource head requests
         def checkAndCreatePackage = {
-            def create = http.request(GET) {
+            def create = http.request(HEAD) {
                 uri.path = "/packages/$packagePath"
                 response.success = { resp ->
-                    logger.debug("Package $packageName exists.")
+                    logger.debug("Package '$packageName' exists.")
                     false
                 }
                 response.'404' = { resp ->
-                    logger.info("Package $packageName does not exist. Attempting to creating it...")
+                    logger.info("Package '$packageName' does not exist. Attempting to creating it...")
                     true
                 }
             }
             if (create) {
-                createPackage()
+                if (dryRun) {
+                    logger.info("(Dry run) Created pakage '$packagePath'.")
+                    return
+                }
+                http.request(POST, JSON) {
+                    uri.path = "/packages/$repoPath"
+                    body = [name: packageName, desc: packageDesc, licenses: packageLicenses, labels: packageLabels]
+
+                    response.success = { resp ->
+                        logger.info("Created package '$packagePath'.")
+                    }
+                    response.failure = { resp ->
+                        throw new GradleException("Could not create package '$packagePath': $resp.statusLine")
+                    }
+                }
+            }
+        }
+
+        def checkAndCreateVersion = {
+            def create = http.request(HEAD) {
+                uri.path = "/packages/$packagePath/versions/$versionName"
+                response.success = { resp ->
+                    logger.debug("Version '$packagePath/$versionName' exists.")
+                    false
+                }
+                response.'404' = { resp ->
+                    logger.info("Version '$packagePath/$versionName' does not exist. Attempting to creating it...")
+                    true
+                }
+            }
+            if (create) {
+                if (dryRun) {
+                    logger.info("(Dry run) Created verion '$packagePath/$versionName'.")
+                    return
+                }
+                http.request(POST, JSON) {
+                    uri.path = "/packages/$packagePath/versions"
+                    body = [name: versionName, desc: versionDesc, vcs_tag: versionVcsTag]
+                    response.success = { resp ->
+                        logger.info("Created version '$versionName'.")
+                    }
+                    response.failure = { resp ->
+                        throw new GradleException("Could not create version '$versionName': $resp.statusLine")
+                    }
+                }
             }
         }
 
@@ -173,7 +197,7 @@ class BintrayUploadTask extends DefaultTask {
                 }
                 logger.info("Uploading to $apiUrl$uploadUri...")
                 if (dryRun) {
-                    logger.info("(Dry run) Uploaded to $apiUrl$uploadUri.")
+                    logger.info("(Dry run) Uploaded to '$apiUrl$uploadUri'.")
                     return
                 }
                 http.request(PUT) {
@@ -181,18 +205,35 @@ class BintrayUploadTask extends DefaultTask {
                     requestContentType = BINARY
                     body = is
                     response.success = { resp ->
-                        logger.info("Uploaded to $apiUrl$uri.path.")
+                        logger.info("Uploaded to '$apiUrl$uri.path'.")
                     }
                     response.failure = { resp ->
-                        throw new GradleException("Could not upload to $apiUrl$uri.path: $resp.statusLine")
+                        throw new GradleException("Could not upload to '$apiUrl$uri.path': $resp.statusLine")
                     }
                 }
             }
         }
 
+        def publishVersion = {
+            def publishUri = "/content/$packagePath/$versionName/publish"
+            http.request(POST) {
+                uri.path = publishUri
+                response.success = { resp ->
+                    logger.info("Published '$packagePath/$versionName'.")
+                }
+                response.failure = { resp ->
+                    throw new GradleException("Could not publish '$packagePath/$versionName': $resp.statusLine")
+                }
+            }
+        }
+
         checkAndCreatePackage()
+        checkAndCreateVersion()
         configurationUploads.each { uploadArtifact it }
         publicationUploads.each { uploadArtifact it }
+        if (publish) {
+            publishVersion
+        }
     }
 
     Artifact[] collectArtifacts(Configuration config) {
@@ -237,54 +278,6 @@ class BintrayUploadTask extends DefaultTask {
         artifacts
     }
 
-    private HTTPBuilder createHttpClient() {
-        def http = new HTTPBuilder(apiUrl)
-
-        // Must use preemptive auth for non-repeatable upload requests
-        http.headers.Authorization = "Basic ${"$user:$apiKey".toString().bytes.encodeBase64()}"
-
-        //Set an entity with a length for a stream that has the totalBytes method on it
-        def er = new EncoderRegistry() {
-            @Override
-            InputStreamEntity encodeStream(Object data, Object contentType) throws UnsupportedEncodingException {
-                if (data.metaClass.getMetaMethod("totalBytes")) {
-                    InputStreamEntity entity = new InputStreamEntity((InputStream) data, data.totalBytes())
-                    entity.setContentType(contentType.toString())
-                    entity
-                } else {
-                    super.encodeStream(data, contentType)
-                }
-            }
-        }
-        http.encoders = er
-
-        //No point in retrying non-repeatable upload requests
-        http.client.httpRequestRetryHandler = new DefaultHttpRequestRetryHandler(0, false)
-
-        //Follow permanent redirects for PUTs
-        http.client.setRedirectStrategy(new DefaultRedirectStrategy() {
-            @Override
-            boolean isRedirected(HttpRequest request, HttpResponse response, HttpContext context) {
-                def redirected = super.isRedirected(request, response, context)
-                return redirected || response.getStatusLine().getStatusCode() == 301
-            }
-
-            @Override
-            HttpUriRequest getRedirect(HttpRequest request, HttpResponse response, HttpContext context) throws org.apache.http.ProtocolException {
-                URI uri = getLocationURI(request, response, context)
-                String method = request.requestLine.method
-                if (method.equalsIgnoreCase(HttpHead.METHOD_NAME)) {
-                    return new HttpHead(uri)
-                } else if (method.equalsIgnoreCase(HttpPut.METHOD_NAME)) {
-                    return new HttpPut(uri)
-                } else {
-                    return new HttpGet(uri)
-                }
-            }
-        })
-        http
-    }
-
     static class Artifact {
         String name
         String groupId
@@ -295,7 +288,8 @@ class BintrayUploadTask extends DefaultTask {
         File file
 
         def getPath() {
-            (groupId?.replaceAll('\\.', '/') ?: "") + "/$name/$version/$name-$version" + (classifier ? "-$classifier" : "") +
+            (groupId?.replaceAll('\\.', '/') ?: "") + "/$name/$version/$name-$version" +
+                    (classifier ? "-$classifier" : "") +
                     (extension ? ".$extension" : "")
         }
 
