@@ -33,10 +33,14 @@ class BintrayExtension {
 
     class PackageConfig {
         String repo
-        String userOrg
         //An alternative user for the package
+        String userOrg
         String name
         String desc
+        String website
+        String issueTracker
+        String vcsUrl
+        boolean publicDownloadNumbers
         String[] licenses
         String[] labels
 

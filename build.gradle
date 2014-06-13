@@ -26,10 +26,12 @@ repositories {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile('org.codehaus.groovy.modules.http-builder:http-builder:0.6') {
+    compile('org.codehaus.groovy.modules.http-builder:http-builder:0.7.2') {
         exclude(module: 'groovy')
     }
-    testCompile 'org.spockframework:spock-core:0.7-groovy-1.8'
+    testCompile('org.spockframework:spock-core:0.7-groovy-2.0') {
+        exclude(module: 'groovy-all')
+    }
 }
 
 sourceCompatibility = 1.7
@@ -104,5 +106,5 @@ task install(dependsOn: 'publishMavenJavaPublicationToMavenLocal') << {
 }
 
 task wrapper(type: Wrapper, description: 'Gradle Wrapper task') {
-    gradleVersion = '1.10'
+    gradleVersion = '2.0-rc-1'
 }

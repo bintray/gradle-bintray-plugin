@@ -62,11 +62,28 @@ class BintrayUploadTask extends DefaultTask {
     String packageDesc
 
     @Input
+    @Optional
+    String packageWebsite
+
+    @Input
+    @Optional
+    String packageIssueTracker
+
+    @Input
+    @Optional
+    String packageVcsUrl
+
+    @Input
+    @Optional
     String[] packageLicenses
 
     @Input
     @Optional
     String[] packageLabels
+
+    @Input
+    @Optional
+    boolean packagePublicDownloadNumbers
 
     @Input
     @Optional
@@ -147,7 +164,9 @@ class BintrayUploadTask extends DefaultTask {
                 }
                 http.request(POST, JSON) {
                     uri.path = "/packages/$repoPath"
-                    body = [name: packageName, desc: packageDesc, licenses: packageLicenses, labels: packageLabels]
+                    body = [name: packageName, desc: packageDesc, licenses: packageLicenses, labels: packageLabels,
+                            website: packageWebsite, issue_tracker: packageIssueTracker, vcs_url: packageVcsUrl,
+                            public_download_numbers: packagePublicDownloadNumbers]
 
                     response.success = { resp ->
                         logger.info("Created package '$packagePath'.")

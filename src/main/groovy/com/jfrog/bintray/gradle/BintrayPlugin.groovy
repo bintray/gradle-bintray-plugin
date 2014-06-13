@@ -47,8 +47,12 @@ class BintrayPlugin implements Plugin<Project> {
                         repoName = extension.pkg.repo
                         packageName = extension.pkg.name
                         packageDesc = extension.pkg.desc
+                        packageWebsite = extension.pkg.website
+                        packageIssueTracker = extension.pkg.issueTracker
+                        packageVcsUrl = extension.pkg.vcsUrl
                         packageLicenses = extension.pkg.licenses
                         packageLabels = extension.pkg.labels
+                        packagePublicDownloadNumbers = extension.pkg.publicDownloadNumbers
                         versionName = extension.pkg.version.name ?: project.version
                         versionDesc = extension.pkg.version.desc
                         versionVcsTag = extension.pkg.version.vcsTag ?: project.version

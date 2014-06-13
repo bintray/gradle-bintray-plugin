@@ -12,7 +12,7 @@ To use the plugin, configure your `build.gradle` script and add the plugin:
             classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:VERSION'
         }
     }
-    apply plugin: 'bintray'
+    apply plugin: 'com.jfrog.bintray'
 ```
 
 # Tasks
@@ -35,9 +35,13 @@ Artifacts can be uploaded from the specified configurations or (the newly suppor
             repo = 'myrepo'
             userOrg = 'myorg' // an optional organization name when the repo belongs to one of the user's orgs
             name = 'mypkg'
-            desc = 'a fantastic package, indeed!'
+            desc = 'what a fantastic package indeed!'
+            website = 'https://github.com/bintray/gradle-bintray-plugin'
+            issueTracker = 'https://github.com/bintray/gradle-bintray-plugin/issues'
+            vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
             licenses = ['Apache-2.0']
             labels = ['gear', 'gore', 'gorilla']
+            publicDownloadNumbers = true
         }
         dryRun = dry // whether to run this as dry-run, without deploying
     }

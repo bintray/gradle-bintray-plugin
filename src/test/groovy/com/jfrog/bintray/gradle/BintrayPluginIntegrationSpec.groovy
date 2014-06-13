@@ -1,21 +1,66 @@
 package com.jfrog.bintray.gradle
 
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import static com.jfrog.bintray.gradle.BintrayUploadTask.*
 
-class BintrayPluginSpec extends Specification {
+class BintrayPluginIntegrationSpec extends Specification {
+
     Project project
 
+    //TODO: [by yl] Upload a parameterized build and check the results using the REST API
+
     def setup() {
-        URL resource = getClass().getResource('/gradle/build.gradle')
+        URL resource = getClass().getResource('/gradle/parameterized-build.gradle')
         def projDir = new File(resource.toURI()).getParentFile()
 
         project = ProjectBuilder.builder().withName('project').withProjectDir(projDir).build()
         //project.setProperty('testUserName', 'user1')
+
+
+        def username = project.hasProperty('bintrayUser') ? project.bintrayUser : getenv()['BINTRAY_USER']
+        def password = project.hasProperty('bintrayKey') ? project.bintrayKey : getenv()['BINTRAY_KEY']
+
+
+        def bt = BintrayHttpClientFactory.create(API_URL_DEFAULT, username, password)
+        //WIP
+    }
+
+    /*
+  String[] configurations
+
+  String[] publications
+
+  boolean publish
+
+
+   */
+
+    @Unroll
+    def "build permutations"(String[] configurations, String[] publications, boolean publish, String userOrg) {
+        //String packageDesc, String[] packageLicenses, String[] packageLabels, String versionName, String versionDesc String versionVcsTag
+
+        //TODO: [by yl] Use rest to check the bintray-demo, bintray-demos repo under different publish options based on params
+        /*expect:
+        Math.max(a, b) == c
+
+        where:
+        a | b | c
+        1 | 3 | 3
+        7 | 4 | 4
+        0 | 0 | 0*/
+
+        /*
+        where:
+a << [3, 7, 0]
+b << [5, 0, 0]
+c << [5, 7, 0]
+         */
     }
 
     def "no BintrayUpload tasks are registered by default"() {
@@ -28,7 +73,7 @@ class BintrayPluginSpec extends Specification {
     def populateDsl() {
         when: "plugin applied to sub-project"
         Project childProject = ProjectBuilder.builder().withName('childProject').withParent(project).build()
-        childProject.apply plugin: 'com.jfrog.bintray'
+        childProject.apply plugin: 'bintray'
         project.evaluate()
         //Notify evaluation listeners
         def gradle = project.getGradle()
@@ -50,10 +95,6 @@ class BintrayPluginSpec extends Specification {
         'myorg' == bintrayUploadTask.userOrg
         'mypkg' == bintrayUploadTask.packageName
         'what a fantastic package indeed!' == bintrayUploadTask.packageDesc
-        'https://github.com/bintray/gradle-bintray-plugin' == bintrayUploadTask.packageWebsite
-        'https://github.com/bintray/gradle-bintray-plugin/issues' == bintrayUploadTask.packageIssueTracker
-        'https://github.com/bintray/gradle-bintray-plugin.git' == bintrayUploadTask.packageVcsUrl
-        bintrayUploadTask.packagePublicDownloadNumbers
         ['Apache-2.0'] == bintrayUploadTask.packageLicenses
         ['gear', 'gore', 'gorilla'] == bintrayUploadTask.packageLabels
     }
@@ -64,7 +105,6 @@ class BintrayPluginSpec extends Specification {
         //Notify evaluation listeners
         def gradle = project.getGradle()
         gradle.listenerManager.allListeners*.projectsEvaluated gradle
-        execute project.clean
         BintrayUploadTask bintrayUploadTask = project.tasks.findByName(NAME)
         execute bintrayUploadTask
         def configurationUploadPaths = bintrayUploadTask.configurationUploads*.file.absolutePath
@@ -82,16 +122,13 @@ class BintrayPluginSpec extends Specification {
     }
 
     private void execute(Task task) {
-        task.taskDependencies.getDependencies(task).each {
-            execute it
-        }
-        task.actions?.each {
-            try {
-                it.execute(task)
-            } catch (Exception e) {
-                //This sucks until I figure a way to contextualize task execution (inputs, history, etc.)
-                e.printStackTrace()
+        for (Task dep : task.taskDependencies.getDependencies(task)) {
+            for (Action action : dep.actions) {
+                action.execute(dep)
             }
+        }
+        for (Action action : task.actions) {
+            action.execute(task)
         }
     }
 }

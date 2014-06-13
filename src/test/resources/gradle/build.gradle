@@ -1,7 +1,7 @@
+apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
-apply plugin: 'java'
-apply plugin: 'bintray'
+apply plugin: 'com.jfrog.bintray'
 
 group = 'grp'
 version = '1'
@@ -41,8 +41,12 @@ bintray {
         userOrg = 'myorg'
         name = 'mypkg'
         desc = 'what a fantastic package indeed!'
+        website = 'https://github.com/bintray/gradle-bintray-plugin'
+        issueTracker = 'https://github.com/bintray/gradle-bintray-plugin/issues'
+        vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
         licenses = ['Apache-2.0']
         labels = ['gear', 'gore', 'gorilla']
+        publicDownloadNumbers = true
     }
-    dryRun = dry
+    dryRun = project.dry
 }
