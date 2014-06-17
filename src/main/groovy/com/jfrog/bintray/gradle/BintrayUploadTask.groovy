@@ -63,11 +63,11 @@ class BintrayUploadTask extends DefaultTask {
 
     @Input
     @Optional
-    String packageWebsite
+    String packageWebsiteUrl
 
     @Input
     @Optional
-    String packageIssueTracker
+    String packageIssueTrackerUrl
 
     @Input
     @Optional
@@ -165,7 +165,7 @@ class BintrayUploadTask extends DefaultTask {
                 http.request(POST, JSON) {
                     uri.path = "/packages/$repoPath"
                     body = [name: packageName, desc: packageDesc, licenses: packageLicenses, labels: packageLabels,
-                            website: packageWebsite, issue_tracker: packageIssueTracker, vcs_url: packageVcsUrl,
+                            website_url: packageWebsiteUrl, issue_tracker_url: packageIssueTrackerUrl, vcs_url: packageVcsUrl,
                             public_download_numbers: packagePublicDownloadNumbers]
 
                     response.success = { resp ->

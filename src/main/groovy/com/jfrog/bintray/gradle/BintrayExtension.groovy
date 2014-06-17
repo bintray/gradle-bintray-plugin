@@ -37,8 +37,8 @@ class BintrayExtension {
         String userOrg
         String name
         String desc
-        String website
-        String issueTracker
+        String websiteUrl
+        String issueTrackerUrl
         String vcsUrl
         boolean publicDownloadNumbers
         String[] licenses

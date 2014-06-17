@@ -50,8 +50,8 @@ class BintrayPluginSpec extends Specification {
         'myorg' == bintrayUploadTask.userOrg
         'mypkg' == bintrayUploadTask.packageName
         'what a fantastic package indeed!' == bintrayUploadTask.packageDesc
-        'https://github.com/bintray/gradle-bintray-plugin' == bintrayUploadTask.packageWebsite
-        'https://github.com/bintray/gradle-bintray-plugin/issues' == bintrayUploadTask.packageIssueTracker
+        'https://github.com/bintray/gradle-bintray-plugin' == bintrayUploadTask.packageWebsiteUrl
+        'https://github.com/bintray/gradle-bintray-plugin/issues' == bintrayUploadTask.packageIssueTrackerUrl
         'https://github.com/bintray/gradle-bintray-plugin.git' == bintrayUploadTask.packageVcsUrl
         bintrayUploadTask.packagePublicDownloadNumbers
         ['Apache-2.0'] == bintrayUploadTask.packageLicenses
