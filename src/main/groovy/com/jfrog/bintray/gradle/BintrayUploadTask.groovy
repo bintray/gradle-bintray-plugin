@@ -146,15 +146,15 @@ class BintrayUploadTask extends DefaultTask {
         def packagePath = "$repoPath/$packageName"
 
         def checkAndCreatePackage = {
-            def create = http.request(HEAD) {
+            def create
+            http.request(HEAD) {
                 uri.path = "/packages/$packagePath"
                 response.success = { resp ->
                     logger.debug("Package '$packageName' exists.")
-                    false
                 }
                 response.'404' = { resp ->
                     logger.info("Package '$packageName' does not exist. Attempting to creating it...")
-                    true
+                    create = true
                 }
             }
             if (create) {
@@ -179,15 +179,15 @@ class BintrayUploadTask extends DefaultTask {
         }
 
         def checkAndCreateVersion = {
-            def create = http.request(HEAD) {
+            def create
+            http.request(HEAD) {
                 uri.path = "/packages/$packagePath/versions/$versionName"
                 response.success = { resp ->
                     logger.debug("Version '$packagePath/$versionName' exists.")
-                    false
                 }
                 response.'404' = { resp ->
                     logger.info("Version '$packagePath/$versionName' does not exist. Attempting to creating it...")
-                    true
+                    create = true
                 }
             }
             if (create) {
