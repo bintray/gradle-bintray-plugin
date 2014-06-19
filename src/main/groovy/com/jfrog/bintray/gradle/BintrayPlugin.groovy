@@ -62,18 +62,20 @@ class BintrayPlugin implements Plugin<Project> {
                         if (installTask) {
                             bintrayUpload.dependsOn(installTask)
                         } else {
-                            project.logger.warn "Configuration(s) specified but project lacks the install task."
+                            project.logger.warn "Configuration(s) specified but project {} lacks the install task.",
+                                    project.path
                         }
                     }
                     if (extension.publications?.length) {
                         def publicationExt = project.extensions.findByType(PublishingExtension)
                         if (!publicationExt) {
-                            project.logger.warn "The publication extension point does not exist in project."
+                            project.logger.warn "The publication extension point does not exist in project {}.",
+                                    project.path
                         } else {
                             extension.publications.each {
                                 Publication publication = publicationExt?.publications?.findByName(it)
                                 if (!publication) {
-                                    project.logger.warn 'Publication {} not found in project.', it
+                                    project.logger.warn 'Publication {} not found in project {}.', it, project.path
                                 } else if (publication instanceof MavenPublication) {
                                     def taskName =
                                             "publish${it[0].toUpperCase()}${it.substring(1)}PublicationToMavenLocal"
