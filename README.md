@@ -36,14 +36,15 @@ Artifacts can be uploaded from the specified configurations or (the newly suppor
             userOrg = 'myorg' // an optional organization name when the repo belongs to one of the user's orgs
             name = 'mypkg'
             desc = 'what a fantastic package indeed!'
-            website = 'https://github.com/bintray/gradle-bintray-plugin'
-            issueTracker = 'https://github.com/bintray/gradle-bintray-plugin/issues'
+            websiteUrl = 'https://github.com/bintray/gradle-bintray-plugin'
+            issueTrackerUrl = 'https://github.com/bintray/gradle-bintray-plugin/issues'
             vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
             licenses = ['Apache-2.0']
             labels = ['gear', 'gore', 'gorilla']
             publicDownloadNumbers = true
         }
         dryRun = dry // whether to run this as dry-run, without deploying
+        publish = true //If version should be auto published after an upload
     }
 ```
 
