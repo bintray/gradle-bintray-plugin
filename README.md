@@ -16,7 +16,8 @@ To use the plugin, configure your `build.gradle` script and add the plugin:
 ```
 
 # Tasks
-The plugin adds the `bintrayUpload` task to your projects, which allows you to upload to bintray and optionally create the target package.
+The plugin adds the `bintrayUpload` task to your projects, which allows you to upload to bintray and optionally create
+the target package and version.
 Artifacts can be uploaded from the specified configurations or (the newly supported) publications.
 
 ## Configuration
@@ -30,7 +31,9 @@ Artifacts can be uploaded from the specified configurations or (the newly suppor
         configurations = ['deployables'] // When uploading configuration files
         // - OR -
         publications = ['mavenStuff'] // When uploading Maven-based publication files
-        
+
+        dryRun = false // whether to run this as dry-run, without deploying
+        publish = true //If version should be auto published after an upload
         pkg {
             repo = 'myrepo'
             userOrg = 'myorg' // an optional organization name when the repo belongs to one of the user's orgs
@@ -42,9 +45,15 @@ Artifacts can be uploaded from the specified configurations or (the newly suppor
             licenses = ['Apache-2.0']
             labels = ['gear', 'gore', 'gorilla']
             publicDownloadNumbers = true
+
+            // optional version attributes
+            version {
+                name = '1.3-Final' // bintray logical version name
+                desc = 'optional, version-specific description'
+                vcsTag = '1.3.0'
+            }
         }
-        dryRun = false // whether to run this as dry-run, without deploying
-        publish = true //If version should be auto published after an upload
+
     }
 ```
 
