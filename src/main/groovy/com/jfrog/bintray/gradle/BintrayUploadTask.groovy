@@ -210,7 +210,8 @@ class BintrayUploadTask extends DefaultTask {
         }
 
         def uploadArtifact = { artifact ->
-            def uploadUri = "/content/$packagePath/${artifact.version}/${artifact.path}"
+            def versionPath = packagePath + '/' + versionName ?: artifact.version
+            def uploadUri = "/content/$versionPath/${artifact.path}"
             artifact.file.withInputStream { is ->
                 is.metaClass.totalBytes = {
                     artifact.file.length()
