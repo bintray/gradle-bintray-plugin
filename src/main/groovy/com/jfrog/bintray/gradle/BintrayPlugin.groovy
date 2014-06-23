@@ -62,14 +62,14 @@ class BintrayPlugin implements Plugin<Project> {
                         if (installTask) {
                             bintrayUpload.dependsOn(installTask)
                         } else {
-                            project.logger.warn "Configuration(s) specified but project {} lacks the install task.",
+                            project.logger.warn "Configuration(s) specified but the install task does not exist in project {}.",
                                     project.path
                         }
                     }
                     if (extension.publications?.length) {
                         def publicationExt = project.extensions.findByType(PublishingExtension)
                         if (!publicationExt) {
-                            project.logger.warn "The publication extension point does not exist in project {}.",
+                            project.logger.warn "Publications(s) specified but no publications exist in project {}.",
                                     project.path
                         } else {
                             extension.publications.each {
