@@ -43,7 +43,7 @@ Artifacts can be uploaded from the specified configurations or (the newly suppor
             labels = ['gear', 'gore', 'gorilla']
             publicDownloadNumbers = true
         }
-        dryRun = dry // whether to run this as dry-run, without deploying
+        dryRun = false // whether to run this as dry-run, without deploying
         publish = true //If version should be auto published after an upload
     }
 ```

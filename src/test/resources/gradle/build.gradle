@@ -28,7 +28,7 @@ publishing {
     }
 }
 
-ext.dry = true
+ext.publish = true
 
 bintray {
     //apiUrl = "https://api.bintray.net"
@@ -48,5 +48,6 @@ bintray {
         labels = ['gear', 'gore', 'gorilla']
         publicDownloadNumbers = true
     }
-    dryRun = project.dry
+    dryRun = false
+    publish = project.publish
 }
