@@ -252,7 +252,7 @@ class BintrayUploadTask extends DefaultTask {
         configurationUploads.each { uploadArtifact it }
         publicationUploads.each { uploadArtifact it }
         if (publish) {
-            publishVersion
+            publishVersion()
         }
     }
 
