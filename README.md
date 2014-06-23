@@ -6,7 +6,7 @@ To use the plugin, configure your `build.gradle` script and add the plugin:
 ```groovy
     buildscript {
         repositories {
-            maven { url 'http://jcenter.bintray.com' }
+            jcenter()
         }
         dependencies {
             classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:VERSION'
