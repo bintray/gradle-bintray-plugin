@@ -108,6 +108,7 @@ class BintrayUploadTask extends DefaultTask {
     @TaskAction
     void bintrayUpload() {
         logger.info("Found {} configuration(s) to publish.", configurations?.length ?: 0);
+        //TODO: [by yl] replace with findResults for Gradle 2.x
         configurationUploads = configurations.collect {
             if (it instanceof CharSequence) {
                 Configuration configuration = project.configurations.findByName(it)
@@ -121,7 +122,7 @@ class BintrayUploadTask extends DefaultTask {
             } else {
                 logger.error("{}: Unsupported configuration type: {}.", path, it.class)
             }
-            null
+            []
         }.flatten() as Artifact[]
 
         publicationUploads = publications.collect {
@@ -137,7 +138,7 @@ class BintrayUploadTask extends DefaultTask {
             } else {
                 logger.error("{}: Unsupported publication type: {}.", path, it.class)
             }
-            null
+            []
         }.flatten() as Artifact[]
 
         //Upload the files
