@@ -90,8 +90,8 @@ publishing {
 }
 
 bintray {
-    user = bintrayUser ?: 'USER'
-    key = bintrayKey ?: 'KEY'
+    user = has('bintrayUser') ? bintrayUser : 'USER'
+    key = has('bintrayKey') ? bintrayKey : 'KEY'
     publications = ['mavenJava']
     pkg {
         repo = 'jfrog-jars'
