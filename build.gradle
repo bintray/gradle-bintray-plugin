@@ -10,14 +10,14 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:0.3"
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:0.4"
     }
 }
 
 apply plugin: 'groovy'
 apply plugin: 'maven-publish'
 apply plugin: 'idea'
-apply plugin: 'bintray'
+apply plugin: 'com.jfrog.bintray'
 
 repositories {
     jcenter()
@@ -90,8 +90,8 @@ publishing {
 }
 
 bintray {
-    user = bintrayUser
-    key = bintrayKey
+    user = bintrayUser ?: 'USER'
+    key = bintrayKey ?: 'KEY'
     publications = ['mavenJava']
     pkg {
         repo = 'jfrog-jars'
