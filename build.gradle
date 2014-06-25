@@ -1,7 +1,7 @@
 import org.gradle.api.publish.maven.MavenPublication
 
 group = 'com.jfrog.bintray.gradle'
-version = '0.5-SNAPSHOT'
+version = '0.4.1'
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 buildscript {
@@ -90,8 +90,8 @@ publishing {
 }
 
 bintray {
-    user = has('bintrayUser') ? bintrayUser : 'USER'
-    key = has('bintrayKey') ? bintrayKey : 'KEY'
+    user = bintrayUser
+    key = bintrayKey
     publications = ['mavenJava']
     pkg {
         repo = 'jfrog-jars'
