@@ -15,8 +15,10 @@ To use the plugin, configure your `build.gradle` script and add the plugin:
     apply plugin: 'com.jfrog.bintray'
 ```
 
-**Compatibility:**
+**Gradle Compatibility:**
 When using Gradle publications you'll need to use Gradle 2.x; Otherwise, the plugin is compatible with Gradle 1.12 and above.
+ **JVM Compatibility:**
+Java 6 and above.
 
 # Tasks
 The plugin adds the `bintrayUpload` task to your projects, which allows you to upload to bintray and optionally create
