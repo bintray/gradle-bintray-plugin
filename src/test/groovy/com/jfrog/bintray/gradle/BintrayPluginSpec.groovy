@@ -45,7 +45,7 @@ class BintrayPluginSpec extends Specification {
         'key' == bintrayUploadTask.apiKey
         ['deployables'] == bintrayUploadTask.configurations
         ['mavenStuff'] == bintrayUploadTask.publications
-        bintrayUploadTask.dryRun
+        bintrayUploadTask.publish
         'myrepo' == bintrayUploadTask.repoName
         'myorg' == bintrayUploadTask.userOrg
         'mypkg' == bintrayUploadTask.packageName
