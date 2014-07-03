@@ -16,6 +16,15 @@ import org.apache.http.protocol.HttpContext
 class BintrayHttpClientFactory {
 
     static HTTPBuilder create(apiUrl, user, apiKey) {
+        def assertNotEmpty = { String name, String val ->
+            if (val?.isEmpty()) {
+                throw new IllegalArgumentException("Bintray $name cannot be empty!");
+            }
+        }
+        assertNotEmpty('apiUrl', apiUrl)
+        assertNotEmpty('user', user)
+        assertNotEmpty('apiKey', apiKey)
+
         def http = new HTTPBuilder(apiUrl)
 
         // Must use preemptive auth for non-repeatable upload requests
