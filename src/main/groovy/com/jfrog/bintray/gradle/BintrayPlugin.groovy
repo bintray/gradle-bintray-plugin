@@ -41,6 +41,7 @@ class BintrayPlugin implements Plugin<Project> {
                         apiKey = extension.key
                         configurations = extension.configurations
                         publications = extension.publications
+                        filesSpec = extension.filesSpec
                         publish = extension.publish
                         dryRun = extension.dryRun
                         userOrg = extension.pkg.userOrg ?: extension.user
@@ -88,6 +89,9 @@ class BintrayPlugin implements Plugin<Project> {
                                 }
                             }
                         }
+                    }
+                    if (extension.filesSpec) {
+                        bintrayUpload.dependsOn(extension.filesSpec)
                     }
                 }
         ] as BuildAdapter

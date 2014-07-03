@@ -19,16 +19,23 @@ class BintrayExtension {
 
     String[] publications
 
+    RecordingCopyTask filesSpec
+
     boolean publish
 
     boolean dryRun
 
     BintrayExtension(Project project) {
         this.project = project
+        filesSpec = project.task(type: RecordingCopyTask, "_bintrayRecordingCopy")
     }
 
     def pkg(Closure closure) {
         ConfigureUtil.configure(closure, pkg)
+    }
+
+    def filesSpec(Closure closure) {
+        ConfigureUtil.configure(closure, filesSpec)
     }
 
     class PackageConfig {

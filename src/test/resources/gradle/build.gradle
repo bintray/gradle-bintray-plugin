@@ -17,13 +17,13 @@ configurations {
 }
 
 artifacts {
-    deployables new File("${projectDir}/../files/art1.txt")
+    deployables new File("${projectDir}/files/art1.txt")
 }
 
 publishing {
     publications {
         mavenStuff(MavenPublication) {
-            artifact new File("${projectDir}/../files/art2.txt")
+            artifact new File("${projectDir}/files/art2.txt")
         }
     }
 }
@@ -36,6 +36,11 @@ bintray {
     key = 'key'
     configurations = ['deployables']
     publications = ['mavenStuff']
+    filesSpec {
+        from 'files'
+        into 'standalone_files/TTT'
+        rename '(.+)\\.(.+)', '$1-aaaaaa.$2'
+    }
     pkg {
         repo = 'myrepo'
         userOrg = 'myorg'
@@ -48,6 +53,6 @@ bintray {
         labels = ['gear', 'gore', 'gorilla']
         publicDownloadNumbers = true
     }
-    dryRun = false
+    dryRun = true
     publish = project.publish
 }

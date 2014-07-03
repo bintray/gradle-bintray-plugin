@@ -4,17 +4,16 @@ import groovyx.net.http.HTTPBuilder
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.file.CopySpec
 import org.gradle.api.publish.Publication
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.Upload
+import org.gradle.api.tasks.*
 
 import static groovyx.net.http.ContentType.BINARY
 import static groovyx.net.http.ContentType.JSON
 import static groovyx.net.http.Method.*
+import static org.apache.commons.io.FilenameUtils.normalize
 
 class BintrayUploadTask extends DefaultTask {
 
@@ -40,6 +39,10 @@ class BintrayUploadTask extends DefaultTask {
     @Input
     @Optional
     Object[] publications
+
+    @Input
+    @Optional
+    CopySpec filesSpec
 
     @Input
     boolean publish
@@ -99,6 +102,7 @@ class BintrayUploadTask extends DefaultTask {
 
     Artifact[] configurationUploads
     Artifact[] publicationUploads
+    Artifact[] fileUploads
 
     {
         group = GROUP
@@ -141,6 +145,8 @@ class BintrayUploadTask extends DefaultTask {
             []
         }.flatten() as Artifact[]
 
+        fileUploads = collectArtifacts(filesSpec)
+
         //Upload the files
         HTTPBuilder http = BintrayHttpClientFactory.create(apiUrl, user, apiKey)
         def repoPath = "${userOrg ?: user}/$repoName"
@@ -165,8 +171,8 @@ class BintrayUploadTask extends DefaultTask {
                 }
                 http.request(POST, JSON) {
                     uri.path = "/packages/$repoPath"
-                    body = [name: packageName, desc: packageDesc, licenses: packageLicenses, labels: packageLabels,
-                            website_url: packageWebsiteUrl, issue_tracker_url: packageIssueTrackerUrl, vcs_url: packageVcsUrl,
+                    body = [name                   : packageName, desc: packageDesc, licenses: packageLicenses, labels: packageLabels,
+                            website_url            : packageWebsiteUrl, issue_tracker_url: packageIssueTrackerUrl, vcs_url: packageVcsUrl,
                             public_download_numbers: packagePublicDownloadNumbers]
 
                     response.success = { resp ->
@@ -250,8 +256,11 @@ class BintrayUploadTask extends DefaultTask {
 
         checkAndCreatePackage()
         checkAndCreateVersion()
+
         configurationUploads.each { uploadArtifact it }
         publicationUploads.each { uploadArtifact it }
+        fileUploads.each { uploadArtifact it }
+
         if (publish) {
             publishVersion()
         }
@@ -299,66 +308,11 @@ class BintrayUploadTask extends DefaultTask {
         artifacts
     }
 
-    static class Artifact {
-        String name
-        String groupId
-        String version
-        String extension
-        String type
-        String classifier
-        File file
-
-        def getPath() {
-            (groupId?.replaceAll('\\.', '/') ?: "") + "/$name/$version/$name-$version" +
-                    (classifier ? "-$classifier" : "") +
-                    (extension ? ".$extension" : "")
+    Artifact[] collectArtifacts(Copy spec) {
+        def artifacts = spec.source.findResults {
+            def destRelPath = normalize "${project.relativePath(spec.destinationDir)}/${project.file(it).name}"
+            new Artifact(file: it, path: destRelPath)
         }
-
-        boolean equals(o) {
-            if (this.is(o)) {
-                return true
-            }
-            if (getClass() != o.class) {
-                return false
-            }
-
-            Artifact artifact = (Artifact) o
-
-            if (classifier != artifact.classifier) {
-                return false
-            }
-            if (extension != artifact.extension) {
-                return false
-            }
-            if (file != artifact.file) {
-                return false
-            }
-            if (groupId != artifact.groupId) {
-                return false
-            }
-            if (name != artifact.name) {
-                return false
-            }
-            if (type != artifact.type) {
-                return false
-            }
-            if (version != artifact.version) {
-                return false
-            }
-
-            return true
-        }
-
-        int hashCode() {
-            int result
-            result = name.hashCode()
-            result = 31 * result + groupId.hashCode()
-            result = 31 * result + version.hashCode()
-            result = 31 * result + (extension != null ? extension.hashCode() : 0)
-            result = 31 * result + (type != null ? type.hashCode() : 0)
-            result = 31 * result + (classifier != null ? classifier.hashCode() : 0)
-            result = 31 * result + file.hashCode()
-            return result
-        }
+        artifacts
     }
 }
