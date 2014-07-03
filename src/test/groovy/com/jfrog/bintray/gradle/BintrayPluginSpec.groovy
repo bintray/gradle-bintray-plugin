@@ -35,7 +35,8 @@ class BintrayPluginSpec extends Specification {
         gradle.listenerManager.allListeners*.projectsEvaluated gradle
         BintrayUploadTask bintrayUploadTask = project.tasks.findByName(NAME)
 
-        then: "project is properly configured with ${NAME} task"
+        then:
+        "project is properly configured with ${NAME} task"
         bintrayUploadTask.getTaskDependencies().values.find { BintrayUploadTask.isAssignableFrom it.class }
         //!bintrayUploadTask.publishConfigurations.isEmpty()
         API_URL_DEFAULT == bintrayUploadTask.apiUrl
@@ -59,7 +60,8 @@ class BintrayPluginSpec extends Specification {
     }
 
     def upload() {
-        when: "Invoke the ${NAME} task"
+        when:
+        "Invoke the ${NAME} task"
         project.evaluate()
         //Notify evaluation listeners
         def gradle = project.getGradle()
@@ -69,6 +71,7 @@ class BintrayPluginSpec extends Specification {
         execute bintrayUploadTask
         def configurationUploadPaths = bintrayUploadTask.configurationUploads*.file.absolutePath
         def publicationUploadPaths = bintrayUploadTask.publicationUploads*.file.absolutePath
+        def fileSpecsArtifactcs = bintrayUploadTask.fileUploads*.file
 
         then: "Uploaded artifact"
         2 == bintrayUploadTask.configurationUploads.length
@@ -79,6 +82,16 @@ class BintrayPluginSpec extends Specification {
 
         publicationUploadPaths.grep ~/.*files\/art2.txt/
         publicationUploadPaths.grep ~/.*build\/publications\/mavenStuff\/pom-default.xml/
+
+        bintrayUploadTask.fileUploads.find {
+            it.path == 'standalone_files/level1/art1-suffix.txt' &&
+                    it.file.path =~ /gradle\/standalone_files\/level1\/art1-suffix.txt/
+        }
+
+        bintrayUploadTask.fileUploads.find {
+            it.path == 'standalone_files/level1/nested/nested-suffix.txt' &&
+                    it.file.path =~ /gradle\/standalone_files\/level1\/nested\/nested-suffix.txt/
+        }
     }
 
     private void execute(Task task) {

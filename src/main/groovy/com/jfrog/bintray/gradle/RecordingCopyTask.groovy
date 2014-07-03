@@ -10,7 +10,7 @@ import static org.apache.commons.io.FilenameUtils.normalize
 
 class RecordingCopyTask extends Copy {
 
-    Artifact[] fileUploads
+    def fileUploads = []
 
     @Override
     protected CopyAction createCopyAction() {
@@ -25,6 +25,7 @@ class RecordingCopyTask extends Copy {
                         if (!details.isDirectory()) {
                             File target = resolver.resolve(details.getRelativePath().getPathString());
                             def destRelPath = normalize project.relativePath(target)
+                            fileUploads << new Artifact(file: target, path: destRelPath)
                             didWork = true
                         }
                 }

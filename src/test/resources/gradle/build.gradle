@@ -38,8 +38,8 @@ bintray {
     publications = ['mavenStuff']
     filesSpec {
         from 'files'
-        into 'standalone_files/TTT'
-        rename '(.+)\\.(.+)', '$1-aaaaaa.$2'
+        into 'standalone_files/level1'
+        rename '(.+)\\.(.+)', '$1-suffix.$2'
     }
     pkg {
         repo = 'myrepo'

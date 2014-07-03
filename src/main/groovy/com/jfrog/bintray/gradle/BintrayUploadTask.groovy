@@ -8,12 +8,14 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.publish.Publication
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.Upload
 
 import static groovyx.net.http.ContentType.BINARY
 import static groovyx.net.http.ContentType.JSON
 import static groovyx.net.http.Method.*
-import static org.apache.commons.io.FilenameUtils.normalize
 
 class BintrayUploadTask extends DefaultTask {
 
@@ -145,7 +147,8 @@ class BintrayUploadTask extends DefaultTask {
             []
         }.flatten() as Artifact[]
 
-        fileUploads = collectArtifacts(filesSpec)
+        RecordingCopyTask recordingCopyTask = getDependsOn().find { it instanceof RecordingCopyTask }
+        fileUploads = (recordingCopyTask ? recordingCopyTask.fileUploads : []) as Artifact[]
 
         //Upload the files
         HTTPBuilder http = BintrayHttpClientFactory.create(apiUrl, user, apiKey)
@@ -218,6 +221,10 @@ class BintrayUploadTask extends DefaultTask {
         def uploadArtifact = { artifact ->
             def versionPath = packagePath + '/' + versionName ?: artifact.version
             def uploadUri = "/content/$versionPath/${artifact.path}"
+            if (!artifact.file.exists()) {
+                logger.error("Skipping upload for missing file '$artifact.file'.")
+                return
+            }
             artifact.file.withInputStream { is ->
                 is.metaClass.totalBytes = {
                     artifact.file.length()
@@ -305,14 +312,6 @@ class BintrayUploadTask extends DefaultTask {
         artifacts << new Artifact(
                 name: identity.artifactId, groupId: identity.groupId, version: identity.version,
                 extension: 'pom', type: 'pom', file: publication.asNormalisedPublication().pomFile)
-        artifacts
-    }
-
-    Artifact[] collectArtifacts(Copy spec) {
-        def artifacts = spec.source.findResults {
-            def destRelPath = normalize "${project.relativePath(spec.destinationDir)}/${project.file(it).name}"
-            new Artifact(file: it, path: destRelPath)
-        }
         artifacts
     }
 }
