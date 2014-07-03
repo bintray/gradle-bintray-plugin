@@ -6,8 +6,6 @@ import org.gradle.api.internal.file.copy.FileCopyDetailsInternal
 import org.gradle.api.internal.tasks.SimpleWorkResult
 import org.gradle.api.tasks.Copy
 
-import static org.apache.commons.io.FilenameUtils.normalize
-
 class RecordingCopyTask extends Copy {
 
     def fileUploads = []
@@ -24,8 +22,8 @@ class RecordingCopyTask extends Copy {
                     FileCopyDetailsInternal details ->
                         if (!details.isDirectory()) {
                             File target = resolver.resolve(details.getRelativePath().getPathString());
-                            def destRelPath = normalize project.relativePath(target)
-                            fileUploads << new Artifact(file: target, path: destRelPath)
+                            def destRelPath = project.relativePath(target)
+                            fileUploads << new Artifact(file: details.file, path: destRelPath)
                             didWork = true
                         }
                 }

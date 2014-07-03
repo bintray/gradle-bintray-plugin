@@ -85,12 +85,12 @@ class BintrayPluginSpec extends Specification {
 
         bintrayUploadTask.fileUploads.find {
             it.path == 'standalone_files/level1/art1-suffix.txt' &&
-                    it.file.path =~ /gradle\/standalone_files\/level1\/art1-suffix.txt/
+                    it.file.path =~ /gradle\/files\/art1.txt/
         }
 
         bintrayUploadTask.fileUploads.find {
             it.path == 'standalone_files/level1/nested/nested-suffix.txt' &&
-                    it.file.path =~ /gradle\/standalone_files\/level1\/nested\/nested-suffix.txt/
+                    it.file.path =~ /gradle\/files\/nested\/nested.txt/
         }
     }
 
