@@ -250,6 +250,10 @@ class BintrayUploadTask extends DefaultTask {
 
         def publishVersion = {
             def publishUri = "/content/$packagePath/$versionName/publish"
+            if (dryRun) {
+                logger.info("(Dry run) Pulished verion '$packagePath/$versionName'.")
+                return
+            }
             http.request(POST) {
                 uri.path = publishUri
                 response.success = { resp ->
