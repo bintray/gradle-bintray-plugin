@@ -54,6 +54,15 @@ class BintrayPlugin implements Plugin<Project> {
                         versionAttributes = extension.pkg.version.attributes
                     }
                     if (extension.configurations?.length) {
+                        extension.configurations.each {
+                            def configuration = project.configurations.findByName(it)
+                            if (!configuration) {
+                                project.logger.warn "Configuration ${it} specified but does not exist in project {}.",
+                                        project.path
+                            } else {
+                                bintrayUpload.dependsOn(configuration.allArtifacts)
+                            }
+                        }
                         Upload installTask = project.tasks.withType(Upload)?.findByName('install')
                         if (installTask) {
                             bintrayUpload.dependsOn(installTask)
