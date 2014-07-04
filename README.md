@@ -1,5 +1,6 @@
 # Overview
 This plugin allows you to publish artifacts to a repository on [bintray](https://bintray.com/). 
+See a usage example in the [sample project](https://github.com/bintray/bintray-examples/tree/master/gradle-example)
 
 # Usage
 To use the plugin, configure your `build.gradle` script and add the plugin:
