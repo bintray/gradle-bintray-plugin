@@ -46,10 +46,12 @@ class BintrayPlugin implements Plugin<Project> {
                         packageVcsUrl = extension.pkg.vcsUrl
                         packageLicenses = extension.pkg.licenses
                         packageLabels = extension.pkg.labels
+                        packageAttributes = extension.pkg.attributes
                         packagePublicDownloadNumbers = extension.pkg.publicDownloadNumbers
                         versionName = extension.pkg.version.name ?: project.version
                         versionDesc = extension.pkg.version.desc
                         versionVcsTag = extension.pkg.version.vcsTag ?: project.version
+                        versionAttributes = extension.pkg.version.attributes
                     }
                     if (extension.configurations?.length) {
                         Upload installTask = project.tasks.withType(Upload)?.findByName('install')

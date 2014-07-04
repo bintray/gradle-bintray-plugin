@@ -1,5 +1,6 @@
 package com.jfrog.bintray.gradle
 
+import groovy.json.JsonBuilder
 import groovyx.net.http.HTTPBuilder
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -88,6 +89,10 @@ class BintrayUploadTask extends DefaultTask {
 
     @Input
     @Optional
+    Map packageAttributes
+
+    @Input
+    @Optional
     boolean packagePublicDownloadNumbers
 
     @Input
@@ -101,6 +106,10 @@ class BintrayUploadTask extends DefaultTask {
     @Input
     @Optional
     String versionVcsTag
+
+    @Input
+    @Optional
+    Map versionAttributes
 
     Artifact[] configurationUploads
     Artifact[] publicationUploads
@@ -157,6 +166,25 @@ class BintrayUploadTask extends DefaultTask {
         def repoPath = "${userOrg ?: user}/$repoName"
         def packagePath = "$repoPath/$packageName"
 
+        def setAttributes = { attributesPath, attributes, entity, entityName ->
+            http.request(POST, JSON) {
+                uri.path = attributesPath
+                def builder = new JsonBuilder()
+                builder.content = attributes.collect {
+                    //Support both arrays and singular values - coerce to an array of values
+                    ['name': it.key, 'values': [it.value].flatten()]
+                }
+                body = builder.toString()
+                response.success = { resp ->
+                    logger.info("Attributes set on $entity '$entityName'.")
+                }
+                response.failure = { resp ->
+                    throw new GradleException(
+                            "Could not set attributes on $entity '$entityName': $resp.statusLine")
+                }
+            }
+        }
+
         def checkAndCreatePackage = {
             def create
             http.request(HEAD) {
@@ -187,6 +215,9 @@ class BintrayUploadTask extends DefaultTask {
                         throw new GradleException("Could not create package '$packagePath': $resp.statusLine")
                     }
                 }
+                if (packageAttributes) {
+                    setAttributes "/packages/$packagePath/attributes", packageAttributes, 'package', packageName
+                }
             }
         }
 
@@ -216,6 +247,9 @@ class BintrayUploadTask extends DefaultTask {
                     response.failure = { resp ->
                         throw new GradleException("Could not create version '$versionName': $resp.statusLine")
                     }
+                }
+                if (versionAttributes) {
+                    setAttributes "/packages/$packagePath/versions/$versionName/attributes", versionAttributes, 'version', versionName
                 }
             }
         }
@@ -270,9 +304,15 @@ class BintrayUploadTask extends DefaultTask {
         checkAndCreatePackage()
         checkAndCreateVersion()
 
-        configurationUploads.each { uploadArtifact it }
-        publicationUploads.each { uploadArtifact it }
-        fileUploads.each { uploadArtifact it }
+        configurationUploads.each {
+            uploadArtifact it
+        }
+        publicationUploads.each {
+            uploadArtifact it
+        }
+        fileUploads.each {
+            uploadArtifact it
+        }
 
         if (publish && !subtaskSkipPublish) {
             publishVersion()

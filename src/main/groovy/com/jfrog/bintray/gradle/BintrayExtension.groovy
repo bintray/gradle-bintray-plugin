@@ -51,6 +51,7 @@ class BintrayExtension {
         boolean publicDownloadNumbers
         String[] licenses
         String[] labels
+        Map attributes
 
         VersionConfig version = new VersionConfig()
 
@@ -63,5 +64,6 @@ class BintrayExtension {
         String name
         String desc
         String vcsTag
+        Map attributes
     }
 }

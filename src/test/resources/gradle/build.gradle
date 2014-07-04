@@ -51,7 +51,14 @@ bintray {
         vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
         licenses = ['Apache-2.0']
         labels = ['gear', 'gore', 'gorilla']
+        attributes= ['plat': ['linux', 'osx']]
         publicDownloadNumbers = true
+        version {
+            name = 'new-release' //Optional logical version name
+            desc = 'new release!'
+            vcsTag = '1.0.0'
+            attributes= ['a': ['ay1', 'ay2', 'ay3'], 'b': ['bee'], c: 'cee']
+        }
     }
     dryRun = true
     publish = project.publish
