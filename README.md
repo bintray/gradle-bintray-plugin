@@ -9,7 +9,7 @@ To use the plugin, configure your `build.gradle` script and add the plugin:
             jcenter()
         }
         dependencies {
-            classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:VERSION'
+            classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
         }
     }
     apply plugin: 'com.jfrog.bintray'
