@@ -16,7 +16,7 @@ To use the plugin, configure your `build.gradle` script and add the plugin:
 ```
 
 **Gradle Compatibility:**
-When using Gradle publications you'll need to use Gradle 2.x; Otherwise, the plugin is compatible with Gradle 1.12 and above.
+When using Gradle publications or when using `filesSpec` for direct file uploads, you'll need to use Gradle 2.x; Otherwise, the plugin is compatible with Gradle 1.12 and above.
  **JVM Compatibility:**
 Java 6 and above.
 
