@@ -33,20 +33,20 @@ Artifacts can be uploaded from the specified configurations or (the newly suppor
         user = 'bintray_user'
         key = 'bintray_api_key'
         
-        configurations = ['deployables'] // When uploading configuration files
+        configurations = ['deployables'] //When uploading configuration files
         // - OR -
-        publications = ['mavenStuff'] // When uploading Maven-based publication files
+        publications = ['mavenStuff'] //When uploading Maven-based publication files
         // - AND/OR -
-        filesSpec { // When uploading any arbitrary files ('filesSpec' is a standard Gradle CopySpec)
+        filesSpec { //When uploading any arbitrary files ('filesSpec' is a standard Gradle CopySpec)
             from 'arbitrary-files'
             into 'standalone_files/level1'
             rename '(.+)\\.(.+)', '$1-suffix.$2'
         }
-        dryRun = false // Whether to run this as dry-run, without deploying
-        publish = true // If version should be auto published after an upload
+        dryRun = false //Whether to run this as dry-run, without deploying
+        publish = true //If version should be auto published after an upload
         pkg {
             repo = 'myrepo'
-            userOrg = 'myorg' // An optional organization name when the repo belongs to one of the user's orgs
+            userOrg = 'myorg' //An optional organization name when the repo belongs to one of the user's orgs
             name = 'mypkg'
             desc = 'what a fantastic package indeed!'
             websiteUrl = 'https://github.com/bintray/gradle-bintray-plugin'
@@ -56,9 +56,9 @@ Artifacts can be uploaded from the specified configurations or (the newly suppor
             labels = ['gear', 'gore', 'gorilla']
             publicDownloadNumbers = true
             attributes= ['a': ['ay1', 'ay2'], 'b': ['bee'], c: 'cee'] //Optional package-level attributes
-            // Optional version descriptor
+            //Optional version descriptor
             version {
-                name = '1.3-Final' // bintray logical version name
+                name = '1.3-Final' //Bintray logical version name
                 desc = 'optional, version-specific description'
                 vcsTag = '1.3.0'
                 attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin'] //Optional version-level attributes
