@@ -1,5 +1,5 @@
 # Overview
-This plugin allows you to publish artifacts to a repository on [bintray](https://bintray.com/). 
+This plugin allows you to publish artifacts to a repository on [bintray](https://bintray.com/).
 
 # Usage
 To use the plugin, configure your `build.gradle` script and add the plugin:
@@ -36,12 +36,17 @@ Artifacts can be uploaded from the specified configurations or (the newly suppor
         configurations = ['deployables'] // When uploading configuration files
         // - OR -
         publications = ['mavenStuff'] // When uploading Maven-based publication files
-
-        dryRun = false // whether to run this as dry-run, without deploying
-        publish = true //If version should be auto published after an upload
+        // - AND/OR -
+        filesSpec { // When uploading any arbitrary files ('filesSpec' is a standard Gradle CopySpec)
+            from 'arbitrary-files'
+            into 'standalone_files/level1'
+            rename '(.+)\\.(.+)', '$1-suffix.$2'
+        }
+        dryRun = false // Whether to run this as dry-run, without deploying
+        publish = true // If version should be auto published after an upload
         pkg {
             repo = 'myrepo'
-            userOrg = 'myorg' // an optional organization name when the repo belongs to one of the user's orgs
+            userOrg = 'myorg' // An optional organization name when the repo belongs to one of the user's orgs
             name = 'mypkg'
             desc = 'what a fantastic package indeed!'
             websiteUrl = 'https://github.com/bintray/gradle-bintray-plugin'
@@ -50,17 +55,19 @@ Artifacts can be uploaded from the specified configurations or (the newly suppor
             licenses = ['Apache-2.0']
             labels = ['gear', 'gore', 'gorilla']
             publicDownloadNumbers = true
-
-            // optional version attributes
+            attributes= ['a': ['ay1', 'ay2'], 'b': ['bee'], c: 'cee'] //Optional package-level attributes
+            // Optional version descriptor
             version {
                 name = '1.3-Final' // bintray logical version name
                 desc = 'optional, version-specific description'
                 vcsTag = '1.3.0'
+                attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin'] //Optional version-level attributes
             }
         }
 
     }
 ```
+* As an example, you can also refer to this multi-module sample project [build file](https://github.com/bintray/bintray-examples/blob/master/gradle-multi-example/build.gradle).
 
 # License
 This plugin is available under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
