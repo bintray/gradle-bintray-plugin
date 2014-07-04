@@ -8,6 +8,8 @@ import org.gradle.api.tasks.Copy
 
 class RecordingCopyTask extends Copy {
 
+    static String NAME = '_bintrayRecordingCopy'
+
     def fileUploads = []
 
     @Override

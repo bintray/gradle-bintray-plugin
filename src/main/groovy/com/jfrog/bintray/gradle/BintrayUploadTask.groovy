@@ -106,6 +106,8 @@ class BintrayUploadTask extends DefaultTask {
     Artifact[] publicationUploads
     Artifact[] fileUploads
 
+    boolean subtaskSkipPublish
+
     {
         group = GROUP
         description = DESCRIPTION
@@ -272,7 +274,7 @@ class BintrayUploadTask extends DefaultTask {
         publicationUploads.each { uploadArtifact it }
         fileUploads.each { uploadArtifact it }
 
-        if (publish) {
+        if (publish && !subtaskSkipPublish) {
             publishVersion()
         }
     }

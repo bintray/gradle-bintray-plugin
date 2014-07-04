@@ -27,7 +27,6 @@ class BintrayExtension {
 
     BintrayExtension(Project project) {
         this.project = project
-        filesSpec = project.task(type: RecordingCopyTask, "_bintrayRecordingCopy")
     }
 
     def pkg(Closure closure) {
@@ -35,7 +34,9 @@ class BintrayExtension {
     }
 
     def filesSpec(Closure closure) {
+        filesSpec = project.task(type: RecordingCopyTask, RecordingCopyTask.NAME)
         ConfigureUtil.configure(closure, filesSpec)
+        filesSpec.outputs.upToDateWhen { false }
     }
 
     class PackageConfig {
