@@ -1,6 +1,8 @@
 # Overview
 This plugin allows you to publish artifacts to a repository on [bintray](https://bintray.com/).
 
+[ ![Download](https://api.bintray.com/packages/jfrog/jfrog-jars/gradle-bintray-plugin/images/download.png) ](https://bintray.com/jfrog/jfrog-jars/gradle-bintray-plugin/_latestVersion)
+
 # Usage
 To use the plugin, configure your `build.gradle` script and add the plugin:
 ```groovy
