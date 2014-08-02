@@ -4,6 +4,8 @@ import groovyx.net.http.EncoderRegistry
 import groovyx.net.http.HTTPBuilder
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
+import org.apache.http.auth.AuthScope
+import org.apache.http.auth.UsernamePasswordCredentials
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpHead
 import org.apache.http.client.methods.HttpPut
@@ -70,6 +72,21 @@ class BintrayHttpClientFactory {
                 }
             }
         })
+
+        if (System.getProperty('http.proxyHost')) {
+            String proxyHost = System.getProperty('http.proxyHost')
+            Integer proxyPort = Integer.parseInt(System.getProperty('http.proxyPort', '80'));
+            String proxyUser = System.getProperty('http.proxyUser')
+            String proxyPassword = System.getProperty('http.proxyPassword', '')
+            println "Using proxy ${proxyUser}:${proxyPassword}@${proxyHost}:${proxyPort}"
+            if (proxyUser) {
+                http.client.getCredentialsProvider().setCredentials(
+                    new AuthScope(proxyHost, proxyPort),
+                    new UsernamePasswordCredentials(proxyUser, proxyPassword)
+                )
+            }
+            http.setProxy(proxyHost, proxyPort, 'http')
+        }
         http
     }
 }
