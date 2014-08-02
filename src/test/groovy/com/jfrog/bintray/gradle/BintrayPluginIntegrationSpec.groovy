@@ -23,8 +23,8 @@ class BintrayPluginIntegrationSpec extends Specification {
         //project.setProperty('testUserName', 'user1')
 
 
-        def username = project.hasProperty('bintrayUser') ? project.bintrayUser : getenv()['BINTRAY_USER']
-        def password = project.hasProperty('bintrayKey') ? project.bintrayKey : getenv()['BINTRAY_KEY']
+        def username = project.hasProperty('bintrayUser') ? project.bintrayUser : System.getenv()['BINTRAY_USER']
+        def password = project.hasProperty('bintrayKey') ? project.bintrayKey : System.getenv()['BINTRAY_KEY']
 
 
         def bt = BintrayHttpClientFactory.create(API_URL_DEFAULT, username, password)
@@ -73,7 +73,7 @@ c << [5, 7, 0]
     def populateDsl() {
         when: "plugin applied to sub-project"
         Project childProject = ProjectBuilder.builder().withName('childProject').withParent(project).build()
-        childProject.apply plugin: 'bintray'
+        childProject.apply plugin: 'com.jfrog.bintray'
         project.evaluate()
         //Notify evaluation listeners
         def gradle = project.getGradle()
