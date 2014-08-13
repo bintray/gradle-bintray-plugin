@@ -193,7 +193,7 @@ class BintrayUploadTask extends DefaultTask {
                     logger.debug("Package '$packageName' exists.")
                 }
                 response.'404' = { resp ->
-                    logger.info("Package '$packageName' does not exist. Attempting to creating it...")
+                    logger.info("Package '$packageName' does not exist. Attempting to create it...")
                     create = true
                 }
             }
@@ -229,13 +229,13 @@ class BintrayUploadTask extends DefaultTask {
                     logger.debug("Version '$packagePath/$versionName' exists.")
                 }
                 response.'404' = { resp ->
-                    logger.info("Version '$packagePath/$versionName' does not exist. Attempting to creating it...")
+                    logger.info("Version '$packagePath/$versionName' does not exist. Attempting to create it...")
                     create = true
                 }
             }
             if (create) {
                 if (dryRun) {
-                    logger.info("(Dry run) Created verion '$packagePath/$versionName'.")
+                    logger.info("(Dry run) Created version '$packagePath/$versionName'.")
                     return
                 }
                 http.request(POST, JSON) {
@@ -287,7 +287,7 @@ class BintrayUploadTask extends DefaultTask {
         def publishVersion = {
             def publishUri = "/content/$packagePath/$versionName/publish"
             if (dryRun) {
-                logger.info("(Dry run) Pulished verion '$packagePath/$versionName'.")
+                logger.info("(Dry run) Published version '$packagePath/$versionName'.")
                 return
             }
             http.request(POST) {
