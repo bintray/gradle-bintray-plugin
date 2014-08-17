@@ -193,7 +193,7 @@ class BintrayUploadTask extends DefaultTask {
                     logger.debug("Package '$packageName' exists.")
                 }
                 response.'404' = { resp ->
-                    logger.info("Package '$packageName' does not exist. Attempting to create it...")
+                    logger.info("Package '$packageName' does not exist. Attempting to creating it...")
                     create = true
                 }
             }
@@ -229,13 +229,13 @@ class BintrayUploadTask extends DefaultTask {
                     logger.debug("Version '$packagePath/$versionName' exists.")
                 }
                 response.'404' = { resp ->
-                    logger.info("Version '$packagePath/$versionName' does not exist. Attempting to create it...")
+                    logger.info("Version '$packagePath/$versionName' does not exist. Attempting to creating it...")
                     create = true
                 }
             }
             if (create) {
                 if (dryRun) {
-                    logger.info("(Dry run) Created version '$packagePath/$versionName'.")
+                    logger.info("(Dry run) Created verion '$packagePath/$versionName'.")
                     return
                 }
                 http.request(POST, JSON) {
@@ -249,7 +249,8 @@ class BintrayUploadTask extends DefaultTask {
                     }
                 }
                 if (versionAttributes) {
-                    setAttributes "/packages/$packagePath/versions/$versionName/attributes", versionAttributes, 'version', versionName
+                    setAttributes "/packages/$packagePath/versions/$versionName/attributes", versionAttributes,
+                            'version', versionName
                 }
             }
         }
@@ -287,7 +288,7 @@ class BintrayUploadTask extends DefaultTask {
         def publishVersion = {
             def publishUri = "/content/$packagePath/$versionName/publish"
             if (dryRun) {
-                logger.info("(Dry run) Published version '$packagePath/$versionName'.")
+                logger.info("(Dry run) Pulished verion '$packagePath/$versionName'.")
                 return
             }
             http.request(POST) {
@@ -320,11 +321,13 @@ class BintrayUploadTask extends DefaultTask {
     }
 
     Artifact[] collectArtifacts(Configuration config) {
+        def pomArtifact
         def artifacts = config.allArtifacts.findResults {
             if (!it.file.exists()) {
                 logger.error("{}: file {} could not be found.", path, it.file.getAbsolutePath())
                 return null
             }
+            pomArtifact = !pomArtifact && it.type == 'pom'
             new Artifact(
                     name: it.name, groupId: project.group, version: project.version, extension: it.extension,
                     type: it.type, classifier: it.classifier, file: it.file)
@@ -334,7 +337,7 @@ class BintrayUploadTask extends DefaultTask {
         Upload installTask = project.tasks.withType(Upload).findByName('install');
         if (!installTask) {
             logger.info "maven plugin was not applied, no pom will be uploaded."
-        } else {
+        } else if (!pomArtifact) {
             artifacts << new Artifact(name: project.name, groupId: project.group, version: project.version,
                     extension: 'pom', type: 'pom',
                     file: new File(getProject().convention.plugins['maven'].mavenPomDir, "pom-default.xml"))
