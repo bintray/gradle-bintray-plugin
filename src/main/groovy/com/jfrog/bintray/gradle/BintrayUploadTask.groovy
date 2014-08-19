@@ -249,7 +249,8 @@ class BintrayUploadTask extends DefaultTask {
                     }
                 }
                 if (versionAttributes) {
-                    setAttributes "/packages/$packagePath/versions/$versionName/attributes", versionAttributes, 'version', versionName
+                    setAttributes "/packages/$packagePath/versions/$versionName/attributes", versionAttributes,
+                            'version', versionName
                 }
             }
         }
@@ -320,11 +321,13 @@ class BintrayUploadTask extends DefaultTask {
     }
 
     Artifact[] collectArtifacts(Configuration config) {
+        def pomArtifact
         def artifacts = config.allArtifacts.findResults {
             if (!it.file.exists()) {
                 logger.error("{}: file {} could not be found.", path, it.file.getAbsolutePath())
                 return null
             }
+            pomArtifact = !pomArtifact && it.type == 'pom'
             new Artifact(
                     name: it.name, groupId: project.group, version: project.version, extension: it.extension,
                     type: it.type, classifier: it.classifier, file: it.file)
@@ -334,7 +337,7 @@ class BintrayUploadTask extends DefaultTask {
         Upload installTask = project.tasks.withType(Upload).findByName('install');
         if (!installTask) {
             logger.info "maven plugin was not applied, no pom will be uploaded."
-        } else {
+        } else if (!pomArtifact) {
             artifacts << new Artifact(name: project.name, groupId: project.group, version: project.version,
                     extension: 'pom', type: 'pom',
                     file: new File(getProject().convention.plugins['maven'].mavenPomDir, "pom-default.xml"))
