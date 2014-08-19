@@ -14,8 +14,13 @@ import org.apache.http.entity.InputStreamEntity
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler
 import org.apache.http.impl.client.DefaultRedirectStrategy
 import org.apache.http.protocol.HttpContext
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
+
 
 class BintrayHttpClientFactory {
+
+    private static Logger logger = Logging.getLogger(BintrayHttpClientFactory.class) 
 
     static HTTPBuilder create(apiUrl, user, apiKey) {
         def assertNotEmpty = { String name, String val ->
@@ -78,7 +83,7 @@ class BintrayHttpClientFactory {
             Integer proxyPort = Integer.parseInt(System.getProperty('http.proxyPort', '80'));
             String proxyUser = System.getProperty('http.proxyUser')
             String proxyPassword = System.getProperty('http.proxyPassword', '')
-            println "Using proxy ${proxyUser}:${proxyPassword}@${proxyHost}:${proxyPort}"
+            logger.info "Using proxy ${proxyUser}:${proxyPassword}@${proxyHost}:${proxyPort}"
             if (proxyUser) {
                 http.client.getCredentialsProvider().setCredentials(
                     new AuthScope(proxyHost, proxyPort),
