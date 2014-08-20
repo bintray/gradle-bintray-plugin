@@ -30,6 +30,15 @@ dependencies {
     }
 }
 
+test {
+    systemProperties = [
+        'http.proxyHost': System.getProperty('http.proxyHost'),
+        'http.proxyPort': System.getProperty('http.proxyPort'),
+        'http.proxyUser': System.getProperty('http.proxyUser'),
+        'http.proxyPassword': System.getProperty('http.proxyPassword')
+    ]
+}
+
 compileGroovy {
     sourceCompatibility = '1.6'
     targetCompatibility = '1.6'
