@@ -50,6 +50,7 @@ class BintrayPlugin implements Plugin<Project> {
                         packagePublicDownloadNumbers = extension.pkg.publicDownloadNumbers
                         versionName = extension.pkg.version.name ?: project.version
                         versionDesc = extension.pkg.version.desc
+                        versionReleased = extension.pkg.version.released
                         versionVcsTag = extension.pkg.version.vcsTag ?: project.version
                         versionAttributes = extension.pkg.version.attributes
                     }

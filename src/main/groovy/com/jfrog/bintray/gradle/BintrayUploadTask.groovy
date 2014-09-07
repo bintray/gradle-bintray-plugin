@@ -105,6 +105,10 @@ class BintrayUploadTask extends DefaultTask {
 
     @Input
     @Optional
+    versionReleased
+
+    @Input
+    @Optional
     String versionVcsTag
 
     @Input
@@ -240,7 +244,7 @@ class BintrayUploadTask extends DefaultTask {
                 }
                 http.request(POST, JSON) {
                     uri.path = "/packages/$packagePath/versions"
-                    body = [name: versionName, desc: versionDesc, vcs_tag: versionVcsTag]
+                    body = [name: versionName, desc: versionDesc, released: versionReleased, vcs_tag: versionVcsTag]
                     response.success = { resp ->
                         logger.info("Created version '$versionName'.")
                     }

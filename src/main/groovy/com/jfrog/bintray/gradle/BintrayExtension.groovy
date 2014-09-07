@@ -63,6 +63,7 @@ class BintrayExtension {
     class VersionConfig {
         String name
         String desc
+        String released
         String vcsTag
         Map attributes
     }
