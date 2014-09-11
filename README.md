@@ -62,8 +62,13 @@ bintray {
         version {
             name = '1.3-Final' //Bintray logical version name
             desc = 'optional, version-specific description'
+            released  = 'optional, date of the version release' //2 possible values: date in the format of 'yyyy-MM-dd'T'HH:mm:ss.SSSZZ' OR new Date()
             vcsTag = '1.3.0'
             attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin'] //Optional version-level attributes
+            gpg {
+                sign = true //Determines whether to GPG sign the files. The default is false
+                passphrase = 'optional, the passphrase for GPG signing'
+            }
         }
     }
 

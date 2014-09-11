@@ -66,5 +66,16 @@ class BintrayExtension {
         String released
         String vcsTag
         Map attributes
+
+        GpgConfig gpg = new GpgConfig()
+
+        def gpg(Closure closure) {
+            ConfigureUtil.configure(closure, gpg)
+        }
+    }
+
+    class GpgConfig {
+        boolean sign
+        String passphrase
     }
 }
