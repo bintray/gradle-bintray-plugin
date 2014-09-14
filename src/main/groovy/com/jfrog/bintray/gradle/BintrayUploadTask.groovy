@@ -255,7 +255,7 @@ class BintrayUploadTask extends DefaultTask {
                 }
                 http.request(POST, JSON) {
                     uri.path = "/packages/$packagePath/versions"
-                    versionReleased - toIsoDateFormat(versionReleased)
+                    versionReleased = Utils.toIsoDateFormat(versionReleased)
                     body = [name: versionName, desc: versionDesc, released: versionReleased, vcs_tag: versionVcsTag]
                     response.success = { resp ->
                         logger.info("Created version '$versionName'.")
@@ -340,10 +340,6 @@ class BintrayUploadTask extends DefaultTask {
         checkAndCreatePackage()
         checkAndCreateVersion()
 
-        if (signVersion) {
-            gpgSignVersion()
-        }
-
         configurationUploads.each {
             uploadArtifact it
         }
@@ -352,6 +348,10 @@ class BintrayUploadTask extends DefaultTask {
         }
         fileUploads.each {
             uploadArtifact it
+        }
+
+        if (signVersion) {
+            gpgSignVersion()
         }
 
         if (publish && !subtaskSkipPublish) {
@@ -401,26 +401,5 @@ class BintrayUploadTask extends DefaultTask {
                 name: identity.artifactId, groupId: identity.groupId, version: identity.version,
                 extension: 'pom', type: 'pom', file: publication.asNormalisedPublication().pomFile)
         artifacts
-    }
-
-    /**
-     * The method converts a date string in the format of java.util.date toString() into a string in the following format:
-     * yyyy-MM-dd'T'HH:mm:ss.SSSZZ
-     * In case the input string already has the target format, it is returned as is.
-     * If the input string has a different format, a ParseException is thrown.
-     */
-    String toIsoDateFormat(String dateString) throws ParseException {
-        if (dateString == null) {
-            return null
-        }
-        DateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ")
-        try {
-            isoFormat.parse(dateString)
-            return dateString
-        } catch (ParseException e) {
-        }
-
-        DateFormat dateToStringFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy")
-        return isoFormat.format(dateToStringFormat.parse(dateString))
     }
 }
