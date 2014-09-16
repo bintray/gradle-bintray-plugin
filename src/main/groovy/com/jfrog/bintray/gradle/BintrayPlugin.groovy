@@ -53,6 +53,8 @@ class BintrayPlugin implements Plugin<Project> {
                         versionReleased = extension.pkg.version.released
                         versionVcsTag = extension.pkg.version.vcsTag ?: project.version
                         versionAttributes = extension.pkg.version.attributes
+                        signVersion = extension.pkg.version.gpg.sign
+                        gpgPassphrase = extension.pkg.version.gpg.passphrase
                     }
                     if (extension.configurations?.length) {
                         extension.configurations.each {

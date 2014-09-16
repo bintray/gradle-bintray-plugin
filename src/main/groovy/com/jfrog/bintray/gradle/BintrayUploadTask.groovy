@@ -13,6 +13,9 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Upload
+import java.text.DateFormat
+import java.text.ParseException
+import java.text.SimpleDateFormat
 
 import static groovyx.net.http.ContentType.BINARY
 import static groovyx.net.http.ContentType.JSON
@@ -105,7 +108,15 @@ class BintrayUploadTask extends DefaultTask {
 
     @Input
     @Optional
-    versionReleased
+    String versionReleased
+
+    @Input
+    @Optional
+    boolean signVersion
+
+    @Input
+    @Optional
+    String gpgPassphrase
 
     @Input
     @Optional
@@ -244,6 +255,7 @@ class BintrayUploadTask extends DefaultTask {
                 }
                 http.request(POST, JSON) {
                     uri.path = "/packages/$packagePath/versions"
+                    versionReleased = Utils.toIsoDateFormat(versionReleased)
                     body = [name: versionName, desc: versionDesc, released: versionReleased, vcs_tag: versionVcsTag]
                     response.success = { resp ->
                         logger.info("Created version '$versionName'.")
@@ -255,6 +267,25 @@ class BintrayUploadTask extends DefaultTask {
                 if (versionAttributes) {
                     setAttributes "/packages/$packagePath/versions/$versionName/attributes", versionAttributes,
                             'version', versionName
+                }
+            }
+        }
+
+        def gpgSignVersion = {
+            if (dryRun) {
+                logger.info("(Dry run) Signed verion '$packagePath/$versionName'.")
+                return
+            }
+            http.request(POST, JSON) {
+                uri.path = "/gpg/$packagePath/versions/$versionName"
+                if (gpgPassphrase != null) {
+                    body = [passphrase: gpgPassphrase]
+                }
+                response.success = { resp ->
+                    logger.info("Signed version '$versionName'.")
+                }
+                response.failure = { resp ->
+                    throw new GradleException("Could not sign version '$versionName': $resp.statusLine")
                 }
             }
         }
@@ -317,6 +348,10 @@ class BintrayUploadTask extends DefaultTask {
         }
         fileUploads.each {
             uploadArtifact it
+        }
+
+        if (signVersion) {
+            gpgSignVersion()
         }
 
         if (publish && !subtaskSkipPublish) {
