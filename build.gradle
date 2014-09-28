@@ -95,6 +95,7 @@ publishing {
     }
 }
 
+/*
 bintray {
     user = bintrayUser
     key = bintrayKey
@@ -109,6 +110,7 @@ bintray {
         }
     }
 }
+*/
 
 task install(dependsOn: 'publishMavenJavaPublicationToMavenLocal') << {
     logger.info "Installing $project.name"
