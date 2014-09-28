@@ -1,5 +1,5 @@
 group = 'com.jfrog.bintray.gradle'
-version = '0.6-SNAPSHOT'
+version = '0.6'
 
 buildscript {
     repositories {
@@ -95,7 +95,6 @@ publishing {
     }
 }
 
-/*
 bintray {
     user = bintrayUser
     key = bintrayKey
@@ -110,7 +109,6 @@ bintray {
         }
     }
 }
-*/
 
 task install(dependsOn: 'publishMavenJavaPublicationToMavenLocal') << {
     logger.info "Installing $project.name"
