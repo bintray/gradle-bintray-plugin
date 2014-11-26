@@ -126,6 +126,18 @@ class BintrayUploadTask extends DefaultTask {
     @Optional
     Map versionAttributes
 
+    @Input
+    @Optional
+    String ossSonatypeUser
+
+    @Input
+    @Optional
+    String ossSonatypePassword
+
+    @Input
+    @Optional
+    String ossSonatypeRepoClosed
+
     Artifact[] configurationUploads
     Artifact[] publicationUploads
     Artifact[] fileUploads
@@ -337,6 +349,26 @@ class BintrayUploadTask extends DefaultTask {
             }
         }
 
+        def mavenCentralSync = {
+            if (dryRun) {
+                logger.info("(Dry run) Sync to Maven Central performed '$packagePath/$versionName'.")
+                return
+            }
+            http.request(POST, JSON) {
+                uri.path = "/maven_central_sync/$packagePath/versions/$versionName"
+                body = [username: ossSonatypeUser, password: ossSonatypePassword]
+                if (ossSonatypeRepoClosed != null) {
+                    body << [close: ossSonatypeRepoClosed]
+                }
+                response.success = { resp ->
+                    logger.info("Sync to Maven Central performed for '$packagePath/$versionName'.")
+                }
+                response.failure = { resp, reader ->
+                    throw new GradleException("Could not sync '$packagePath/$versionName' to Maven Central: $resp.statusLine $reader")
+                }
+            }
+        }
+
         checkAndCreatePackage()
         checkAndCreateVersion()
 
@@ -349,13 +381,14 @@ class BintrayUploadTask extends DefaultTask {
         fileUploads.each {
             uploadArtifact it
         }
-
         if (signVersion) {
             gpgSignVersion()
         }
-
         if (publish && !subtaskSkipPublish) {
             publishVersion()
+        }
+        if (ossSonatypeUser != null && ossSonatypePassword != null) {
+            mavenCentralSync()
         }
     }
 

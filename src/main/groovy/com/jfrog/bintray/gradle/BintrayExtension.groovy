@@ -72,10 +72,22 @@ class BintrayExtension {
         def gpg(Closure closure) {
             ConfigureUtil.configure(closure, gpg)
         }
+
+        MavenCentralSyncConfig mavenCentralSync = new MavenCentralSyncConfig()
+
+        def mavenCentralSync(Closure closure) {
+            ConfigureUtil.configure(closure, mavenCentralSync)
+        }
     }
 
     class GpgConfig {
         boolean sign
         String passphrase
+    }
+
+    class MavenCentralSyncConfig {
+        String user
+        String password
+        String close
     }
 }
