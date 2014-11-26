@@ -128,15 +128,15 @@ class BintrayUploadTask extends DefaultTask {
 
     @Input
     @Optional
-    String ossSonatypeUser
+    String ossUser
 
     @Input
     @Optional
-    String ossSonatypePassword
+    String ossPassword
 
     @Input
     @Optional
-    String ossSonatypeRepoClosed
+    String ossCloseRepo
 
     Artifact[] configurationUploads
     Artifact[] publicationUploads
@@ -356,9 +356,9 @@ class BintrayUploadTask extends DefaultTask {
             }
             http.request(POST, JSON) {
                 uri.path = "/maven_central_sync/$packagePath/versions/$versionName"
-                body = [username: ossSonatypeUser, password: ossSonatypePassword]
-                if (ossSonatypeRepoClosed != null) {
-                    body << [close: ossSonatypeRepoClosed]
+                body = [username: ossUser, password: ossPassword]
+                if (ossCloseRepo != null) {
+                    body << [close: ossCloseRepo]
                 }
                 response.success = { resp ->
                     logger.info("Sync to Maven Central performed for '$packagePath/$versionName'.")
@@ -387,7 +387,7 @@ class BintrayUploadTask extends DefaultTask {
         if (publish && !subtaskSkipPublish) {
             publishVersion()
         }
-        if (ossSonatypeUser != null && ossSonatypePassword != null) {
+        if (ossUser != null && ossPassword != null) {
             mavenCentralSync()
         }
     }
