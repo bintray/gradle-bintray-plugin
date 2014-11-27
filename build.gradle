@@ -1,5 +1,5 @@
 group = 'com.jfrog.bintray.gradle'
-version = '0.7-SNAPSHOT'
+version = currentVersion
 
 buildscript {
     repositories {
@@ -7,6 +7,7 @@ buildscript {
         jcenter()
     }
     dependencies {
+        classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '3.0.1')
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5"
     }
 }
@@ -14,6 +15,7 @@ buildscript {
 apply plugin: 'groovy'
 apply plugin: 'maven-publish'
 apply plugin: 'idea'
+apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'com.jfrog.bintray'
 
 repositories {
@@ -91,6 +93,28 @@ publishing {
                 root.appendNode('description', 'A gradle plugin for publishing to Bintray')
                 root.children().last() + pomConfig
             }
+        }
+    }
+}
+
+artifactory {
+    contextUrl = 'https://oss.jfrog.org'
+    resolve {
+        repository {
+            repoKey = 'libs-release'
+        }
+    }
+    publish {
+        repository {
+            repoKey = 'oss-snapshot-local' //The Artifactory repository key to publish to
+            //when using oss.jfrog.org the credentials are from Bintray. For local build we expect them to be found in
+            //~/.gradle/gradle.properties, otherwise to be set in the build server
+            username = project.hasProperty('bintrayUser') ? project.bintrayUser : getenv()['BINTRAY_USER']
+            password = project.hasProperty('bintrayKey') ? project.bintrayKey : getenv()['BINTRAY_KEY']
+        }
+        defaults {
+            publications 'mavenJava'
+            properties = ['bintray.repo': 'jfrog/jfrog-jars', 'bintray.package': 'gradle-bintray-plugin', 'bintray.version': version.toString()]
         }
     }
 }
