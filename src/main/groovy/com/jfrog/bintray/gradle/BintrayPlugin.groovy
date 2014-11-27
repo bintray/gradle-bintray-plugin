@@ -55,6 +55,9 @@ class BintrayPlugin implements Plugin<Project> {
                         versionAttributes = extension.pkg.version.attributes
                         signVersion = extension.pkg.version.gpg.sign
                         gpgPassphrase = extension.pkg.version.gpg.passphrase
+                        ossUser = extension.pkg.version.mavenCentralSync.user
+                        ossPassword = extension.pkg.version.mavenCentralSync.password
+                        ossCloseRepo = extension.pkg.version.mavenCentralSync.close
                     }
                     if (extension.configurations?.length) {
                         extension.configurations.each {

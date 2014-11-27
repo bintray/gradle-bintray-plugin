@@ -67,8 +67,13 @@ bintray {
             attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin'] //Optional version-level attributes
             gpg {
                 sign = true //Determines whether to GPG sign the files. The default is false
-                passphrase = 'optional, the passphrase for GPG signing'
+                passphrase = 'passphrase' //Optional. The passphrase for GPG signing'
             }
+			mavenCentralSync {
+				user = 'userToken' //OSS user token
+				password = 'paasword' //OSS user password
+				close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
+			}            
         }
     }
 }
