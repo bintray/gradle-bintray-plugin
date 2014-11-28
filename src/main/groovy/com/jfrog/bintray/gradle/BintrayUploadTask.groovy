@@ -205,9 +205,9 @@ class BintrayUploadTask extends DefaultTask {
                 response.success = { resp ->
                     logger.info("Attributes set on $entity '$entityName'.")
                 }
-                response.failure = { resp ->
+                response.failure = { resp, json ->
                     throw new GradleException(
-                            "Could not set attributes on $entity '$entityName': $resp.statusLine")
+                            "Could not set attributes on $entity '$entityName': $json.message")
                 }
             }
         }
@@ -238,8 +238,8 @@ class BintrayUploadTask extends DefaultTask {
                     response.success = { resp ->
                         logger.info("Created package '$packagePath'.")
                     }
-                    response.failure = { resp ->
-                        throw new GradleException("Could not create package '$packagePath': $resp.statusLine")
+                    response.failure = { resp, json ->
+                        throw new GradleException("Could not create package '$packagePath': $json.message")
                     }
                 }
                 if (packageAttributes) {
@@ -272,8 +272,8 @@ class BintrayUploadTask extends DefaultTask {
                     response.success = { resp ->
                         logger.info("Created version '$versionName'.")
                     }
-                    response.failure = { resp ->
-                        throw new GradleException("Could not create version '$versionName': $resp.statusLine")
+                    response.failure = { resp, json ->
+                        throw new GradleException("Could not create version '$versionName': $json.message")
                     }
                 }
                 if (versionAttributes) {
@@ -296,8 +296,8 @@ class BintrayUploadTask extends DefaultTask {
                 response.success = { resp ->
                     logger.info("Signed version '$versionName'.")
                 }
-                response.failure = { resp ->
-                    throw new GradleException("Could not sign version '$versionName': $resp.statusLine")
+                response.failure = { resp, json ->
+                    throw new GradleException("Could not sign version '$versionName': $json.message")
                 }
             }
         }
