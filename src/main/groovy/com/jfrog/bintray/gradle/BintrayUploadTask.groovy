@@ -296,8 +296,8 @@ class BintrayUploadTask extends DefaultTask {
                 response.success = { resp ->
                     logger.info("Signed version '$versionName'.")
                 }
-                response.failure = { resp ->
-                    throw new GradleException("Could not sign version '$versionName': $resp.statusLine")
++               response.failure = { resp, reader ->
++                   throw new GradleException("Could not sign version '$versionName': $resp.statusLine $reader")
                 }
             }
         }
