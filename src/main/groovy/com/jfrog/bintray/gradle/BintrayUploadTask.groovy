@@ -128,6 +128,10 @@ class BintrayUploadTask extends DefaultTask {
 
     @Input
     @Optional
+    boolean syncToMavenCentral
+
+    @Input
+    @Optional
     String ossUser
 
     @Input
@@ -387,7 +391,7 @@ class BintrayUploadTask extends DefaultTask {
         if (publish && !subtaskSkipPublish) {
             publishVersion()
         }
-        if (ossUser != null && ossPassword != null) {
+        if (syncToMavenCentral && ossUser != null && ossPassword != null) {
             mavenCentralSync()
         }
     }

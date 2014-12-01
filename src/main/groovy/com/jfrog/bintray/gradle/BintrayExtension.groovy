@@ -86,6 +86,7 @@ class BintrayExtension {
     }
 
     class MavenCentralSyncConfig {
+        Boolean sync
         String user
         String password
         String close
