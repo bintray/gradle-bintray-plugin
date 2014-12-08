@@ -24,7 +24,7 @@ class RecordingCopyTask extends Copy {
                     FileCopyDetailsInternal details ->
                         if (!details.isDirectory()) {
                             File target = resolver.resolve(details.getRelativePath().getPathString());
-                            def destRelPath = project.relativePath(target)
+                            def destRelPath = project.relativePath(target).replaceAll('\\\\','/')
                             fileUploads << new Artifact(file: details.file, path: destRelPath)
                             didWork = true
                         }
