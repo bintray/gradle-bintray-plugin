@@ -404,9 +404,13 @@ class BintrayUploadTask extends DefaultTask {
                 return null
             }
             pomArtifact = !pomArtifact && it.type == 'pom'
-            new Artifact(
-                    name: it.name, groupId: project.group, version: project.version, extension: it.extension,
-                    type: it.type, classifier: it.classifier, file: it.file)
+            if (it instanceof org.gradle.plugins.signing.Signature)
+                new Signature(
+                        name: it.name, groupId: project.group, version: project.version,
+                        extension: it.extension, type: it.type, classifier: it.classifier,
+                        file: it.file, signedArtifact: createArtifact(it.toSignArtifact))
+            else
+                createArtifact(it)
         }.unique();
 
         //Add pom file per config
@@ -438,5 +442,12 @@ class BintrayUploadTask extends DefaultTask {
                 name: identity.artifactId, groupId: identity.groupId, version: identity.version,
                 extension: 'pom', type: 'pom', file: publication.asNormalisedPublication().pomFile)
         artifacts
+    }
+
+    Artifact createArtifact(artifact) {
+        return new Artifact(
+                name: artifact.name, groupId: project.group, version: project.version,
+                extension: artifact.extension, type: artifact.type,
+                classifier: artifact.classifier, file: artifact.file)
     }
 }
