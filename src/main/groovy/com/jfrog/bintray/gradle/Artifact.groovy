@@ -7,14 +7,16 @@ class Artifact {
     String extension
     String type
     String classifier
-    String path
     File file
+    String path
+    boolean signed
+    String originalArtifactExtension
 
     def getPath() {
-        path ?:
-                (groupId?.replaceAll('\\.', '/') ?: "") + "/$name/$version/$name-$version" +
-                        (classifier ? "-$classifier" : "") +
-                        (extension ? ".$extension" : "")
+        path ?: (groupId?.replaceAll('\\.', '/') ?: "") + "/$name/$version/$name-$version" +
+                (classifier ? "-$classifier" : "") +
+                (signed ? "-$originalArtifactExtension" : "") +
+                (extension ? ".$extension" : "")
     }
 
     boolean equals(o) {
@@ -51,6 +53,9 @@ class Artifact {
         if (version != artifact.version) {
             return false
         }
+        if (signed != artifact.signed) {
+            return false
+        }
 
         return true
     }
@@ -65,6 +70,9 @@ class Artifact {
         result = 31 * result + (classifier != null ? classifier.hashCode() : 0)
         result = 31 * result + (path != null ? path.hashCode() : 0)
         result = 31 * result + file.hashCode()
+        result = 31 * result + (signed ? 1 : 0);
+        result = 31 * result + (originalArtifactExtension != null ? originalArtifactExtension.hashCode() : 0)
+
         return result
     }
 }
