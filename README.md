@@ -4,7 +4,16 @@ This plugin allows you to publish artifacts to a repository on [bintray](https:/
 [ ![Download](https://api.bintray.com/packages/jfrog/jfrog-jars/gradle-bintray-plugin/images/download.svg) ](https://bintray.com/jfrog/jfrog-jars/gradle-bintray-plugin/_latestVersion)
 
 # Usage
-To use the plugin, configure your `build.gradle` script and add the plugin:
+Depending on the version of Gradle you're running, there are different usage scenarios. Add one of the following snippets to your `build.gradle` file:
+
+## Gradle >= 2.1
+```groovy
+plugins {
+    id "com.jfrog.bintray" version "1.0"
+}
+```
+
+## Gradle < 2.1
 ```groovy
 buildscript {
     repositories {
@@ -19,6 +28,7 @@ apply plugin: 'com.jfrog.bintray'
 
 **Gradle Compatibility:**
 When using Gradle publications or when using `filesSpec` for direct file uploads, you'll need to use Gradle 2.x; Otherwise, the plugin is compatible with Gradle 1.12 and above.
+
  **JVM Compatibility:**
 Java 6 and above.
 
