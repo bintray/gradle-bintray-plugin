@@ -402,11 +402,10 @@ class BintrayUploadTask extends DefaultTask {
             }
             pomArtifact = !pomArtifact && it.type == 'pom'
             boolean signedArtifact = (it instanceof org.gradle.plugins.signing.Signature)
-            def originalArtifactExtension = signedArtifact ? it.toSignArtifact.getExtension() : it.extension
+            def signedExtenstion = signedArtifact ? it.toSignArtifact.getExtension() : null
             new Artifact(
-                    name: it.name, groupId: project.group, version: project.version, extension: it.extension,
-                    type: it.type, classifier: it.classifier, file: it.file, signed: signedArtifact,
-                    originalArtifactExtension: originalArtifactExtension
+                name: it.name, groupId: project.group, version: project.version, extension: it.extension,
+                type: it.type, classifier: it.classifier, file: it.file, signedExtenstion: signedExtenstion
             )
         }.unique();
 
@@ -430,11 +429,11 @@ class BintrayUploadTask extends DefaultTask {
         def identity = publication.mavenProjectIdentity
         def artifacts = publication.artifacts.findResults {
             boolean signedArtifact = (it instanceof org.gradle.plugins.signing.Signature)
-            def originalArtifactExtension = signedArtifact ? it.toSignArtifact.getExtension() : it.extension
+            def signedExtenstion = signedArtifact ? it.toSignArtifact.getExtension() : null
             new Artifact(
-                    name: identity.artifactId, groupId: identity.groupId, version: identity.version,
-                    extension: it.extension, type: it.extension, classifier: it.classifier, file: it.file,
-                    signed: signedArtifact, originalArtifactExtension: originalArtifactExtension
+                name: identity.artifactId, groupId: identity.groupId, version: identity.version,
+                extension: it.extension, type: it.extension, classifier: it.classifier, file: it.file,
+                signedExtenstion: signedExtenstion
             )
         }
 
