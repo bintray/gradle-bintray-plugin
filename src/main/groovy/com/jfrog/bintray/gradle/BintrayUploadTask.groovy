@@ -13,9 +13,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Upload
-import java.text.DateFormat
-import java.text.ParseException
-import java.text.SimpleDateFormat
 
 import static groovyx.net.http.ContentType.BINARY
 import static groovyx.net.http.ContentType.JSON
@@ -397,16 +394,19 @@ class BintrayUploadTask extends DefaultTask {
     }
 
     Artifact[] collectArtifacts(Configuration config) {
-        def pomArtifact
+        boolean pomArtifact
         def artifacts = config.allArtifacts.findResults {
             if (!it.file.exists()) {
                 logger.error("{}: file {} could not be found.", path, it.file.getAbsolutePath())
                 return null
             }
             pomArtifact = !pomArtifact && it.type == 'pom'
+            boolean signedArtifact = (it instanceof org.gradle.plugins.signing.Signature)
+            def signedExtenstion = signedArtifact ? it.toSignArtifact.getExtension() : null
             new Artifact(
-                    name: it.name, groupId: project.group, version: project.version, extension: it.extension,
-                    type: it.type, classifier: it.classifier, file: it.file)
+                name: it.name, groupId: project.group, version: project.version, extension: it.extension,
+                type: it.type, classifier: it.classifier, file: it.file, signedExtenstion: signedExtenstion
+            )
         }.unique();
 
         //Add pom file per config
@@ -428,9 +428,13 @@ class BintrayUploadTask extends DefaultTask {
         }
         def identity = publication.mavenProjectIdentity
         def artifacts = publication.artifacts.findResults {
+            boolean signedArtifact = (it instanceof org.gradle.plugins.signing.Signature)
+            def signedExtenstion = signedArtifact ? it.toSignArtifact.getExtension() : null
             new Artifact(
-                    name: identity.artifactId, groupId: identity.groupId, version: identity.version,
-                    extension: it.extension, type: it.extension, classifier: it.classifier, file: it.file)
+                name: identity.artifactId, groupId: identity.groupId, version: identity.version,
+                extension: it.extension, type: it.extension, classifier: it.classifier, file: it.file,
+                signedExtenstion: signedExtenstion
+            )
         }
 
         //Add the pom
