@@ -92,8 +92,7 @@ class BintrayPlugin implements Plugin<Project> {
                                 } else if (publication instanceof MavenPublication) {
                                     def taskName =
                                             "publish${it[0].toUpperCase()}${it.substring(1)}PublicationToMavenLocal"
-                                    Task publishToLocalTask = project.tasks.findByName(taskName)
-                                    bintrayUpload.dependsOn(publishToLocalTask)
+                                    bintrayUpload.dependsOn(taskName)
                                     /*bintrayUpload.dependsOn(publication.publishableFiles)*/
                                 } else {
                                     project.logger.warn "{} can only use maven publications - skipping {}.",
