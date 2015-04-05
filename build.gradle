@@ -30,9 +30,21 @@ dependencies {
     testCompile('org.spockframework:spock-core:0.7-groovy-2.0') {
         exclude(module: 'groovy-all')
     }
+    testCompile('com.jfrog.bintray.client:bintray-client-java-api:0.4')
+    testCompile('com.jfrog.bintray.client:bintray-client-java-service:0.4')
+    testCompile('com.jfrog.bintray.client:bintray-client-java-impl:0.1.1')
+    testCompile('org.codehaus.gpars:gpars:1.2.1')
+    testCompile('org.codehaus.groovy.modules.http-builder:http-builder:0.7.1')
 }
 
 test {
+    if (System.getProperty('testsDebug', 'true').toBoolean()) {
+        testLogging {
+            exceptionFormat "full"
+            events "started", "passed", "skipped", "failed", "standardOut", "standardError"
+            minGranularity 0
+        }
+    }
     systemProperties = [
         'http.proxyHost': System.getProperty('http.proxyHost'),
         'http.proxyPort': System.getProperty('http.proxyPort'),
@@ -109,8 +121,8 @@ artifactory {
             repoKey = 'oss-snapshot-local' //The Artifactory repository key to publish to
             //when using oss.jfrog.org the credentials are from Bintray. For local build we expect them to be found in
             //~/.gradle/gradle.properties, otherwise to be set in the build server
-            username = project.hasProperty('bintrayUser') ? project.bintrayUser : getenv()['BINTRAY_USER']
-            password = project.hasProperty('bintrayKey') ? project.bintrayKey : getenv()['BINTRAY_KEY']
+            username = project.hasProperty('bintrayUser') ? project.bintrayUser : System.getenv('BINTRAY_USER')
+            password = project.hasProperty('bintrayKey') ? project.bintrayKey : System.getenv('BINTRAY_KEY')
         }
         defaults {
             publications 'mavenJava'
@@ -120,8 +132,8 @@ artifactory {
 }
 
 bintray {
-    user = bintrayUser
-    key = bintrayKey
+    user = project.hasProperty('bintrayUser') ? project.bintrayUser : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayKey') ? project.bintrayKey : System.getenv('BINTRAY_KEY')
     publications = ['mavenJava']
     pkg {
         repo = 'jfrog-jars'

@@ -13,6 +13,9 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Upload
+import java.text.DateFormat
+import java.text.ParseException
+import java.text.SimpleDateFormat
 
 import static groovyx.net.http.ContentType.BINARY
 import static groovyx.net.http.ContentType.JSON
@@ -125,10 +128,6 @@ class BintrayUploadTask extends DefaultTask {
 
     @Input
     @Optional
-    boolean syncToMavenCentral
-
-    @Input
-    @Optional
     String ossUser
 
     @Input
@@ -230,10 +229,16 @@ class BintrayUploadTask extends DefaultTask {
                     logger.info("(Dry run) Created pakage '$packagePath'.")
                     return
                 }
+
                 http.request(POST, JSON) {
                     uri.path = "/packages/$repoPath"
-                    body = [name                   : packageName, desc: packageDesc, licenses: packageLicenses, labels: packageLabels,
-                            website_url            : packageWebsiteUrl, issue_tracker_url: packageIssueTrackerUrl, vcs_url: packageVcsUrl,
+                    body = [name: packageName,
+                            desc: packageDesc,
+                            licenses: packageLicenses,
+                            labels: packageLabels,
+                            website_url: packageWebsiteUrl,
+                            issue_tracker_url: packageIssueTrackerUrl,
+                            vcs_url: packageVcsUrl,
                             public_download_numbers: packagePublicDownloadNumbers]
 
                     response.success = { resp ->
@@ -297,8 +302,8 @@ class BintrayUploadTask extends DefaultTask {
                 response.success = { resp ->
                     logger.info("Signed version '$versionName'.")
                 }
-                response.failure = { resp, reader ->
-                    throw new GradleException("Could not sign version '$versionName': $resp.statusLine $reader")
+                response.failure = { resp ->
+                    throw new GradleException("Could not sign version '$versionName': $resp.statusLine")
                 }
             }
         }
@@ -388,25 +393,22 @@ class BintrayUploadTask extends DefaultTask {
         if (publish && !subtaskSkipPublish) {
             publishVersion()
         }
-        if (syncToMavenCentral && ossUser != null && ossPassword != null) {
+        if (ossUser != null && ossPassword != null) {
             mavenCentralSync()
         }
     }
 
     Artifact[] collectArtifacts(Configuration config) {
-        boolean pomArtifact
+        def pomArtifact
         def artifacts = config.allArtifacts.findResults {
             if (!it.file.exists()) {
                 logger.error("{}: file {} could not be found.", path, it.file.getAbsolutePath())
                 return null
             }
             pomArtifact = !pomArtifact && it.type == 'pom'
-            boolean signedArtifact = (it instanceof org.gradle.plugins.signing.Signature)
-            def signedExtenstion = signedArtifact ? it.toSignArtifact.getExtension() : null
             new Artifact(
-                name: it.name, groupId: project.group, version: project.version, extension: it.extension,
-                type: it.type, classifier: it.classifier, file: it.file, signedExtenstion: signedExtenstion
-            )
+                    name: it.name, groupId: project.group, version: project.version, extension: it.extension,
+                    type: it.type, classifier: it.classifier, file: it.file)
         }.unique();
 
         //Add pom file per config
@@ -428,13 +430,9 @@ class BintrayUploadTask extends DefaultTask {
         }
         def identity = publication.mavenProjectIdentity
         def artifacts = publication.artifacts.findResults {
-            boolean signedArtifact = (it instanceof org.gradle.plugins.signing.Signature)
-            def signedExtenstion = signedArtifact ? it.toSignArtifact.getExtension() : null
             new Artifact(
-                name: identity.artifactId, groupId: identity.groupId, version: identity.version,
-                extension: it.extension, type: it.extension, classifier: it.classifier, file: it.file,
-                signedExtenstion: signedExtenstion
-            )
+                    name: identity.artifactId, groupId: identity.groupId, version: identity.version,
+                    extension: it.extension, type: it.extension, classifier: it.classifier, file: it.file)
         }
 
         //Add the pom
