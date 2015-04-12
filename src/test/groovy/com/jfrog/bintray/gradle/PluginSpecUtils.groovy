@@ -8,7 +8,7 @@ import com.jfrog.bintray.client.impl.BintrayClient
  */
 class PluginSpecUtils {
     private static Bintray bintrayClient
-    private static def config = TestsConfig.getInstance().confog
+    private static def config = TestsConfig.getInstance().config
 
     def static getGradleCommandPath() {
         System.getenv("GRADLE_HOME") + File.separator + "bin" + File.separator + "gradle.bat"
@@ -21,9 +21,8 @@ class PluginSpecUtils {
 
     def static GradleLauncher createGradleLauncher() {
         File projectFile = getGradleProjectFile()
-        def gradleLogPath = projectFile.getParentFile().getCanonicalPath()
         GradleLauncher launcher = new GradleLauncher(
-                getGradleCommandPath(), projectFile.getCanonicalPath(), gradleLogPath)
+                getGradleCommandPath(), projectFile.getCanonicalPath())
                 .addTask("clean")
                 .addTask("bintrayUpload")
                 .addEnvVar("bintrayUser", config.bintrayUser)
@@ -34,10 +33,8 @@ class PluginSpecUtils {
                 .addEnvVar("versionName", config.versionName)
                 .addSwitch("stacktrace")
 
-        int i=1
-        for(label in config.pkgLabels) {
-            launcher.addEnvVar("label${i}", label)
-            i++
+        config.pkgLabels.eachWithIndex { label, index ->
+            launcher.addEnvVar("label${index+1}", label)
         }
         launcher
     }
