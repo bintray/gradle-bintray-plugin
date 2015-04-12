@@ -7,40 +7,40 @@ import static java.lang.System.getenv
  */
 class TestsConfig {
     private static TestsConfig instance = new TestsConfig()
-    public def confog
+    public def config
 
     static TestsConfig getInstance() {
         return instance
     }
 
     private TestsConfig() {
-        confog = new ConfigSlurper().parse(this.class.getResource('/gradle/config.groovy')).conf
+        config = new ConfigSlurper().parse(this.class.getResource('/gradle/config.groovy')).conf
 
         def bintrayUser = getenv('BINTRAY_USER')
         if (bintrayUser) {
-            confog.bintrayUser = bintrayUser
+            config.bintrayUser = bintrayUser
         }
         def bintrayApiKey = getenv('BINTRAY_KEY')
         if (bintrayApiKey) {
-            confog.bintrayApiKey = bintrayApiKey
+            config.bintrayApiKey = bintrayApiKey
         }
-        if (confog.url == [:]) {
-            confog.url = "https://api.bintray.com"
+        if (config.url == [:]) {
+            config.url = "https://api.bintray.com"
         }
-        if (confog.repo == [:]) {
-            confog.repo = "maven"
+        if (config.repo == [:]) {
+            config.repo = "maven"
         }
-        if (confog.pkgName == [:]) {
-            confog.pkgName = "gradle.tests.pkg.name"
+        if (config.pkgName == [:]) {
+            config.pkgName = "gradle.tests.pkg.name"
         }
-        if (confog.pkgDesc == [:]) {
-            confog.pkgDesc = "gradle.tests.pkg.description"
+        if (config.pkgDesc == [:]) {
+            config.pkgDesc = "gradle.tests.pkg.description"
         }
-        if (confog.versionName == [:]) {
-            confog.versionName = "9.8.7"
+        if (config.versionName == [:]) {
+            config.versionName = "9.8.7"
         }
-        if (confog.pkgLabels == [:]) {
-            confog.pkgLabels = ['a','b','c']
+        if (config.pkgLabels == [:]) {
+            config.pkgLabels = ['a','b','c']
         }
     }
 }

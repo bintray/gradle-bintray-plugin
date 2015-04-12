@@ -9,7 +9,6 @@ import com.google.common.collect.Sets
 class GradleLauncher {
     private def gradleCommandPath
     private def gradleProjectFilePath
-    private def gradleLogPath
     private def cmd
 
     private Set<String> tasks = Sets.newHashSet()
@@ -17,10 +16,9 @@ class GradleLauncher {
     private Map<String, Object> envVars = Maps.newHashMap()
     private Map<String, Object> systemProps = Maps.newHashMap()
 
-    GradleLauncher(gradleCommandPath, gradleProjectFilePath, gradleLogPath) {
+    GradleLauncher(gradleCommandPath, gradleProjectFilePath) {
         this.gradleCommandPath = gradleCommandPath
         this.gradleProjectFilePath = gradleProjectFilePath
-        this.gradleLogPath = gradleLogPath
     }
 
     GradleLauncher addTask(String gradleTask) {
@@ -99,41 +97,34 @@ class GradleLauncher {
                 "-b $gradleProjectFilePath ${tasksToString()}"
     }
 
-    private def getCmd(File logFile) {
+    private def getCmd() {
         if (cmd == null) {
             createCmd()
         }
-        "$cmd > ${logFile.getCanonicalPath()} 2>&1"
-    }
-
-    private File createLogFile(fileName) {
-        String path = gradleLogPath
-        if (!path.endsWith(File.separator)) {
-            path += File.separator
-        }
-        path += fileName
-        File log = new File(path)
-        log.createNewFile()
-        log
-    }
-
-    private def printLog(File logFile) {
-        logFile.eachLine { line ->
-            println line
-        }
-        logFile.delete()
+        cmd
     }
 
     def launch() {
         Process p
         try {
-            def logFileName = "gradle.build.${System.currentTimeMillis()}.log"
-            File logFile = createLogFile(logFileName)
-            def cmd = getCmd(logFile)
+            def cmd = getCmd()
             println "Launching Gradle process: $cmd"
             p = Runtime.getRuntime().exec(cmd)
+
+            final Thread logPrinter = new Thread(){
+                @Override
+                public void run() {
+                    final def processReader = new BufferedReader(new InputStreamReader(p.getInputStream()))
+                    def line
+                    while ((line = processReader.readLine()) != null){
+                        println(line)
+                    }
+                    processReader.close()
+                }
+            }
+
+            logPrinter.start()
             p.waitFor()
-            printLog(logFile)
             println "Gradle process finished with exit code ${p.exitValue()}"
             p.exitValue()
         } finally {

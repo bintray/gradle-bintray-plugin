@@ -4,8 +4,8 @@ import com.jfrog.bintray.client.api.handle.Bintray
 import com.jfrog.bintray.client.api.model.Pkg
 import org.junit.Rule
 import org.junit.rules.TestName
-import spock.lang.Specification
 import spock.lang.Shared
+import spock.lang.Specification
 
 class GradleBintrayPluginSpec extends Specification {
 
@@ -14,7 +14,7 @@ class GradleBintrayPluginSpec extends Specification {
     @Shared
     private Bintray bintray = PluginSpecUtils.getBintrayClient()
     @Shared
-    private def config = TestsConfig.getInstance().confog
+    private def config = TestsConfig.getInstance().config
 
     def setupSpec() {
         assert config
