@@ -404,8 +404,8 @@ class BintrayUploadTask extends DefaultTask {
             boolean signedArtifact = (it instanceof org.gradle.plugins.signing.Signature)
             def signedExtenstion = signedArtifact ? it.toSignArtifact.getExtension() : null
             new Artifact(
-                name: it.name, groupId: project.group, version: project.version, extension: it.extension,
-                type: it.type, classifier: it.classifier, file: it.file, signedExtenstion: signedExtenstion
+                    name: it.name, groupId: project.group, version: project.version, extension: it.extension,
+                    type: it.type, classifier: it.classifier, file: it.file, signedExtenstion: signedExtenstion
             )
         }.unique();
 
@@ -431,9 +431,9 @@ class BintrayUploadTask extends DefaultTask {
             boolean signedArtifact = (it instanceof org.gradle.plugins.signing.Signature)
             def signedExtenstion = signedArtifact ? it.toSignArtifact.getExtension() : null
             new Artifact(
-                name: identity.artifactId, groupId: identity.groupId, version: identity.version,
-                extension: it.extension, type: it.extension, classifier: it.classifier, file: it.file,
-                signedExtenstion: signedExtenstion
+                    name: identity.artifactId, groupId: identity.groupId, version: identity.version,
+                    extension: it.extension, type: it.extension, classifier: it.classifier, file: it.file,
+                    signedExtenstion: signedExtenstion
             )
         }
 

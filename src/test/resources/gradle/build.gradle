@@ -1,65 +1,83 @@
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
+buildscript {
+    repositories {
+        jcenter()
+    }
 
-group = 'grp'
-version = '1'
+    dependencies {
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.1"
+    }
 
-repositories {
-    jcenter()
-    //maven { url 'http://jcenter.bintray.com' }
 }
 
-//Test "old style" configurations
-configurations {
-    deployables
+def rootProjectDir = projectDir
+def testsDir = new File(rootProjectDir, 'buildFiles')
+
+def getTestFile = { fileName ->
+    testsDir.toString() + '/' + fileName
 }
 
-artifacts {
-    deployables new File("${projectDir}/files/art1.txt")
+allprojects {
+    apply plugin: 'idea'
+
+    group = 'org.jfrog.example.bintray.gradle'
+    version = '1.0'
 }
 
-publishing {
-    publications {
-        mavenStuff(MavenPublication) {
-            artifact new File("${projectDir}/files/art2.txt")
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.jfrog.bintray'
+
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+
+    dependencies {
+        testCompile 'junit:junit:4.7'
+    }
+
+    // custom tasks for creating source/javadoc jars
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    // add javadoc/source jar tasks as artifacts
+    artifacts {
+        archives sourcesJar, javadocJar
+    }
+
+    repositories {
+        jcenter()
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                if (plugins.hasPlugin('war')) {
+                    from components.web
+                } else {
+                    from components.java
+                }
+
+                artifact sourcesJar {
+                    classifier "sources"
+                }
+
+                artifact javadocJar {
+                    classifier "javadoc"
+                }
+            }
         }
     }
+
+    apply from: getTestFile("${testName}.gradle")
 }
 
-ext.publish = true
-
-bintray {
-    //apiUrl = "https://api.bintray.net"
-    user = 'landman'
-    key = 'key'
-    configurations = ['deployables']
-    publications = ['mavenStuff']
-    filesSpec {
-        from 'files'
-        into 'standalone_files/level1'
-        rename '(.+)\\.(.+)', '$1-suffix.$2'
-    }
-    pkg {
-        repo = 'myrepo'
-        userOrg = 'myorg'
-        name = 'mypkg'
-        desc = 'what a fantastic package indeed!'
-        websiteUrl = 'https://github.com/bintray/gradle-bintray-plugin'
-        issueTrackerUrl = 'https://github.com/bintray/gradle-bintray-plugin/issues'
-        vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
-        licenses = ['Apache-2.0']
-        labels = ['gear', 'gore', 'gorilla']
-        attributes= ['plat': ['linux', 'osx']]
-        publicDownloadNumbers = true
-        version {
-            name = 'new-release' //Optional logical version name
-            desc = 'new release!'
-            vcsTag = '1.0.0'
-            attributes= ['a': ['ay1', 'ay2', 'ay3'], 'b': ['bee'], c: 'cee']
-        }
-    }
-    dryRun = true
-    publish = project.publish
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.10'
 }
