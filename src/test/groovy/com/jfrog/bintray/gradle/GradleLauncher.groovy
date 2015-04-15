@@ -114,12 +114,15 @@ class GradleLauncher {
             final Thread logPrinter = new Thread(){
                 @Override
                 public void run() {
-                    final def processReader = new BufferedReader(new InputStreamReader(p.getInputStream()))
-                    def line
-                    while ((line = processReader.readLine()) != null){
-                        println(line)
+                    final def processReader =
+                            new BufferedReader(new InputStreamReader(p.getInputStream()))
+
+                    processReader.withReader {
+                        def line
+                        while ((line = it.readLine()) != null){
+                            println(line)
+                        }
                     }
-                    processReader.close()
                 }
             }
 

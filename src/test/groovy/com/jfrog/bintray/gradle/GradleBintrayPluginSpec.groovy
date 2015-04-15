@@ -25,7 +25,10 @@ class GradleBintrayPluginSpec extends Specification {
         File gradleCommand = new File(PluginSpecUtils.getGradleCommandPath())
         assert gradleCommand.exists() && !gradleCommand.isDirectory()
 
-        cleanup()
+        def config = TestsConfig.getInstance().config
+        assert config.bintrayUser
+        assert config.bintrayApiKey
+        assert System.getenv("GRADLE_HOME")
     }
 
     def cleanup() {
