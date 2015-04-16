@@ -56,10 +56,11 @@ bintray {
     }
     dryRun = false //Whether to run this as dry-run, without deploying
     publish = true //If version should be auto published after an upload
+    //Package configuration. The plugin will use the repo and name properties to check if the package already exists. In that case, there's no need to configure the other package properties (like userOrg, desc, etc).
     pkg {
         repo = 'myrepo'
-        userOrg = 'myorg' //An optional organization name when the repo belongs to one of the user's orgs
         name = 'mypkg'
+        userOrg = 'myorg' //An optional organization name when the repo belongs to one of the user's orgs
         desc = 'what a fantastic package indeed!'
         websiteUrl = 'https://github.com/bintray/gradle-bintray-plugin'
         issueTrackerUrl = 'https://github.com/bintray/gradle-bintray-plugin/issues'
