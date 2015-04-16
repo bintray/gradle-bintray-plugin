@@ -71,20 +71,22 @@ bintray {
         //Optional version descriptor
         version {
             name = '1.3-Final' //Bintray logical version name
-            desc = 'optional, version-specific description'
-            released  = 'optional, date of the version release' //2 possible values: date in the format of 'yyyy-MM-dd'T'HH:mm:ss.SSSZZ' OR a java.util.Date instance
+            desc = //Optional - Version-specific description'
+            released  = //Optional - Date of the version release. 2 possible values: date in the format of 'yyyy-MM-dd'T'HH:mm:ss.SSSZZ' OR a java.util.Date instance
             vcsTag = '1.3.0'
             attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin'] //Optional version-level attributes
+            //Optional configuration for GPG signing
             gpg {
                 sign = true //Determines whether to GPG sign the files. The default is false
                 passphrase = 'passphrase' //Optional. The passphrase for GPG signing'
             }
-			mavenCentralSync {
-                sync = true //Optional (true by default). Determines whether to sync the version to Maven Central.
-				user = 'userToken' //OSS user token
-				password = 'paasword' //OSS user password
-				close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
-			}            
+            //Optional configuration for Maven Central sync of the version
+            mavenCentralSync {
+            	sync = true //Optional (true by default). Determines whether to sync the version to Maven Central.
+		user = 'userToken' //OSS user token
+		password = 'paasword' //OSS user password
+		close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
+		}            
         }
     }
 }
