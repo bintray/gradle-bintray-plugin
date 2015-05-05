@@ -26,7 +26,7 @@ class PluginSpecUtils {
                 .addTask("clean")
                 .addTask("bintrayUpload")
                 .addEnvVar("bintrayUser", config.bintrayUser)
-                .addEnvVar("bintrayKey", config.bintrayApiKey)
+                .addEnvVar("bintrayKey", config.bintrayKey)
                 .addEnvVar("repoName", config.repo)
                 .addEnvVar("pkgName", config.pkgName)
                 .addEnvVar("pkgDesc", config.pkgDesc)
@@ -47,7 +47,7 @@ class PluginSpecUtils {
     def static getBintrayClient() {
         if (bintrayClient == null) {
             bintrayClient = BintrayClient.create(config.url as String,
-                    config.bintrayUser as String, config.bintrayApiKey as String)
+                    config.bintrayUser as String, config.bintrayKey as String)
         }
         bintrayClient
     }

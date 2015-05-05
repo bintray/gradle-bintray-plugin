@@ -17,12 +17,19 @@ class TestsConfig {
         config = new ConfigSlurper().parse(this.class.getResource('/gradle/config.groovy')).conf
 
         def bintrayUser = getenv('BINTRAY_USER')
+        if (!bintrayUser) {
+            bintrayUser = System.getProperty('bintrayUser')
+        }
         if (bintrayUser) {
             config.bintrayUser = bintrayUser
         }
-        def bintrayApiKey = getenv('BINTRAY_KEY')
-        if (bintrayApiKey) {
-            config.bintrayApiKey = bintrayApiKey
+
+        def bintrayKey = getenv('BINTRAY_KEY')
+        if (!bintrayKey) {
+            bintrayKey = System.getProperty('bintrayKey')
+        }
+        if (bintrayKey) {
+            config.bintrayKey = bintrayKey
         }
         if (config.url == [:]) {
             config.url = "https://api.bintray.com"
