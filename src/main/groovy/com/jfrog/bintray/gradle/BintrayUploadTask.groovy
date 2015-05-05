@@ -206,9 +206,9 @@ class BintrayUploadTask extends DefaultTask {
                 response.success = { resp ->
                     logger.info("Attributes set on $entity '$entityName'.")
                 }
-                response.failure = { resp ->
+                response.failure = { resp, reader ->
                     throw new GradleException(
-                            "Could not set attributes on $entity '$entityName': $resp.statusLine")
+                            "Could not set attributes on $entity '$entityName': $resp.statusLine $reader")
                 }
             }
         }
@@ -239,8 +239,8 @@ class BintrayUploadTask extends DefaultTask {
                     response.success = { resp ->
                         logger.info("Created package '$packagePath'.")
                     }
-                    response.failure = { resp ->
-                        throw new GradleException("Could not create package '$packagePath': $resp.statusLine")
+                    response.failure = { resp, reader ->
+                        throw new GradleException("Could not create package '$packagePath': $resp.statusLine $reader")
                     }
                 }
                 if (packageAttributes) {
@@ -273,8 +273,8 @@ class BintrayUploadTask extends DefaultTask {
                     response.success = { resp ->
                         logger.info("Created version '$versionName'.")
                     }
-                    response.failure = { resp ->
-                        throw new GradleException("Could not create version '$versionName': $resp.statusLine")
+                    response.failure = { resp, reader ->
+                        throw new GradleException("Could not create version '$versionName': $resp.statusLine $reader")
                     }
                 }
                 if (versionAttributes) {
@@ -326,8 +326,8 @@ class BintrayUploadTask extends DefaultTask {
                     response.success = { resp ->
                         logger.info("Uploaded to '$apiUrl$uri.path'.")
                     }
-                    response.failure = { resp ->
-                        throw new GradleException("Could not upload to '$apiUrl$uri.path': $resp.statusLine")
+                    response.failure = { resp, reader ->
+                        throw new GradleException("Could not upload to '$apiUrl$uri.path': $resp.statusLine $reader")
                     }
                 }
             }
@@ -344,8 +344,8 @@ class BintrayUploadTask extends DefaultTask {
                 response.success = { resp ->
                     logger.info("Published '$packagePath/$versionName'.")
                 }
-                response.failure = { resp ->
-                    throw new GradleException("Could not publish '$packagePath/$versionName': $resp.statusLine")
+                response.failure = { resp, reader ->
+                    throw new GradleException("Could not publish '$packagePath/$versionName': $resp.statusLine $reader")
                 }
             }
         }

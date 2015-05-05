@@ -111,22 +111,11 @@ class GradleLauncher {
             println "Launching Gradle process: $cmd"
             p = Runtime.getRuntime().exec(cmd)
 
-            final Thread logPrinter = new Thread(){
-                @Override
-                public void run() {
-                    final def processReader =
-                            new BufferedReader(new InputStreamReader(p.getInputStream()))
+            LogPrinter inputPrinter = new LogPrinter(p.getInputStream())
+            LogPrinter errorPrinter = new LogPrinter(p.getErrorStream())
 
-                    processReader.withReader {
-                        def line
-                        while ((line = it.readLine()) != null){
-                            println(line)
-                        }
-                    }
-                }
-            }
-
-            logPrinter.start()
+            new Thread(inputPrinter).start()
+            new Thread(errorPrinter).start()
             p.waitFor()
             println "Gradle process finished with exit code ${p.exitValue()}"
             p.exitValue()
@@ -140,6 +129,27 @@ class GradleLauncher {
                 }
                 if (p.getErrorStream() != null) {
                     p.getErrorStream().close()
+                }
+            }
+        }
+    }
+
+    private static class LogPrinter implements Runnable {
+        private InputStream inputStream
+
+        LogPrinter(InputStream inputStream) {
+            this.inputStream = inputStream
+        }
+
+        @Override
+        public void run() {
+            final def processReader =
+                    new BufferedReader(new InputStreamReader(inputStream))
+
+            processReader.withReader {
+                def line
+                while ((line = it.readLine()) != null){
+                    println(line)
                 }
             }
         }
