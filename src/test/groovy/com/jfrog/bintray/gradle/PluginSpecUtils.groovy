@@ -11,7 +11,10 @@ class PluginSpecUtils {
     private static def config = TestsConfig.getInstance().config
 
     def static getGradleCommandPath() {
-        System.getenv("GRADLE_HOME") + File.separator + "bin" + File.separator + "gradle.bat"
+        if (System.getenv("GRADLE_HOME")) {
+            return System.getenv("GRADLE_HOME") + File.separator + "bin" + File.separator + "gradle.bat"
+        }
+        'gradlew'
     }
 
     private static def getGradleProjectFile() {
