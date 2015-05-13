@@ -28,7 +28,6 @@ class GradleBintrayPluginSpec extends Specification {
         def config = TestsConfig.getInstance().config
         assert config.bintrayUser
         assert config.bintrayKey
-        assert System.getenv("GRADLE_HOME")
     }
 
     def cleanup() {

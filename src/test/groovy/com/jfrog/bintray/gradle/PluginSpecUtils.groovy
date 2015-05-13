@@ -9,9 +9,19 @@ import com.jfrog.bintray.client.impl.BintrayClient
 class PluginSpecUtils {
     private static Bintray bintrayClient
     private static def config = TestsConfig.getInstance().config
+    public static final OS_NAME = System.getProperty("os.name")
 
     def static getGradleCommandPath() {
-        System.getenv("GRADLE_HOME") + File.separator + "bin" + File.separator + "gradle.bat"
+        def ext = OS_NAME.contains("Windows") ? ".bat" : ""
+        if (System.getenv("GRADLE_HOME")) {
+            return System.getenv("GRADLE_HOME") + File.separator + "bin" + File.separator + "gradle" + ext
+        }
+        return "gradlew" + ext
+    }
+
+    private static def getGradleProjectDir() {
+        def resource = getClass().getResource("/gradle")
+        new File(resource.toURI())
     }
 
     private static def getGradleProjectFile() {
