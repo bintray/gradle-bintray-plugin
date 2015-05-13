@@ -12,11 +12,12 @@ class PluginSpecUtils {
     public static final OS_NAME = System.getProperty("os.name")
 
     def static getGradleCommandPath() {
-        def ext = OS_NAME.contains("Windows") ? ".bat" : ""
+        def windows = OS_NAME.contains("Windows")
         if (System.getenv("GRADLE_HOME")) {
+            def ext = windows ? ".bat" : ""
             return System.getenv("GRADLE_HOME") + File.separator + "bin" + File.separator + "gradle" + ext
         }
-        return "gradlew" + ext
+        return windows ? "gradlew.bat" : "./gradlew"
     }
 
     private static def getGradleProjectDir() {
