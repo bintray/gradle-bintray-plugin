@@ -9,7 +9,7 @@ Depending on the version of Gradle you're running, there are different usage sce
 ## Gradle >= 2.1
 ```groovy
 plugins {
-    id "com.jfrog.bintray" version "1.1"
+    id "com.jfrog.bintray" version "1.2"
 }
 ```
 
@@ -20,7 +20,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.1'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
     }
 }
 apply plugin: 'com.jfrog.bintray'
