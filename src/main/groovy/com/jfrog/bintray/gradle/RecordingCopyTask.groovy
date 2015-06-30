@@ -1,12 +1,12 @@
 package com.jfrog.bintray.gradle
 
-import org.gradle.api.InvalidUserDataException
 import org.gradle.api.internal.file.copy.CopyAction
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal
 import org.gradle.api.internal.tasks.SimpleWorkResult
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.SkipWhenEmpty
 
 class RecordingCopyTask extends Copy {
 
@@ -14,17 +14,16 @@ class RecordingCopyTask extends Copy {
 
     def fileUploads = []
 
-    @OutputDirectory
+    @Override
+    @SkipWhenEmpty
+    @Optional
     public File getDestinationDir() {
-        null
+        project.getBuildDir()
     }
 
     @Override
     protected CopyAction createCopyAction() {
-        def intoDir = getRootSpec().@destinationDir
-        if (intoDir instanceof String) {
-            throw new InvalidUserDataException("Bintray copy spec 'into' only accepts a relative string path.")
-        }
+        def intoDir = project.relativePath(getRootSpec().getDestinationDir())
         return {
                 //CopyAction
             CopyActionProcessingStream stream ->
