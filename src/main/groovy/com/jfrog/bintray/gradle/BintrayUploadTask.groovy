@@ -227,7 +227,7 @@ class BintrayUploadTask extends DefaultTask {
             }
             if (create) {
                 if (dryRun) {
-                    logger.info("(Dry run) Created pakage '$packagePath'.")
+                    logger.info("(Dry run) Created package '$packagePath'.")
                     return
                 }
                 http.request(POST, JSON) {
@@ -263,7 +263,7 @@ class BintrayUploadTask extends DefaultTask {
             }
             if (create) {
                 if (dryRun) {
-                    logger.info("(Dry run) Created verion '$packagePath/$versionName'.")
+                    logger.info("(Dry run) Created version '$packagePath/$versionName'.")
                     return
                 }
                 http.request(POST, JSON) {
