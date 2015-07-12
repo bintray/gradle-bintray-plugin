@@ -1,43 +1,205 @@
 # Overview
-This plugin allows you to publish artifacts to a repository on [bintray](https://bintray.com/).
+
+The Gradle Bintray Plugin allows you to publish artifacts to Bintray.
 
 [ ![Download](https://api.bintray.com/packages/jfrog/jfrog-jars/gradle-bintray-plugin/images/download.svg) ](https://bintray.com/jfrog/jfrog-jars/gradle-bintray-plugin/_latestVersion)
 
-# Usage
-Depending on the version of Gradle you're running, there are different usage scenarios. Add one of the following snippets to your `build.gradle` file:
+# Getting Started Using the Plugin
+Please follow the below steps to add the Gradle Bintray Plugin to your Gradle build script.
 
-## Gradle >= 2.1
+#### Step 1: [Sign up](https://bintray.com/docs/usermanual/working/working_allaboutjoiningbintraysigningupandloggingin.html) to [Bintray](https://bintray.com/) and locate your API Key under Edit Your Profile -> API Key
+
+#### Step 2: Apply the plugin to your Gradle build script
+
+To apply the plugin, please add one of the following snippets to your `build.gradle` file:
+
+###### Gradle >= 2.1
 ```groovy
 plugins {
-    id "com.jfrog.bintray" version "1.1"
+    id "com.jfrog.bintray" version "1.2"
 }
 ```
+* Currently the "plugins" notation cannot be used for applying the plugin for sub projects, when used from the root build script.
 
-## Gradle < 2.1
+###### Gradle < 2.1
 ```groovy
 buildscript {
     repositories {
         jcenter()
     }
     dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.1'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
     }
 }
 apply plugin: 'com.jfrog.bintray'
 ```
+* If you have a multi project build make sure to apply the plugin and the plugin configuration to every project which its artifacts you wish to publish to bintray.
 
-**Gradle Compatibility:**
-When using Gradle publications or when using `filesSpec` for direct file uploads, you'll need to use Gradle 2.x; Otherwise, the plugin is compatible with Gradle 1.12 and above.
+#### Step 3: Add the `bintray` configuration closure to your `build.gradle` file
 
- **JVM Compatibility:**
-Java 6 and above.
+Add the below "bintray" closure with your bintray user name and key.
 
-# Tasks
-The plugin adds the `bintrayUpload` task to your projects, which allows you to upload to bintray and optionally create
-the target package and version.
-Artifacts can be uploaded from the specified configurations or (the newly supported) publications.
+```groovy
+bintray {
+    user = 'bintray_user'
+    key = 'bintray_api_key'
+    ...
+}
+```
 
-## Configuration
+In case you prefer not to have your Bintray credentials explicitly defined in the script,
+you can store them in environment variables or in external user properties and use them as follows:
+
+```groovy
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    ...
+}
+```
+
+
+#### Step 4: Add your Bintray package information to the `bintray` closure
+
+Mandatory parameters:
+
+1. repo - existing repository in bintray to add the artifacts to (for example: 'generic', 'maven' etc)
+2. name - package name
+3. licenses - your package licenses
+4. vcsUrl - your VCS URL
+
+Optional parameters:
+
+1. userOrg – an optional organization name when the repo belongs to one of the user's orgs. If not added will use 'BINTRAY_USER' by default
+
+```groovy
+bintray {	
+    user = 'bintray_user'
+    key = 'bintray_api_key'
+    pkg {
+		repo = 'generic'
+		name = 'gradle-project'
+		userOrg = 'bintray_user'
+		licenses = ['Apache-2.0']
+		vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
+    }
+}
+```
+
+
+#### Step 5: Add version information to the `pkg` closure
+
+Mandatory parameters:
+
+1. name - Version name
+
+Optional parameters:
+
+1. desc - Version description
+2. released - Date of the version release. Can accept one of the following formats: 
+	* Date in the format of 'yyyy-MM-dd'T'HH:mm:ss.SSSZZ'
+	* java.util.Date instance
+3. vcsTag - Version control tag name
+4. attributes - Attributes to be attached to the version
+	
+
+```groovy
+pkg {
+	version {
+	            name = '1.0-Final'
+	            desc = 'Gradle Bintray Plugin 1.0 final'
+	            released  = new Date()
+	            vcsTag = '1.3.0'
+	            attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
+        }
+}
+```
+
+
+#### Step 6: Define artifacts to be uploaded to Bintray
+
+The plugin supports three methods to create groups of artifacts: Configurations, Publications and Copying specific files using filesSpec. One of the methods should be used to group artifacts to be uploaded to Bintray.
+
+##### [Maven Publications](https://docs.gradle.org/current/dsl/org.gradle.api.publish.maven.MavenPublication.html)
+
+* Maven Publications should be added to the Gradle script, outside of the bintray closure. They should however be referenced from inside the bintray closure.
+* Ivy Publications are not supported.
+
+Below you can find an example for Maven Publication that can be added to your Gradle script:
+
+```groovy
+publishing {
+	publications {
+		MyPublication(MavenPublication) {
+			from components.java
+			groupId 'org.jfrog.gradle.sample'
+			artifactId 'gradle-project'
+			version '1.1'
+		}
+	}
+}
+```
+
+This Publication should be referenced from the bintray closure as follows:
+
+```groovy
+bintray {
+    user = 'bintray_user'
+    key = 'bintray_api_key'	
+    publications = ['MyPublication'] 
+}
+```
+
+* [Example project](https://github.com/bintray/bintray-examples/tree/master/gradle-bintray-plugin-examples/gradle-bintray-plugin-publications-example) for using Maven Publications.
+
+##### [Configurations](https://docs.gradle.org/current/dsl/org.gradle.api.artifacts.Configuration.html)
+
+Configurations should be added to the Gradle script, outside of the bintray closure. They should however be referenced from inside the bintray closure.
+
+The following example uses the archives Configuration by applying the java plugin:
+
+```groovy
+apply plugin: 'java'
+```
+and the Configuration should be referenced from the bintray closure as follows:
+
+```groovy
+bintray {
+    user = 'bintray_user'
+    key = 'bintray_api_key'	
+    configurations = ['archives']
+}
+```
+
+* [Example project](https://github.com/bintray/bintray-examples/tree/master/gradle-bintray-plugin-examples/gradle-bintray-plugin-configurations-example) for using Configurations.
+
+##### Copying specific files using filesSpec
+
+FilesSpec is following [Gradle's CopySpec](https://docs.gradle.org/current/javadoc/org/gradle/api/file/CopySpec.html) which is used by the copy task.
+
+Below you can find an example for uploading arbitrary files from a specific folder ('build/libs') to a directory ('standalone_files/level1') under the build version in bintray using filesSpec.
+
+```groovy
+bintray {
+    user = 'bintray_user'
+    key = 'bintray_api_key'
+    filesSpec {
+	 from 'build/libs'
+	 into 'standalone_files/level1'
+    }
+}
+```
+
+* [Example project](https://github.com/bintray/bintray-examples/tree/master/gradle-bintray-plugin-examples/gradle-bintray-plugin-filesSpec-example) for using filesSpec.
+
+
+#### Step 7: Run the build
+
+> gradle bintrayUpload
+
+## The Bintray Plugin DSL
+The Gradle Bintray plugin can be configured using its own Convention DSL inside the build.gradle script of your root project.
+The syntax of the Convention DSL is described below:
 
 ### build.gradle
 ```groovy
@@ -92,7 +254,16 @@ bintray {
     }
 }
 ```
-* As an example, you can also refer to this multi-module sample project [build file](https://github.com/bintray/bintray-examples/blob/master/gradle-multi-example/build.gradle).
+* As an example, you can also refer to these [sample projects](https://github.com/bintray/bintray-examples/tree/master/gradle-bintray-plugin-examples).
+
+**Gradle Compatibility:**
+When using Gradle publications or when using `filesSpec` for direct file uploads, you'll need to use Gradle 2.x; Otherwise, the plugin is compatible with Gradle 1.12 and above.
+
+**JVM Compatibility:**
+Java 6 and above.
+
+# Example Projects
+As an example, you can also refer to these [sample projects](https://github.com/bintray/bintray-examples/tree/master/gradle-bintray-plugin-examples).
 
 # License
 This plugin is available under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
