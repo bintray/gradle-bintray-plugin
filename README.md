@@ -150,7 +150,7 @@ bintray {
 }
 ```
 
-* [Example project](https://github.com/bintray/bintray-examples/tree/master/gradle-bintray-plugin-examples/gradle-bintray-plugin-publications-example) for using Maven Publications.
+* [Example project](https://github.com/bintray/bintray-examples/tree/master/gradle-bintray-plugin-examples/publications-example) for using Maven Publications.
 
 ##### [Configurations](https://docs.gradle.org/current/dsl/org.gradle.api.artifacts.Configuration.html)
 
@@ -171,7 +171,7 @@ bintray {
 }
 ```
 
-* [Example project](https://github.com/bintray/bintray-examples/tree/master/gradle-bintray-plugin-examples/gradle-bintray-plugin-configurations-example) for using Configurations.
+* [Example project](https://github.com/bintray/bintray-examples/tree/master/gradle-bintray-plugin-examples/configurations-example) for using Configurations.
 
 ##### Copying specific files using filesSpec
 
@@ -190,7 +190,7 @@ bintray {
 }
 ```
 
-* [Example project](https://github.com/bintray/bintray-examples/tree/master/gradle-bintray-plugin-examples/gradle-bintray-plugin-filesSpec-example) for using filesSpec.
+* [Example project](https://github.com/bintray/bintray-examples/tree/master/gradle-bintray-plugin-examples/filesSpec-example) for using filesSpec.
 
 
 #### Step 7: Run the build
