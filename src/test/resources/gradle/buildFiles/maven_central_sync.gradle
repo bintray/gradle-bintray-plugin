@@ -1,0 +1,18 @@
+bintray {
+    apiUrl = bintrayApiUrl
+    user = bintrayUser
+    key = bintrayKey
+    pkg {
+        repo = repoName
+        name = pkgName
+        version {
+            name = versionName
+            mavenCentralSync {
+                sync = true
+                user = mavenCentralUser
+                password = mavenCentralPassword
+                close = '1'
+            }
+        }
+    }
+}

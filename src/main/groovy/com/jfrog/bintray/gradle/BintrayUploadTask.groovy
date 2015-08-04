@@ -4,6 +4,7 @@ import groovy.json.JsonBuilder
 import groovyx.net.http.HTTPBuilder
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.CopySpec
 import org.gradle.api.publish.Publication
@@ -24,6 +25,8 @@ class BintrayUploadTask extends DefaultTask {
     static final String GROUP = 'publishing'
     static final String DESCRIPTION = 'Publishes artifacts to bintray.com.'
     static final String API_URL_DEFAULT = 'https://api.bintray.com'
+
+    List<BintrayUploadTask> bintrayUploadTasks = null
 
     @Input
     @Optional
@@ -339,8 +342,13 @@ class BintrayUploadTask extends DefaultTask {
                 logger.info("(Dry run) Pulished verion '$packagePath/$versionName'.")
                 return
             }
-            http.request(POST) {
+            http.request(POST, JSON) {
                 uri.path = publishUri
+                // In case Maven Central Sync is configured, add this header to the publish request
+                // to make it synchronous.
+                if (shouldSyncToMavenCentral()) {
+                    body = [publish_wait_for_secs: '-1']
+                }
                 response.success = { resp ->
                     logger.info("Published '$packagePath/$versionName'.")
                 }
@@ -370,8 +378,10 @@ class BintrayUploadTask extends DefaultTask {
             }
         }
 
-        checkAndCreatePackage()
-        checkAndCreateVersion()
+        if (firstTask) {
+            checkAndCreatePackage()
+            checkAndCreateVersion()
+        }
 
         configurationUploads.each {
             uploadArtifact it
@@ -382,15 +392,63 @@ class BintrayUploadTask extends DefaultTask {
         fileUploads.each {
             uploadArtifact it
         }
-        if (signVersion) {
-            gpgSignVersion()
+        if (lastTask) {
+            if (signVersion) {
+                gpgSignVersion()
+            }
+            if (publish && !subtaskSkipPublish) {
+                publishVersion()
+            }
+            if (shouldSyncToMavenCentral()) {
+                mavenCentralSync()
+            }
         }
-        if (publish && !subtaskSkipPublish) {
-            publishVersion()
+    }
+
+    /**
+     * Indicates whether this BintrayUploadTask is the first task to be excuted.
+     * @return  true if this is the first BintrayUploadTask task.
+     */
+    boolean isFirstTask() {
+        currentTaskIndex == 0
+    }
+
+    /**
+     * Indicates whether this BintrayUploadTask is the last task to be excuted.
+     * @return  true if this is the last BintrayUploadTask task.
+     */
+    boolean isLastTask() {
+        currentTaskIndex == allBintrayUploadTasks.size() - 1
+    }
+
+    /**
+     * Return the index of this BintrayUploadTask in the list of all tasks of type BintrayUploadTask.
+     * @return  The task index.
+     */
+    int getCurrentTaskIndex() {
+        List<BintrayUploadTask> tasks = allBintrayUploadTasks
+        int currentTaskIndex = tasks.indexOf(this);
+        if (currentTaskIndex == -1) {
+            throw new Exception("Could not find the current task {} in the task graph", getPath());
         }
-        if (syncToMavenCentral && ossUser != null && ossPassword != null) {
-            mavenCentralSync()
+        currentTaskIndex
+    }
+
+    List<BintrayUploadTask> getAllBintrayUploadTasks() {
+        if (!bintrayUploadTasks) {
+            List<BintrayUploadTask> tasks = new ArrayList<BintrayUploadTask>()
+            for (Task task : getProject().getGradle().getTaskGraph().getAllTasks()) {
+                if (task instanceof BintrayUploadTask) {
+                    tasks.add(task);
+                }
+            }
+            bintrayUploadTasks = tasks
         }
+        bintrayUploadTasks
+    }
+
+    boolean shouldSyncToMavenCentral() {
+        syncToMavenCentral && ossUser != null && ossPassword != null
     }
 
     Artifact[] collectArtifacts(Configuration config) {

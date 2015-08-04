@@ -4,13 +4,13 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.1"
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.3-SNAPSHOT"
     }
-
 }
 
 def rootProjectDir = projectDir
 def testsDir = new File(rootProjectDir, 'buildFiles')
+def projectUrl = 'https://github.com/bintray/gradle-bintray-plugin'
 
 def getTestFile = { fileName ->
     testsDir.toString() + '/' + fileName
@@ -20,7 +20,7 @@ allprojects {
     apply plugin: 'idea'
 
     group = 'org.jfrog.example.bintray.gradle'
-    version = '1.0'
+    version = versionName
 }
 
 subprojects {
@@ -70,6 +70,34 @@ subprojects {
 
                 artifact javadocJar {
                     classifier "javadoc"
+                }
+
+                pom.withXml {
+                    asNode().children().last() + {
+                        resolveStrategy = Closure.DELEGATE_FIRST
+                        name 'project-name'
+                        description 'description for project'
+                        url projectUrl
+                        scm {
+                            url projectUrl
+                            connection projectUrl
+                            developerConnection projectUrl
+                        }
+                        licenses {
+                            license {
+                                name 'The Apache Software License, Version 2.0'
+                                url 'http://www.apache.org/license/LICENSE-2.0.txt'
+                                distribution 'repo'
+                            }
+                        }
+                        developers {
+                            developer {
+                                id 'JFrog'
+                                name 'JFrogDev'
+                                email 'jfrogdev@jfrog.com'
+                            }
+                        }
+                    }
                 }
             }
         }

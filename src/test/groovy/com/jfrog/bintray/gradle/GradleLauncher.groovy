@@ -4,7 +4,7 @@ import com.beust.jcommander.internal.Maps
 import com.google.common.collect.Sets
 
 /**
- * Created by user on 19/11/2014.
+ * Created by Eyal BM on 19/11/2014.
  */
 class GradleLauncher {
     private def gradleCommandPath

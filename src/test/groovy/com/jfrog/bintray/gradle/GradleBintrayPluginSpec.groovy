@@ -7,6 +7,8 @@ import org.junit.rules.TestName
 import spock.lang.Shared
 import spock.lang.Specification
 
+import static groovyx.net.http.Method.*
+
 class GradleBintrayPluginSpec extends Specification {
 
     @Rule
@@ -28,9 +30,11 @@ class GradleBintrayPluginSpec extends Specification {
         def config = TestsConfig.getInstance().config
         assert config.bintrayUser
         assert config.bintrayKey
+
+        cleanupSpec()
     }
 
-    def cleanup() {
+    def cleanupSpec() {
         boolean pkgExists = bintray.currentSubject().repository(config.repo)
                 .pkg(config.pkgName).exists()
 
@@ -66,5 +70,15 @@ class GradleBintrayPluginSpec extends Specification {
         pkg.name() == config.pkgName
         pkg.description() == config.pkgDesc
         pkg.labels().sort() == config.pkgLabels.sort()
+    }
+
+    def "maven central sync"() {
+        when:
+        PluginSpecUtils.linkPackageToJCenter()
+        def exitCode = PluginSpecUtils.launchGradle(testName.methodName)
+
+        then:
+        // Gradle build finished successfully:
+        exitCode == 0
     }
 }

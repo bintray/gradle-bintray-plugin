@@ -1,9 +1,11 @@
 def pkgLabels = [label1, label2, label3]
 
 bintray {
+    apiUrl = bintrayApiUrl
     user = bintrayUser
     key = bintrayKey
     publications = ['mavenJava']
+    publish = true
     pkg {
         repo = repoName
         name = pkgName
@@ -15,6 +17,9 @@ bintray {
         vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
         version {
             name = versionName
+            gpg {
+                sign = true
+            }
         }
     }
 }
