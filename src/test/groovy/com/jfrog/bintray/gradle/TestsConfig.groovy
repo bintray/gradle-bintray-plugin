@@ -87,9 +87,6 @@ class TestsConfig {
         if (config.pkgDesc == [:]) {
             config.pkgDesc = "gradle.tests.pkg.description"
         }
-        if (config.versionName == [:]) {
-            config.versionName = PluginSpecUtils.getOrCreatePackageVersion()
-        }
         if (config.pkgLabels == [:]) {
             config.pkgLabels = ['a','b','c']
         }

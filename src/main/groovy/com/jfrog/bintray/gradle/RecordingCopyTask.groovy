@@ -24,14 +24,13 @@ class RecordingCopyTask extends Copy {
     @Override
     protected CopyAction createCopyAction() {
         def intoDir = project.relativePath(getRootSpec().getDestinationDir())
+        // In case we're running on Windows, the path seperator should be replaced.
+        intoDir = intoDir.replace('\\', '/')
         return {
-                //CopyAction
             CopyActionProcessingStream stream ->
                 stream.process {
-                        //CopyActionProcessingStreamAction
                     FileCopyDetailsInternal details ->
                         if (!details.isDirectory()) {
-                            //
                             def destRelPath = intoDir != null ? (intoDir + '/' + details.getPath()) : details.getPath()
                             fileUploads << new Artifact(file: details.file, path: destRelPath)
                             didWork = true

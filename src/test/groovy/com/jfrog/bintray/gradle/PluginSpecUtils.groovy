@@ -3,6 +3,9 @@ package com.jfrog.bintray.gradle
 import com.jfrog.bintray.client.api.handle.Bintray
 import com.jfrog.bintray.client.impl.BintrayClient
 import groovyx.net.http.HTTPBuilder
+
+import java.util.regex.Matcher
+
 import static groovyx.net.http.Method.*
 
 /**
@@ -12,13 +15,9 @@ class PluginSpecUtils {
     private static Bintray bintrayClient
     private static def config = TestsConfig.getInstance().config
     public static final OS_NAME = System.getProperty("os.name")
-    public static TEST_PACKAGE_VERSION = null
 
-    def static getOrCreatePackageVersion() {
-        if (!TEST_PACKAGE_VERSION) {
-            TEST_PACKAGE_VERSION = System.currentTimeMillis().toString()
-        }
-        TEST_PACKAGE_VERSION
+    def static String createVersion() {
+        System.currentTimeMillis().toString()
     }
 
     def static getGradleCommandPath() {
@@ -30,21 +29,17 @@ class PluginSpecUtils {
         return windows ? "gradlew.bat" : "./gradlew"
     }
 
-    private static def getGradleProjectDir() {
-        def resource = getClass().getResource("/gradle")
+    private static def getGradleProjectFile(String projectName) {
+        def resource = getClass().getResource("/gradle/projects/$projectName/build.gradle")
         new File(resource.toURI())
     }
 
-    private static def getGradleProjectFile() {
-        def resource = getClass().getResource("/gradle/build.gradle")
-        new File(resource.toURI())
-    }
-
-    def static GradleLauncher createGradleLauncher() {
-        File projectFile = getGradleProjectFile()
+    def static GradleLauncher createGradleLauncher(String projectName) {
+        File projectFile = getGradleProjectFile(projectName)
         GradleLauncher launcher = new GradleLauncher(
                 getGradleCommandPath(), projectFile.getCanonicalPath())
                 .addTask("clean")
+                .addTask("build")
                 .addTask("bintrayUpload")
                 .addEnvVar("bintrayApiUrl", config.url)
                 .addEnvVar("bintrayUser", config.bintrayUser)
@@ -52,7 +47,6 @@ class PluginSpecUtils {
                 .addEnvVar("repoName", config.repo)
                 .addEnvVar("pkgName", config.pkgName)
                 .addEnvVar("pkgDesc", config.pkgDesc)
-                .addEnvVar("versionName", config.versionName)
                 .addEnvVar("mavenCentralUser", config.mavenCentralUser)
                 .addEnvVar("mavenCentralPassword", config.mavenCentralPassword)
                 .addSwitch("stacktrace")
@@ -63,9 +57,16 @@ class PluginSpecUtils {
         launcher
     }
 
-    def static launchGradle(String testMethodName) {
-        def testFileName = testMethodName.replaceAll(" ", "_")
-        createGradleLauncher().addEnvVar("testName", testFileName).launch()
+    def static launchGradle(String testMethodName, String version = null) {
+        String[] projectAndMethod = extractFromTestMethodName(testMethodName)
+        String projectName = projectAndMethod[0]
+        String testFileName = projectAndMethod[1].replaceAll(" ", "_")
+
+        GradleLauncher launcher = createGradleLauncher(projectName).addEnvVar("testName", testFileName)
+        if (version) {
+            launcher.addEnvVar("versionName", version)
+        }
+        launcher.launch()
     }
 
     def static getBintrayClient() {
@@ -76,6 +77,10 @@ class PluginSpecUtils {
         bintrayClient
     }
 
+    /**
+     * Links the configured package to JCenter on Bintray.
+     * @return
+     */
     def static linkPackageToJCenter() {
         HTTPBuilder http = BintrayHttpClientFactory.create(config.url, config.bintrayAdminUser, config.bintrayAdminKey)
 
@@ -85,5 +90,21 @@ class PluginSpecUtils {
                 println "Package '${config.pkgName}' was linked to JCenter."
             }
         }
+    }
+
+    /**
+     * Gets the Spock test method name in the format of '[project name]test name'
+     * and extracts from it the project name amd the test name.
+     * @param methodName    The Spock test method name
+     * @return  String array with two items:
+     * [0] - The project name.
+     * [1] - The test name.
+     */
+    def static String[] extractFromTestMethodName(String methodName) {
+        Matcher matcher = (methodName =~ /\[(.+)\](.+)/ )
+        if (matcher.matches()) {
+            return [matcher.group(1), matcher.group(2)]
+        }
+        throw new Exception("Test method name '$methodName' has an invalid format. Should be '[project name]test name'.")
     }
 }

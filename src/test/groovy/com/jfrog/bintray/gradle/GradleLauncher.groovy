@@ -1,6 +1,7 @@
 package com.jfrog.bintray.gradle
 
 import com.beust.jcommander.internal.Maps
+import com.google.common.collect.Lists
 import com.google.common.collect.Sets
 
 /**
@@ -11,7 +12,7 @@ class GradleLauncher {
     private def gradleProjectFilePath
     private def cmd
 
-    private Set<String> tasks = Sets.newHashSet()
+    private List<String> tasks = Lists.newArrayList()
     private Set<String> switches = Sets.newHashSet()
     private Map<String, Object> envVars = Maps.newHashMap()
     private Map<String, Object> systemProps = Maps.newHashMap()

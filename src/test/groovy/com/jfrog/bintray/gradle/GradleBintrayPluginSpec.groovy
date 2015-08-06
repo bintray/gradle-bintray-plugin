@@ -17,6 +17,8 @@ class GradleBintrayPluginSpec extends Specification {
     private Bintray bintray = PluginSpecUtils.getBintrayClient()
     @Shared
     private def config = TestsConfig.getInstance().config
+    @Shared
+    private versionForMavenCentralSync = null
 
     def setupSpec() {
         assert config
@@ -45,9 +47,11 @@ class GradleBintrayPluginSpec extends Specification {
         }
     }
 
-    def "create package and version"() {
+    def "[publication]create package and version with publication"() {
         when:
-        def exitCode = PluginSpecUtils.launchGradle(testName.methodName)
+        String version = PluginSpecUtils.createVersion()
+        versionForMavenCentralSync = version
+        def exitCode = PluginSpecUtils.launchGradle(testName.methodName, version)
 
         then:
         // Gradle build finished successfully:
@@ -59,7 +63,7 @@ class GradleBintrayPluginSpec extends Specification {
 
         // Version was created:
         bintray.currentSubject().repository(config.repo)
-                .pkg(config.pkgName).version(config.versionName).exists()
+                .pkg(config.pkgName).version(version).exists()
 
         when:
         // Get the created package:
@@ -72,10 +76,38 @@ class GradleBintrayPluginSpec extends Specification {
         pkg.labels().sort() == config.pkgLabels.sort()
     }
 
-    def "maven central sync"() {
+    def "[fileSpec]create package and version with fileSpec"() {
+        when:
+        String version = PluginSpecUtils.createVersion()
+        def exitCode = PluginSpecUtils.launchGradle(testName.methodName, version)
+
+        then:
+        // Gradle build finished successfully:
+        exitCode == 0
+
+        // Package was created:
+        bintray.currentSubject().repository(config.repo)
+                .pkg(config.pkgName).exists()
+
+        // Version was created:
+        bintray.currentSubject().repository(config.repo)
+                .pkg(config.pkgName).version(version).exists()
+
+        when:
+        // Get the created package:
+        Pkg pkg = bintray.currentSubject().repository(config.repo)
+                .pkg(config.pkgName).get()
+
+        then:
+        pkg.name() == config.pkgName
+        pkg.description() == config.pkgDesc
+        pkg.labels().sort() == config.pkgLabels.sort()
+    }
+
+    def "[publication]maven central sync"() {
         when:
         PluginSpecUtils.linkPackageToJCenter()
-        def exitCode = PluginSpecUtils.launchGradle(testName.methodName)
+        def exitCode = PluginSpecUtils.launchGradle(testName.methodName, versionForMavenCentralSync)
 
         then:
         // Gradle build finished successfully:

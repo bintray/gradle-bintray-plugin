@@ -12,7 +12,7 @@ buildscript {
 }
 
 def rootProjectDir = projectDir
-def testsDir = new File(rootProjectDir, 'buildFiles')
+def testsDir = new File(rootProjectDir.getParentFile().getParentFile(), 'buildFiles')
 def projectUrl = 'https://github.com/bintray/gradle-bintray-plugin'
 
 def getTestFile = { fileName ->

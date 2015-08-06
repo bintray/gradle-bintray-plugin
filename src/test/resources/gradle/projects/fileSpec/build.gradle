@@ -1,0 +1,65 @@
+buildscript {
+    repositories {
+//        maven {
+//            url 'https://oss.jfrog.org/oss-snapshot-local'
+//        }
+        mavenLocal()
+        jcenter()
+    }
+
+    dependencies {
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.4-SNAPSHOT"
+    }
+}
+
+def rootProjectDir = projectDir
+def testsDir = new File(rootProjectDir.getParentFile().getParentFile(), 'buildFiles')
+
+def getTestFile = { fileName ->
+    testsDir.toString() + '/' + fileName
+}
+
+allprojects {
+    apply plugin: 'idea'
+
+    group = 'org.jfrog.example.bintray.gradle'
+    version = versionName
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'com.jfrog.bintray'
+
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+
+    dependencies {
+        testCompile 'junit:junit:4.7'
+    }
+
+    // custom tasks for creating source/javadoc jars
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    // add javadoc/source jar tasks as artifacts
+    artifacts {
+        archives sourcesJar, javadocJar
+    }
+
+    repositories {
+        jcenter()
+    }
+
+    apply from: getTestFile("${testName}.gradle")
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.10'
+}
