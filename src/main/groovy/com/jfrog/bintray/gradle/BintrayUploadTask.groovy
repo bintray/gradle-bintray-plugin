@@ -245,13 +245,13 @@ class BintrayUploadTask extends DefaultTask {
                     logger.debug("Package '$packageName' exists.")
                 }
                 response.'404' = { resp ->
-                    logger.info("Package '$packageName' does not exist. Attempting to creating it...")
+                    logger.info("Package '$packageName' does not exist. Attempting to create it...")
                     create = true
                 }
             }
             if (create) {
                 if (dryRun) {
-                    logger.info("(Dry run) Created pakage '$packagePath'.")
+                    logger.info("(Dry run) Created package '$packagePath'.")
                 } else {
                     http.request(POST, JSON) {
                         addHeaders(headers)
@@ -295,7 +295,7 @@ class BintrayUploadTask extends DefaultTask {
                     logger.debug("Version '$packagePath/$versionName' exists.")
                 }
                 response.'404' = { resp ->
-                    logger.info("Version '$packagePath/$versionName' does not exist. Attempting to creating it...")
+                    logger.info("Version '$packagePath/$versionName' does not exist. Attempting to create it...")
                     create = true
                 }
             }
@@ -389,7 +389,7 @@ class BintrayUploadTask extends DefaultTask {
             def versionName = version.name
             def publishUri = "/content/$pkgPath/$versionName/publish"
             if (dryRun) {
-                logger.info("(Dry run) Pulished version '$pkgPath/$versionName'.")
+                logger.info("(Dry run) Published version '$pkgPath/$versionName'.")
                 return
             }
             http.request(POST, JSON) {
@@ -408,7 +408,7 @@ class BintrayUploadTask extends DefaultTask {
             def pkgPath = "$repoPath/$pkg.name"
             def versionName = version.name
             if (dryRun) {
-                logger.info("(Dry run) Sync to Maven Central performed '$pkgPath/$versionName'.")
+                logger.info("(Dry run) Sync to Maven Central performed for '$pkgPath/$versionName'.")
                 return
             }
             http.request(POST, JSON) {
@@ -522,7 +522,7 @@ class BintrayUploadTask extends DefaultTask {
     }
 
     /**
-     * Indicates whether this BintrayUploadTask is the last task to be excuted.
+     * Indicates whether this BintrayUploadTask is the last task to be executed.
      * @return  true if this is the last BintrayUploadTask task.
      */
     boolean isLastTask() {
@@ -568,10 +568,10 @@ class BintrayUploadTask extends DefaultTask {
             }
             pomArtifact = !pomArtifact && it.type == 'pom'
             boolean signedArtifact = (it instanceof org.gradle.plugins.signing.Signature)
-            def signedExtenstion = signedArtifact ? it.toSignArtifact.getExtension() : null
+            def signedExtension = signedArtifact ? it.toSignArtifact.getExtension() : null
             new Artifact(
                     name: it.name, groupId: project.group, version: project.version, extension: it.extension,
-                    type: it.type, classifier: it.classifier, file: it.file, signedExtenstion: signedExtenstion
+                    type: it.type, classifier: it.classifier, file: it.file, signedExtension: signedExtension
             )
         }.unique();
 
@@ -602,7 +602,7 @@ class BintrayUploadTask extends DefaultTask {
         def identity = publication.mavenProjectIdentity
         def artifacts = publication.artifacts.findResults {
             boolean signedArtifact = (it instanceof org.gradle.plugins.signing.Signature)
-            def signedExtenstion = signedArtifact ? it.toSignArtifact.getExtension() : null
+            def signedExtension = signedArtifact ? it.toSignArtifact.getExtension() : null
             new Artifact(
                 name: identity.artifactId,
                 groupId: identity.groupId,
@@ -611,7 +611,7 @@ class BintrayUploadTask extends DefaultTask {
                 type: it.extension,
                 classifier: it.classifier,
                 file: it.file,
-                signedExtenstion: signedExtenstion
+                signedExtension: signedExtension
             )
         }
 

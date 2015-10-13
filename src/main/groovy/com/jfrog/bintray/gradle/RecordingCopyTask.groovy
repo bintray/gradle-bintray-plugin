@@ -24,7 +24,7 @@ class RecordingCopyTask extends Copy {
     @Override
     protected CopyAction createCopyAction() {
         def intoDir = project.relativePath(getRootSpec().getDestinationDir())
-        // In case we're running on Windows, the path seperator should be replaced.
+        // In case we're running on Windows, the path separator should be replaced.
         intoDir = intoDir.replace('\\', '/')
         return {
             CopyActionProcessingStream stream ->
