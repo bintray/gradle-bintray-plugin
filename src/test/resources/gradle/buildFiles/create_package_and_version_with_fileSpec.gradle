@@ -6,7 +6,7 @@ bintray {
     key = bintrayKey
     filesSpec {
         from 'build/libs'
-        into 'standalone_files/level1'
+        into "standalone_files/v$versionName"
     }
     publish = true
     pkg {

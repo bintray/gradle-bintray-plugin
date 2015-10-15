@@ -54,6 +54,9 @@ class PluginSpecUtils {
         config.pkgLabels.eachWithIndex { label, index ->
             launcher.addEnvVar("label${index+1}", label)
         }
+        if (Boolean.valueOf(System.getenv("BINTRAY_PLUGIN_TESTS_DEBUG"))) {
+            launcher.addSystemProp("org.gradle.jvmargs", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005")
+        }
         launcher
     }
 
@@ -83,9 +86,11 @@ class PluginSpecUtils {
      */
     def static linkPackageToJCenter() {
         HTTPBuilder http = BintrayHttpClientFactory.create(config.url, config.bintrayAdminUser, config.bintrayAdminKey)
+        String path = "/repository/${config.bintrayAdminUser}/jcenter/links/${config.bintrayUser}/${config.repo}/${config.pkgName}"
+        println "Linking package ${config.pkgName} to jcenter by sending: PUT ${config.url}$path"
 
         http.request(PUT) {
-            uri.path = "/repository/${config.bintrayAdminUser}/jcenter/links/${config.bintrayUser}/${config.repo}/${config.pkgName}"
+            uri.path = path
             response.success = { resp ->
                 println "Package '${config.pkgName}' was linked to JCenter."
             }

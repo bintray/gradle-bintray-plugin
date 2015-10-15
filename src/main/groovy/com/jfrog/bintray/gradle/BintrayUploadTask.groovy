@@ -15,6 +15,8 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Upload
 
+import java.util.concurrent.ConcurrentHashMap
+
 import static groovyx.net.http.ContentType.BINARY
 import static groovyx.net.http.ContentType.JSON
 import static groovyx.net.http.Method.*
@@ -27,6 +29,7 @@ class BintrayUploadTask extends DefaultTask {
     static final String API_URL_DEFAULT = 'https://api.bintray.com'
 
     List<BintrayUploadTask> bintrayUploadTasks = null
+    private static ConcurrentHashMap<String, Package> packagesCreated = new ConcurrentHashMap<>()
 
     @Input
     @Optional
@@ -217,6 +220,11 @@ class BintrayUploadTask extends DefaultTask {
         }
 
         def checkAndCreatePackage = {
+            // Check if the package has already been created by another BintrayUploadTask.
+            Package pkg = checkPackageAlreadyCreated()
+            if (!pkg) {
+                return
+            }
             def create
             http.request(HEAD) {
                 uri.path = "/packages/$packagePath"
@@ -250,9 +258,15 @@ class BintrayUploadTask extends DefaultTask {
                     setAttributes "/packages/$packagePath/attributes", packageAttributes, 'package', packageName
                 }
             }
+            setPackageAsCreated(pkg)
         }
 
         def checkAndCreateVersion = {
+            // Check if the version has already been created by another BintrayUploadTask.
+            Version version = checkVersionAlreadyCreated()
+            if (!version) {
+                return;
+            }
             def create
             http.request(HEAD) {
                 uri.path = "/packages/$packagePath/versions/$versionName"
@@ -285,16 +299,19 @@ class BintrayUploadTask extends DefaultTask {
                             'version', versionName
                 }
             }
+            setVersionAsCreated(version)
         }
 
-        def gpgSignVersion = {
+        def gpgSignVersion = { pkg, version ->
+            def pkgPath = "$repoPath/$pkg.name"
+            def versionName = version.name
             if (dryRun) {
-                logger.info("(Dry run) Signed verion '$packagePath/$versionName'.")
+                logger.info("(Dry run) Signed verion '$pkgPath/$versionName'.")
                 return
             }
             http.request(POST, JSON) {
-                uri.path = "/gpg/$packagePath/versions/$versionName"
-                if (gpgPassphrase != null) {
+                uri.path = "/gpg/$pkgPath/versions/$versionName"
+                if (version.gpgPassphrase) {
                     body = [passphrase: gpgPassphrase]
                 }
                 response.success = { resp ->
@@ -336,52 +353,67 @@ class BintrayUploadTask extends DefaultTask {
             }
         }
 
-        def publishVersion = {
-            def publishUri = "/content/$packagePath/$versionName/publish"
+        def publishVersion = { pkg, version ->
+            def pkgPath = "$repoPath/$pkg.name"
+            def versionName = version.name
+            def publishUri = "/content/$pkgPath/$versionName/publish"
             if (dryRun) {
-                logger.info("(Dry run) Pulished verion '$packagePath/$versionName'.")
+                logger.info("(Dry run) Pulished verion '$pkgPath/$versionName'.")
                 return
             }
             http.request(POST, JSON) {
                 uri.path = publishUri
-                // In case Maven Central Sync is configured, add this header to the publish request
-                // to make it synchronous.
-                if (shouldSyncToMavenCentral()) {
-                    body = [publish_wait_for_secs: '-1']
-                }
                 response.success = { resp ->
-                    logger.info("Published '$packagePath/$versionName'.")
+                    logger.info("Published '$pkgPath/$versionName'.")
                 }
                 response.failure = { resp, reader ->
-                    throw new GradleException("Could not publish '$packagePath/$versionName': $resp.statusLine $reader")
+                    throw new GradleException("Could not publish '$pkgPath/$versionName': $resp.statusLine $reader")
                 }
             }
         }
 
-        def mavenCentralSync = {
+        def mavenCentralSync = { pkg, version ->
+            def pkgPath = "$repoPath/$pkg.name"
+            def versionName = version.name
             if (dryRun) {
-                logger.info("(Dry run) Sync to Maven Central performed '$packagePath/$versionName'.")
+                logger.info("(Dry run) Sync to Maven Central performed '$pkgPath/$versionName'.")
                 return
             }
             http.request(POST, JSON) {
-                uri.path = "/maven_central_sync/$packagePath/versions/$versionName"
+                uri.path = "/maven_central_sync/$pkgPath/versions/$versionName"
                 body = [username: ossUser, password: ossPassword]
                 if (ossCloseRepo != null) {
                     body << [close: ossCloseRepo]
                 }
                 response.success = { resp ->
-                    logger.info("Sync to Maven Central performed for '$packagePath/$versionName'.")
+                    logger.info("Sync to Maven Central performed for '$pkgPath/$versionName'.")
                 }
                 response.failure = { resp, reader ->
-                    throw new GradleException("Could not sync '$packagePath/$versionName' to Maven Central: $resp.statusLine $reader")
+                    throw new GradleException("Could not sync '$pkgPath/$versionName' to Maven Central: $resp.statusLine $reader")
                 }
             }
         }
 
-        if (firstTask) {
-            checkAndCreatePackage()
-            checkAndCreateVersion()
+        def signPublishAndSync = {
+            Collection<Package> packages = BintrayUploadTask.packagesCreated.values()
+            for (Package p : packages) {
+                Collection<Version> versions = p.versions.values()
+                for (Version v : versions) {
+                    if (v.gpgSign) {
+                        gpgSignVersion(p, v)
+                    }
+                    if (v.publish) {
+                        publishVersion(p, v)
+                    }
+                    if (v.mavenCentralSync) {
+                        mavenCentralSync(p, v)
+                    }
+                }
+            }
         }
+
+        checkAndCreatePackage()
+        checkAndCreateVersion()
 
         configurationUploads.each {
             uploadArtifact it
@@ -393,24 +425,61 @@ class BintrayUploadTask extends DefaultTask {
             uploadArtifact it
         }
         if (lastTask) {
-            if (signVersion) {
-                gpgSignVersion()
-            }
-            if (publish && !subtaskSkipPublish) {
-                publishVersion()
-            }
-            if (shouldSyncToMavenCentral()) {
-                mavenCentralSync()
-            }
+            signPublishAndSync()
         }
     }
 
-    /**
-     * Indicates whether this BintrayUploadTask is the first task to be excuted.
-     * @return  true if this is the first BintrayUploadTask task.
-     */
-    boolean isFirstTask() {
-        currentTaskIndex == 0
+    Package checkPackageAlreadyCreated() {
+        Package pkg = new Package(packageName)
+        Package p = BintrayUploadTask.packagesCreated.putIfAbsent(packageName, pkg)
+        if (p) {
+            if (!p.created) {
+                synchronized (p) {
+                    if (!p.created) {
+                        p.wait()
+                    }
+                }
+            }
+            return null
+        }
+        return pkg
+    }
+
+    Version checkVersionAlreadyCreated() {
+        Package pkg = BintrayUploadTask.packagesCreated.get(packageName)
+        if (!pkg) {
+            throw new IllegalStateException(
+                "Attempted checking and creating version, before checking and creating the package.")
+        }
+        boolean shouldPublish = publish && !subtaskSkipPublish
+        Version version = new Version(
+            versionName, signVersion, gpgPassphrase, shouldPublish, shouldSyncToMavenCentral())
+        Version v = pkg.addVersionIfAbsent(version)
+        if (v) {
+            if (!v.created) {
+                synchronized (v) {
+                    if (!v.created) {
+                        v.wait()
+                    }
+                }
+            }
+            return null
+        }
+        return version
+    }
+
+    void setPackageAsCreated(Package pkg) {
+        pkg.setAsCreated()
+        synchronized (pkg) {
+            pkg.notifyAll()
+        }
+    }
+
+    void setVersionAsCreated(Version version) {
+        version.setAsCreated()
+        synchronized (version) {
+            version.notifyAll()
+        }
     }
 
     /**
@@ -500,5 +569,81 @@ class BintrayUploadTask extends DefaultTask {
                 name: identity.artifactId, groupId: identity.groupId, version: identity.version,
                 extension: 'pom', type: 'pom', file: publication.asNormalisedPublication().pomFile)
         artifacts
+    }
+
+    class Package {
+        private String name
+        private boolean created
+        private ConcurrentHashMap<String, Version> versions = new ConcurrentHashMap<String, Version>()
+
+        Package(String name) {
+            this.name = name
+        }
+
+        boolean isCreated() {
+            return created
+        }
+
+        void setAsCreated() {
+            this.created = true
+        }
+
+        public Version addVersionIfAbsent(Version version) {
+            Version v = versions.putIfAbsent(version.name, version)
+            if (v) {
+                v.merge(version)
+            }
+            return v
+        }
+    }
+
+    class Version {
+        private String name
+        private boolean created
+        private boolean gpgSign
+        private String gpgPassphrase
+        private boolean publish
+        private boolean mavenCentralSync
+
+        Version(String name, boolean gpgSign, String gpgPassphrase, boolean publish, boolean mavenCentralSync) {
+            this.name = name
+            this.gpgSign = gpgSign
+            this.gpgPassphrase = gpgPassphrase
+            this.publish = publish
+            this.mavenCentralSync = mavenCentralSync
+        }
+
+        boolean isCreated() {
+            return created
+        }
+
+        void setAsCreated() {
+            this.created = true
+        }
+
+        boolean isGpgSign() {
+            return gpgSign
+        }
+
+        String getGpgPassphrase() {
+            return gpgPassphrase
+        }
+
+        boolean isPublish() {
+            return publish
+        }
+
+        boolean isMavenCentralSync() {
+            return mavenCentralSync
+        }
+
+        void merge(Version version) {
+            if (version) {
+                this.gpgSign = this.gpgSign || version.gpgSign
+                this.publish = this.publish || version.publish
+                this.mavenCentralSync = this.mavenCentralSync || version.mavenCentralSync
+                this.gpgPassphrase = gpgPassphrase ?: this.gpgPassphrase
+            }
+        }
     }
 }

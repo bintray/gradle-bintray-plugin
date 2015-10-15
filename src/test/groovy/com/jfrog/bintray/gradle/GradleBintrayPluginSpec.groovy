@@ -37,6 +37,14 @@ class GradleBintrayPluginSpec extends Specification {
     }
 
     def cleanupSpec() {
+        if (versionForMavenCentralSync) {
+            if (bintray.currentSubject().repository(config.repo)
+                    .pkg(config.pkgName).version(versionForMavenCentralSync).exists()) {
+                bintray.currentSubject().repository(config.repo)
+                        .pkg(config.pkgName).version(versionForMavenCentralSync).delete()
+            }
+        }
+
         boolean pkgExists = bintray.currentSubject().repository(config.repo)
                 .pkg(config.pkgName).exists()
 
@@ -45,6 +53,34 @@ class GradleBintrayPluginSpec extends Specification {
             bintray.currentSubject().repository(config.repo)
                     .pkg(config.pkgName).delete()
         }
+    }
+
+    def "[fileSpec]create package and version with fileSpec"() {
+        when:
+        String version = PluginSpecUtils.createVersion()
+        def exitCode = PluginSpecUtils.launchGradle(testName.methodName, version)
+
+        then:
+        // Gradle build finished successfully:
+        exitCode == 0
+
+        // Package was created:
+        bintray.currentSubject().repository(config.repo)
+                .pkg(config.pkgName).exists()
+
+        // Version was created:
+        bintray.currentSubject().repository(config.repo)
+                .pkg(config.pkgName).version(version).exists()
+
+        when:
+        // Get the created package:
+        Pkg pkg = bintray.currentSubject().repository(config.repo)
+                .pkg(config.pkgName).get()
+
+        then:
+        pkg.name() == config.pkgName
+        pkg.description() == config.pkgDesc
+        pkg.labels().sort() == config.pkgLabels.sort()
     }
 
     def "[publication]create package and version with publication"() {
@@ -76,36 +112,10 @@ class GradleBintrayPluginSpec extends Specification {
         pkg.labels().sort() == config.pkgLabels.sort()
     }
 
-    def "[fileSpec]create package and version with fileSpec"() {
-        when:
-        String version = PluginSpecUtils.createVersion()
-        def exitCode = PluginSpecUtils.launchGradle(testName.methodName, version)
-
-        then:
-        // Gradle build finished successfully:
-        exitCode == 0
-
-        // Package was created:
-        bintray.currentSubject().repository(config.repo)
-                .pkg(config.pkgName).exists()
-
-        // Version was created:
-        bintray.currentSubject().repository(config.repo)
-                .pkg(config.pkgName).version(version).exists()
-
-        when:
-        // Get the created package:
-        Pkg pkg = bintray.currentSubject().repository(config.repo)
-                .pkg(config.pkgName).get()
-
-        then:
-        pkg.name() == config.pkgName
-        pkg.description() == config.pkgDesc
-        pkg.labels().sort() == config.pkgLabels.sort()
-    }
-
     def "[publication]maven central sync"() {
         when:
+        println("Waiting 60 seconds before linking the package to jcenter...")
+        Thread.sleep(60000)
         PluginSpecUtils.linkPackageToJCenter()
         def exitCode = PluginSpecUtils.launchGradle(testName.methodName, versionForMavenCentralSync)
 

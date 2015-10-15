@@ -82,7 +82,7 @@ class TestsConfig {
             config.repo = "maven"
         }
         if (config.pkgName == [:]) {
-            config.pkgName = "gradle.tests.pkg.name"
+            config.pkgName = "gradle.tests.pkg.name5"
         }
         if (config.pkgDesc == [:]) {
             config.pkgDesc = "gradle.tests.pkg.description"

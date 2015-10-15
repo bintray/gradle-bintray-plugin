@@ -1,9 +1,9 @@
 buildscript {
     repositories {
+        mavenLocal()
 //        maven {
 //            url 'https://oss.jfrog.org/oss-snapshot-local'
 //        }
-        mavenLocal()
         jcenter()
     }
 
@@ -22,7 +22,7 @@ def getTestFile = { fileName ->
 allprojects {
     apply plugin: 'idea'
 
-    group = 'org.jfrog.example.bintray.gradle'
+    group = pkgName
     version = versionName
 }
 
