@@ -4,7 +4,7 @@ buildscript {
         maven {
             url 'https://oss.jfrog.org/oss-release-local'
         }
-        //jcenter()
+        jcenter()
     }
 
     dependencies {
