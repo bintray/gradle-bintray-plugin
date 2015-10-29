@@ -280,7 +280,7 @@ class BintrayUploadTask extends DefaultTask {
             }
             if (create) {
                 if (dryRun) {
-                    logger.info("(Dry run) Created verion '$packagePath/$versionName'.")
+                    logger.info("(Dry run) Created version '$packagePath/$versionName'.")
                     return
                 }
                 http.request(POST, JSON) {
@@ -306,7 +306,7 @@ class BintrayUploadTask extends DefaultTask {
             def pkgPath = "$repoPath/$pkg.name"
             def versionName = version.name
             if (dryRun) {
-                logger.info("(Dry run) Signed verion '$pkgPath/$versionName'.")
+                logger.info("(Dry run) Signed version '$pkgPath/$versionName'.")
                 return
             }
             http.request(POST, JSON) {
@@ -358,7 +358,7 @@ class BintrayUploadTask extends DefaultTask {
             def versionName = version.name
             def publishUri = "/content/$pkgPath/$versionName/publish"
             if (dryRun) {
-                logger.info("(Dry run) Pulished verion '$pkgPath/$versionName'.")
+                logger.info("(Dry run) Pulished version '$pkgPath/$versionName'.")
                 return
             }
             http.request(POST, JSON) {
