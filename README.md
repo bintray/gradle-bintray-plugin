@@ -265,6 +265,22 @@ Java 6 and above.
 # Example Projects
 As an example, you can also refer to these [sample projects](https://github.com/bintray/bintray-examples/tree/master/gradle-bintray-plugin-examples).
 
+
+
+You can use the `-P` command line option to pass user and key as command line argument:
+
+`gradle -Puser=someuser -Pkey=ASDFASDFASDF bintrayUpload`
+
+then you need to use those properties in your config:
+
+```groovy
+bintray {
+    user = property('user')
+    key = property('key')
+}
+```
+
+
 # License
 This plugin is available under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
