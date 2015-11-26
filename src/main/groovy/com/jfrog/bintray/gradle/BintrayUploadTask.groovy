@@ -14,7 +14,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Upload
-
 import java.util.concurrent.ConcurrentHashMap
 
 import static groovyx.net.http.ContentType.BINARY
@@ -150,6 +149,7 @@ class BintrayUploadTask extends DefaultTask {
     Artifact[] fileUploads
 
     boolean subtaskSkipPublish
+    Properties releaseProps
 
     {
         group = GROUP
@@ -202,6 +202,7 @@ class BintrayUploadTask extends DefaultTask {
 
         def setAttributes = { attributesPath, attributes, entity, entityName ->
             http.request(POST, JSON) {
+                addHeaders(headers)
                 uri.path = attributesPath
                 def builder = new JsonBuilder()
                 builder.content = attributes.collect {
@@ -227,6 +228,7 @@ class BintrayUploadTask extends DefaultTask {
             }
             def create
             http.request(HEAD) {
+                addHeaders(headers)
                 uri.path = "/packages/$packagePath"
                 response.success = { resp ->
                     logger.debug("Package '$packageName' exists.")
@@ -242,6 +244,7 @@ class BintrayUploadTask extends DefaultTask {
                     return
                 }
                 http.request(POST, JSON) {
+                    addHeaders(headers)
                     uri.path = "/packages/$repoPath"
                     body = [name                   : packageName, desc: packageDesc, licenses: packageLicenses, labels: packageLabels,
                             website_url            : packageWebsiteUrl, issue_tracker_url: packageIssueTrackerUrl, vcs_url: packageVcsUrl,
@@ -269,6 +272,7 @@ class BintrayUploadTask extends DefaultTask {
             }
             def create
             http.request(HEAD) {
+                addHeaders(headers)
                 uri.path = "/packages/$packagePath/versions/$versionName"
                 response.success = { resp ->
                     logger.debug("Version '$packagePath/$versionName' exists.")
@@ -284,6 +288,7 @@ class BintrayUploadTask extends DefaultTask {
                     return
                 }
                 http.request(POST, JSON) {
+                    addHeaders(headers)
                     uri.path = "/packages/$packagePath/versions"
                     versionReleased = Utils.toIsoDateFormat(versionReleased)
                     body = [name: versionName, desc: versionDesc, released: versionReleased, vcs_tag: versionVcsTag]
@@ -310,6 +315,7 @@ class BintrayUploadTask extends DefaultTask {
                 return
             }
             http.request(POST, JSON) {
+                addHeaders(headers)
                 uri.path = "/gpg/$pkgPath/versions/$versionName"
                 if (version.gpgPassphrase) {
                     body = [passphrase: gpgPassphrase]
@@ -340,8 +346,12 @@ class BintrayUploadTask extends DefaultTask {
                     return
                 }
                 http.request(PUT) {
-                    uri.path = uploadUri
+                    addHeaders(headers)
+                    // Set the requestContentType to BINARY, so that HTTPBuilder can encode the uploaded file:
                     requestContentType = BINARY
+                    // Set the Content-Type to '*/*' to enable Bintray to set it on its own:
+                    headers["Content-Type"] = '*/*'
+                    uri.path = uploadUri
                     body = is
                     response.success = { resp ->
                         logger.info("Uploaded to '$apiUrl$uri.path'.")
@@ -362,6 +372,7 @@ class BintrayUploadTask extends DefaultTask {
                 return
             }
             http.request(POST, JSON) {
+                addHeaders(headers)
                 uri.path = publishUri
                 response.success = { resp ->
                     logger.info("Published '$pkgPath/$versionName'.")
@@ -380,6 +391,7 @@ class BintrayUploadTask extends DefaultTask {
                 return
             }
             http.request(POST, JSON) {
+                addHeaders(headers)
                 uri.path = "/maven_central_sync/$pkgPath/versions/$versionName"
                 body = [username: ossUser, password: ossPassword]
                 if (ossCloseRepo != null) {
@@ -427,6 +439,19 @@ class BintrayUploadTask extends DefaultTask {
         if (lastTask) {
             signPublishAndSync()
         }
+    }
+
+    String getPluginVersion() {
+        if (!releaseProps) {
+            Properties tempProps = new Properties()
+            tempProps.load(getClass().classLoader.getResource("bintray.plugin.release.properties").openStream())
+            releaseProps = tempProps
+        }
+        releaseProps.get('version')
+    }
+
+    void addHeaders(Map<?,?> headers) {
+        headers.put("User-Agent","gradle-bintray-plugin/$pluginVersion")
     }
 
     Package checkPackageAlreadyCreated() {
