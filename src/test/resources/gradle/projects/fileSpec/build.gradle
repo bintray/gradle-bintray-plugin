@@ -1,14 +1,14 @@
 buildscript {
     repositories {
         mavenLocal()
-        maven {
-            url 'https://oss.jfrog.org/oss-release-local'
-        }
+//        maven {
+//            url 'https://oss.jfrog.org/oss-release-local'
+//        }
         jcenter()
     }
 
     dependencies {
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.4"
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.5"
     }
 }
 
