@@ -44,6 +44,8 @@ class BintrayPlugin implements Plugin<Project> {
                         packageWebsiteUrl = extension.pkg.websiteUrl
                         packageIssueTrackerUrl = extension.pkg.issueTrackerUrl
                         packageVcsUrl = extension.pkg.vcsUrl
+                        packageGithubRepo = extension.pkg.githubRepo
+                        packageGithubReleaseNotesFile = extension.pkg.githubReleaseNotesFile
                         packageLicenses = extension.pkg.licenses
                         packageLabels = extension.pkg.labels
                         packageAttributes = extension.pkg.attributes
