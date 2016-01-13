@@ -86,6 +86,14 @@ class BintrayUploadTask extends DefaultTask {
 
     @Input
     @Optional
+    String packageGithubRepo
+
+    @Input
+    @Optional
+    String packageGithubReleaseNotesFile
+
+    @Input
+    @Optional
     String[] packageLicenses
 
     @Input
@@ -248,7 +256,8 @@ class BintrayUploadTask extends DefaultTask {
                     uri.path = "/packages/$repoPath"
                     body = [name                   : packageName, desc: packageDesc, licenses: packageLicenses, labels: packageLabels,
                             website_url            : packageWebsiteUrl, issue_tracker_url: packageIssueTrackerUrl, vcs_url: packageVcsUrl,
-                            public_download_numbers: packagePublicDownloadNumbers]
+                            public_download_numbers: packagePublicDownloadNumbers, github_repo: packageGithubRepo,
+                            github_release_notes_file: packageGithubReleaseNotesFile]
 
                     response.success = { resp ->
                         logger.info("Created package '$packagePath'.")

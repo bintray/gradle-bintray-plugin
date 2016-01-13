@@ -48,6 +48,8 @@ class BintrayExtension {
         String websiteUrl
         String issueTrackerUrl
         String vcsUrl
+        String githubRepo
+        String githubReleaseNotesFile
         boolean publicDownloadNumbers
         String[] licenses
         String[] labels
