@@ -16,7 +16,7 @@ bintray {
         issueTrackerUrl = 'https://github.com/bintray/gradle-bintray-plugin/issues'
         vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
         githubRepo = 'bintray/gradle-bintray-plugin'
-        githubReleaseNotesFile = 'CHANGELOG.md'
+        githubReleaseNotesFile = 'README.md'
         version {
             name = versionName
             gpg {

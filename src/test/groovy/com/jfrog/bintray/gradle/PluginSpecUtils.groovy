@@ -49,6 +49,7 @@ class PluginSpecUtils {
                 .addEnvVar("pkgDesc", config.pkgDesc)
                 .addEnvVar("mavenCentralUser", config.mavenCentralUser)
                 .addEnvVar("mavenCentralPassword", config.mavenCentralPassword)
+                .addSwitch("info")
                 .addSwitch("stacktrace")
 
         config.pkgLabels.eachWithIndex { label, index ->

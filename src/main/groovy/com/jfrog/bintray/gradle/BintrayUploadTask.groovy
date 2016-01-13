@@ -166,7 +166,8 @@ class BintrayUploadTask extends DefaultTask {
 
     @TaskAction
     void bintrayUpload() {
-        logger.info("Found {} configuration(s) to publish.", configurations?.length ?: 0);
+        logger.info("Gradle Bintray Plugin version: $pluginVersion");
+
         //TODO: [by yl] replace with findResults for Gradle 2.x
         configurationUploads = configurations.collect {
             if (it instanceof CharSequence) {
@@ -254,9 +255,14 @@ class BintrayUploadTask extends DefaultTask {
                 http.request(POST, JSON) {
                     addHeaders(headers)
                     uri.path = "/packages/$repoPath"
-                    body = [name                   : packageName, desc: packageDesc, licenses: packageLicenses, labels: packageLabels,
-                            website_url            : packageWebsiteUrl, issue_tracker_url: packageIssueTrackerUrl, vcs_url: packageVcsUrl,
-                            public_download_numbers: packagePublicDownloadNumbers, github_repo: packageGithubRepo,
+                    body = [name: packageName, desc: packageDesc,
+                            licenses: packageLicenses,
+                            labels: packageLabels,
+                            website_url: packageWebsiteUrl,
+                            issue_tracker_url: packageIssueTrackerUrl,
+                            vcs_url: packageVcsUrl,
+                            public_download_numbers: packagePublicDownloadNumbers,
+                            github_repo: packageGithubRepo,
                             github_release_notes_file: packageGithubReleaseNotesFile]
 
                     response.success = { resp ->
