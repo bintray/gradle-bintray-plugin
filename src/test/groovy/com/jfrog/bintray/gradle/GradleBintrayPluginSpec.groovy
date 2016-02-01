@@ -55,10 +55,40 @@ class GradleBintrayPluginSpec extends Specification {
         }
     }
 
+    def "[configuration]create package and version with configuration"() {
+        when:
+        String version = PluginSpecUtils.createVersion()
+        String[] tasks = ["clean", "install", "bintrayUpload"]
+        def exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks, version)
+
+        then:
+        // Gradle build finished successfully:
+        exitCode == 0
+
+        // Package was created:
+        bintray.currentSubject().repository(config.repo)
+                .pkg(config.pkgName).exists()
+
+        // Version was created:
+        bintray.currentSubject().repository(config.repo)
+                .pkg(config.pkgName).version(version).exists()
+
+        when:
+        // Get the created package:
+        Pkg pkg = bintray.currentSubject().repository(config.repo)
+                .pkg(config.pkgName).get()
+
+        then:
+        pkg.name() == config.pkgName
+        pkg.description() == config.pkgDesc
+        pkg.labels().sort() == config.pkgLabels.sort()
+    }
+
     def "[fileSpec]create package and version with fileSpec"() {
         when:
         String version = PluginSpecUtils.createVersion()
-        def exitCode = PluginSpecUtils.launchGradle(testName.methodName, version)
+        String[] tasks = ["clean", "build", "bintrayUpload"]
+        def exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks, version)
 
         then:
         // Gradle build finished successfully:
@@ -87,7 +117,8 @@ class GradleBintrayPluginSpec extends Specification {
         when:
         String version = PluginSpecUtils.createVersion()
         versionForMavenCentralSync = version
-        def exitCode = PluginSpecUtils.launchGradle(testName.methodName, version)
+        String[] tasks = ["clean", "build", "bintrayUpload"]
+        def exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks, version)
 
         then:
         // Gradle build finished successfully:
@@ -117,7 +148,9 @@ class GradleBintrayPluginSpec extends Specification {
         println("Waiting 60 seconds before linking the package to jcenter...")
         Thread.sleep(60000)
         PluginSpecUtils.linkPackageToJCenter()
-        def exitCode = PluginSpecUtils.launchGradle(testName.methodName, versionForMavenCentralSync)
+        String[] tasks = ["clean", "build", "bintrayUpload"]
+        def exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks,
+            versionForMavenCentralSync)
 
         then:
         // Gradle build finished successfully:

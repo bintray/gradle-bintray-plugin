@@ -204,7 +204,7 @@ class BintrayUploadTask extends DefaultTask {
         RecordingCopyTask recordingCopyTask = getDependsOn().find { it instanceof RecordingCopyTask }
         fileUploads = (recordingCopyTask ? recordingCopyTask.fileUploads : []) as Artifact[]
 
-        //Upload the files
+        // Upload the files
         HTTPBuilder http = BintrayHttpClientFactory.create(apiUrl, user, apiKey)
         def repoPath = "${userOrg ?: user}/$repoName"
         def packagePath = "$repoPath/$packageName"
@@ -576,14 +576,21 @@ class BintrayUploadTask extends DefaultTask {
             )
         }.unique();
 
-        //Add pom file per config
+        // Add pom file per config
         Upload installTask = project.tasks.withType(Upload).findByName('install');
         if (!installTask) {
             logger.info "maven plugin was not applied, no pom will be uploaded."
         } else if (!pomArtifact) {
-            artifacts << new Artifact(name: project.name, groupId: project.group, version: project.version,
-                    extension: 'pom', type: 'pom',
-                    file: new File(getProject().convention.plugins['maven'].mavenPomDir, "pom-default.xml"))
+            File pom = new File(getProject().convention.plugins['maven'].mavenPomDir, "pom-default.xml")
+            String artifactId = Utils.readArtifactIdFromPom(pom)
+            artifacts << new Artifact(
+                name: artifactId,
+                groupId: project.group,
+                version: project.version,
+                extension: 'pom',
+                type: 'pom',
+                file: pom
+            )
         }
         artifacts
     }
@@ -598,16 +605,26 @@ class BintrayUploadTask extends DefaultTask {
             boolean signedArtifact = (it instanceof org.gradle.plugins.signing.Signature)
             def signedExtenstion = signedArtifact ? it.toSignArtifact.getExtension() : null
             new Artifact(
-                    name: identity.artifactId, groupId: identity.groupId, version: identity.version,
-                    extension: it.extension, type: it.extension, classifier: it.classifier, file: it.file,
-                    signedExtenstion: signedExtenstion
+                name: identity.artifactId,
+                groupId: identity.groupId,
+                version: identity.version,
+                extension: it.extension,
+                type: it.extension,
+                classifier: it.classifier,
+                file: it.file,
+                signedExtenstion: signedExtenstion
             )
         }
 
-        //Add the pom
+        // Add the pom file
         artifacts << new Artifact(
-                name: identity.artifactId, groupId: identity.groupId, version: identity.version,
-                extension: 'pom', type: 'pom', file: publication.asNormalisedPublication().pomFile)
+            name: identity.artifactId,
+            groupId: identity.groupId,
+            version: identity.version,
+            extension: 'pom',
+            type: 'pom',
+            file: publication.asNormalisedPublication().pomFile
+        )
         artifacts
     }
 

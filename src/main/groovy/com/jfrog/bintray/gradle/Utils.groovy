@@ -1,5 +1,8 @@
 package com.jfrog.bintray.gradle
 
+import org.apache.maven.model.Model
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader
+import org.apache.maven.project.MavenProject
 import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -24,5 +27,13 @@ class Utils {
 
         DateFormat dateToStringFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy")
         return isoFormat.format(dateToStringFormat.parse(dateString))
+    }
+
+    public static String readArtifactIdFromPom(File pom) {
+        FileReader reader = new FileReader(pom);
+        MavenXpp3Reader mavenreader = new MavenXpp3Reader();
+        Model model = mavenreader.read(reader);
+        MavenProject project = new MavenProject(model);
+        return project.getArtifactId();
     }
 }

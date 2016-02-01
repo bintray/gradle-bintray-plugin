@@ -34,23 +34,24 @@ class PluginSpecUtils {
         new File(resource.toURI())
     }
 
-    def static GradleLauncher createGradleLauncher(String projectName) {
+    def static GradleLauncher createGradleLauncher(String projectName, String[] tasks) {
         File projectFile = getGradleProjectFile(projectName)
         GradleLauncher launcher = new GradleLauncher(
-                getGradleCommandPath(), projectFile.getCanonicalPath())
-                .addTask("clean")
-                .addTask("build")
-                .addTask("bintrayUpload")
-                .addEnvVar("bintrayApiUrl", config.url)
-                .addEnvVar("bintrayUser", config.bintrayUser)
-                .addEnvVar("bintrayKey", config.bintrayKey)
-                .addEnvVar("repoName", config.repo)
-                .addEnvVar("pkgName", config.pkgName)
-                .addEnvVar("pkgDesc", config.pkgDesc)
-                .addEnvVar("mavenCentralUser", config.mavenCentralUser)
-                .addEnvVar("mavenCentralPassword", config.mavenCentralPassword)
-                .addSwitch("info")
-                .addSwitch("stacktrace")
+            getGradleCommandPath(), projectFile.getCanonicalPath())
+            .addEnvVar("bintrayApiUrl", config.url)
+            .addEnvVar("bintrayUser", config.bintrayUser)
+            .addEnvVar("bintrayKey", config.bintrayKey)
+            .addEnvVar("repoName", config.repo)
+            .addEnvVar("pkgName", config.pkgName)
+            .addEnvVar("pkgDesc", config.pkgDesc)
+            .addEnvVar("mavenCentralUser", config.mavenCentralUser)
+            .addEnvVar("mavenCentralPassword", config.mavenCentralPassword)
+            .addSwitch("info")
+            .addSwitch("stacktrace")
+
+        for (String task : tasks) {
+            launcher.addTask(task)
+        }
 
         config.pkgLabels.eachWithIndex { label, index ->
             launcher.addEnvVar("label${index+1}", label)
@@ -61,12 +62,13 @@ class PluginSpecUtils {
         launcher
     }
 
-    def static launchGradle(String testMethodName, String version = null) {
+    def static launchGradle(String testMethodName, String[] tasks, String version = null) {
         String[] projectAndMethod = extractFromTestMethodName(testMethodName)
         String projectName = projectAndMethod[0]
         String testFileName = projectAndMethod[1].replaceAll(" ", "_")
 
-        GradleLauncher launcher = createGradleLauncher(projectName).addEnvVar("testName", testFileName)
+        GradleLauncher launcher = createGradleLauncher(projectName, tasks)
+            .addEnvVar("testName", testFileName)
         if (version) {
             launcher.addEnvVar("versionName", version)
         }
