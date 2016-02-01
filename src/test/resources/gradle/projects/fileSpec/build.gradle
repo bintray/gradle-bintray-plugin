@@ -5,7 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6-SNAPSHOT"
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7-SNAPSHOT"
     }
 }
 
