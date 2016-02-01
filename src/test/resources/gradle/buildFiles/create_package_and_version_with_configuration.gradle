@@ -1,0 +1,24 @@
+def pkgLabels = [label1, label2, label3]
+
+bintray {
+    apiUrl = bintrayApiUrl
+    user = bintrayUser
+    key = bintrayKey
+    configurations = ['archives']
+    publish = true
+    pkg {
+        repo = repoName
+        name = pkgName
+        desc =  pkgDesc
+        labels = pkgLabels
+        licenses = ['Apache-2.0']
+        websiteUrl = 'https://github.com/bintray/gradle-bintray-plugin'
+        issueTrackerUrl = 'https://github.com/bintray/gradle-bintray-plugin/issues'
+        vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
+        githubRepo = 'bintray/gradle-bintray-plugin'
+        githubReleaseNotesFile = 'README.md'
+        version {
+            name = versionName
+        }
+    }
+}
