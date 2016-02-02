@@ -16,7 +16,7 @@ To apply the plugin, please add one of the following snippets to your `build.gra
 ###### Gradle >= 2.1
 ```groovy
 plugins {
-    id "com.jfrog.bintray" version "1.4"
+    id "com.jfrog.bintray" version "1.6"
 }
 ```
 * Currently the "plugins" notation cannot be used for applying the plugin for sub projects, when used from the root build script.
@@ -28,7 +28,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.4'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
     }
 }
 apply plugin: 'com.jfrog.bintray'
@@ -231,6 +231,10 @@ bintray {
         labels = ['gear', 'gore', 'gorilla']
         publicDownloadNumbers = true
         attributes= ['a': ['ay1', 'ay2'], 'b': ['bee'], c: 'cee'] //Optional package-level attributes
+
+        githubRepo = 'bintray/gradle-bintray-plugin' //Optional Github repository
+        githubReleaseNotesFile = 'README.md' //Optional Github readme file
+                
         //Optional version descriptor
         version {
             name = '1.3-Final' //Bintray logical version name
