@@ -156,7 +156,6 @@ class BintrayUploadTask extends DefaultTask {
     Artifact[] publicationUploads
     Artifact[] fileUploads
 
-    boolean subtaskSkipPublish
     Properties releaseProps
 
     {
@@ -491,9 +490,8 @@ class BintrayUploadTask extends DefaultTask {
             throw new IllegalStateException(
                 "Attempted checking and creating version, before checking and creating the package.")
         }
-        boolean shouldPublish = publish && !subtaskSkipPublish
         Version version = new Version(
-            versionName, signVersion, gpgPassphrase, shouldPublish, shouldSyncToMavenCentral())
+            versionName, signVersion, gpgPassphrase, publish, shouldSyncToMavenCentral())
         Version v = pkg.addVersionIfAbsent(version)
         if (v) {
             if (!v.created) {

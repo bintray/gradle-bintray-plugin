@@ -103,13 +103,11 @@ class BintrayPlugin implements Plugin<Project> {
                             }
                         }
                     }
-                    //Depend on tasks in sub-projects
+                    // Depend on tasks in sub-projects
                     project.subprojects.each {
                         Task subTask = it.tasks.findByName(BintrayUploadTask.NAME)
                         if (subTask) {
                             bintrayUpload.dependsOn(subTask)
-                            //When depending on child task, publish only from the root
-                            subTask.subtaskSkipPublish = true
                         }
                     }
                     if (extension.filesSpec) {
