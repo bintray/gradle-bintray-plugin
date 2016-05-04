@@ -23,6 +23,8 @@ class BintrayExtension {
 
     boolean publish
 
+    boolean override
+
     boolean dryRun
 
     BintrayExtension(Project project) {

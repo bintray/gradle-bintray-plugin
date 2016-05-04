@@ -18,7 +18,7 @@ class GradleBintrayPluginSpec extends Specification {
     @Shared
     private def config = TestsConfig.getInstance().config
     @Shared
-    private versionForMavenCentralSync = null
+    private savedVersion = null
 
     def setupSpec() {
         assert config
@@ -37,11 +37,11 @@ class GradleBintrayPluginSpec extends Specification {
     }
 
     def cleanupSpec() {
-        if (versionForMavenCentralSync) {
+        if (savedVersion) {
             if (bintray.currentSubject().repository(config.repo)
-                    .pkg(config.pkgName).version(versionForMavenCentralSync).exists()) {
+                    .pkg(config.pkgName).version(savedVersion).exists()) {
                 bintray.currentSubject().repository(config.repo)
-                        .pkg(config.pkgName).version(versionForMavenCentralSync).delete()
+                        .pkg(config.pkgName).version(savedVersion).delete()
             }
         }
 
@@ -116,7 +116,7 @@ class GradleBintrayPluginSpec extends Specification {
     def "[publication]create package and version with publication"() {
         when:
         String version = PluginSpecUtils.createVersion()
-        versionForMavenCentralSync = version
+        savedVersion = version
         String[] tasks = ["clean", "build", "bintrayUpload"]
         def exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks, version)
 
@@ -143,6 +143,36 @@ class GradleBintrayPluginSpec extends Specification {
         pkg.labels().sort() == config.pkgLabels.sort()
     }
 
+    def "[publication]override"() {
+        setup:
+        String[] tasks = ["clean", "build", "bintrayUpload"]
+
+        when:
+        def exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks,
+            savedVersion)
+
+        then:
+        // Gradle build fails, because override is blocked by default:
+        exitCode != 0
+
+        when:
+        exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks,
+            savedVersion, false)
+
+        then:
+        // Gradle build still fails, because we set override to false:
+        exitCode != 0
+
+        when:
+        exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks,
+                savedVersion, true)
+
+        then:
+        // Gradle build finished successfully:
+        exitCode == 0
+    }
+
+    /* This test is disabled for now
     def "[publication]maven central sync"() {
         when:
         println("Waiting 60 seconds before linking the package to jcenter...")
@@ -150,10 +180,11 @@ class GradleBintrayPluginSpec extends Specification {
         PluginSpecUtils.linkPackageToJCenter()
         String[] tasks = ["clean", "build", "bintrayUpload"]
         def exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks,
-            versionForMavenCentralSync)
+            savedVersion)
 
         then:
         // Gradle build finished successfully:
         exitCode == 0
     }
+    */
 }

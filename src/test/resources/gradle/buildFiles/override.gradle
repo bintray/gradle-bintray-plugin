@@ -1,0 +1,22 @@
+bintray {
+    apiUrl = bintrayApiUrl
+    user = bintrayUser
+    key = bintrayKey
+    publications = ['mavenJava']
+    publish = true
+
+    def shouldOverride = project.property("shouldOverride")
+    if (shouldOverride) {
+        override = shouldOverride
+    }
+
+    pkg {
+        repo = repoName
+        name = pkgName
+        desc =  pkgDesc
+        licenses = ['Apache-2.0']
+        version {
+            name = versionName
+        }
+    }
+}

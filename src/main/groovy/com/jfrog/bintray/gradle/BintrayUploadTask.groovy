@@ -56,6 +56,9 @@ class BintrayUploadTask extends DefaultTask {
     boolean publish
 
     @Input
+    boolean override
+
+    @Input
     boolean dryRun
 
     @Input
@@ -346,6 +349,10 @@ class BintrayUploadTask extends DefaultTask {
         def uploadArtifact = { artifact ->
             def versionPath = packagePath + '/' + versionName ?: artifact.version
             def uploadUri = "/content/$versionPath/${artifact.path}"
+            if (override) {
+                uploadUri += "?override=1"
+            }
+
             if (!artifact.file.exists()) {
                 logger.error("Skipping upload for missing file '$artifact.file'.")
                 return

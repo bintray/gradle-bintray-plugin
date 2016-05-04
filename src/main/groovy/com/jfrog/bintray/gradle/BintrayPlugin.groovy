@@ -36,6 +36,7 @@ class BintrayPlugin implements Plugin<Project> {
                         publications = extension.publications
                         filesSpec = extension.filesSpec
                         publish = extension.publish
+                        override = extension.override
                         dryRun = extension.dryRun
                         userOrg = extension.pkg.userOrg ?: extension.user
                         repoName = extension.pkg.repo

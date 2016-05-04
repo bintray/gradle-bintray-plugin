@@ -62,7 +62,9 @@ class PluginSpecUtils {
         launcher
     }
 
-    def static launchGradle(String testMethodName, String[] tasks, String version = null) {
+    def static launchGradle(String testMethodName, String[] tasks,
+        String version = null, Boolean override = null) {
+
         String[] projectAndMethod = extractFromTestMethodName(testMethodName)
         String projectName = projectAndMethod[0]
         String testFileName = projectAndMethod[1].replaceAll(" ", "_")
@@ -71,6 +73,9 @@ class PluginSpecUtils {
             .addEnvVar("testName", testFileName)
         if (version) {
             launcher.addEnvVar("versionName", version)
+        }
+        if (override) {
+            launcher.addEnvVar("shouldOverride", override.toString())
         }
         launcher.launch()
     }
