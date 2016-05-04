@@ -25,7 +25,7 @@ class Utils {
         } catch (ParseException e) {
         }
 
-        DateFormat dateToStringFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy")
+        DateFormat dateToStringFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH)
         return isoFormat.format(dateToStringFormat.parse(dateString))
     }
 
