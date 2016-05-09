@@ -75,7 +75,7 @@ class PluginSpecUtils {
             launcher.addEnvVar("versionName", version)
         }
         if (override) {
-            launcher.addEnvVar("shouldOverride", override.toString())
+            launcher.addEnvVar("override", override.toString())
         }
         launcher.launch()
     }

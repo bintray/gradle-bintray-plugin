@@ -234,8 +234,8 @@ class BintrayUploadTask extends DefaultTask {
         def checkAndCreatePackage = {
             // Check if the package has already been created by another BintrayUploadTask.
             Package pkg = checkPackageAlreadyCreated()
-            if (!pkg) {
-                return
+            if (pkg && pkg.isCreated()) {
+                return;
             }
             def create
             http.request(HEAD) {
@@ -252,30 +252,30 @@ class BintrayUploadTask extends DefaultTask {
             if (create) {
                 if (dryRun) {
                     logger.info("(Dry run) Created pakage '$packagePath'.")
-                    return
-                }
-                http.request(POST, JSON) {
-                    addHeaders(headers)
-                    uri.path = "/packages/$repoPath"
-                    body = [name: packageName, desc: packageDesc,
-                            licenses: packageLicenses,
-                            labels: packageLabels,
-                            website_url: packageWebsiteUrl,
-                            issue_tracker_url: packageIssueTrackerUrl,
-                            vcs_url: packageVcsUrl,
-                            public_download_numbers: packagePublicDownloadNumbers,
-                            github_repo: packageGithubRepo,
-                            github_release_notes_file: packageGithubReleaseNotesFile]
+                } else {
+                    http.request(POST, JSON) {
+                        addHeaders(headers)
+                        uri.path = "/packages/$repoPath"
+                        body = [name: packageName, desc: packageDesc,
+                                licenses: packageLicenses,
+                                labels: packageLabels,
+                                website_url: packageWebsiteUrl,
+                                issue_tracker_url: packageIssueTrackerUrl,
+                                vcs_url: packageVcsUrl,
+                                public_download_numbers: packagePublicDownloadNumbers,
+                                github_repo: packageGithubRepo,
+                                github_release_notes_file: packageGithubReleaseNotesFile]
 
-                    response.success = { resp ->
-                        logger.info("Created package '$packagePath'.")
+                        response.success = { resp ->
+                            logger.info("Created package '$packagePath'.")
+                        }
+                        response.failure = { resp, reader ->
+                            throw new GradleException("Could not create package '$packagePath': $resp.statusLine $reader")
+                        }
                     }
-                    response.failure = { resp, reader ->
-                        throw new GradleException("Could not create package '$packagePath': $resp.statusLine $reader")
+                    if (packageAttributes) {
+                        setAttributes "/packages/$packagePath/attributes", packageAttributes, 'package', packageName
                     }
-                }
-                if (packageAttributes) {
-                    setAttributes "/packages/$packagePath/attributes", packageAttributes, 'package', packageName
                 }
             }
             setPackageAsCreated(pkg)
@@ -284,7 +284,7 @@ class BintrayUploadTask extends DefaultTask {
         def checkAndCreateVersion = {
             // Check if the version has already been created by another BintrayUploadTask.
             Version version = checkVersionAlreadyCreated()
-            if (!version) {
+            if (version && version.isCreated()) {
                 return;
             }
             def create
@@ -302,23 +302,23 @@ class BintrayUploadTask extends DefaultTask {
             if (create) {
                 if (dryRun) {
                     logger.info("(Dry run) Created version '$packagePath/$versionName'.")
-                    return
-                }
-                http.request(POST, JSON) {
-                    addHeaders(headers)
-                    uri.path = "/packages/$packagePath/versions"
-                    versionReleased = Utils.toIsoDateFormat(versionReleased)
-                    body = [name: versionName, desc: versionDesc, released: versionReleased, vcs_tag: versionVcsTag]
-                    response.success = { resp ->
-                        logger.info("Created version '$versionName'.")
+                } else {
+                    http.request(POST, JSON) {
+                        addHeaders(headers)
+                        uri.path = "/packages/$packagePath/versions"
+                        versionReleased = Utils.toIsoDateFormat(versionReleased)
+                        body = [name: versionName, desc: versionDesc, released: versionReleased, vcs_tag: versionVcsTag]
+                        response.success = { resp ->
+                            logger.info("Created version '$versionName'.")
+                        }
+                        response.failure = { resp, reader ->
+                            throw new GradleException("Could not create version '$versionName': $resp.statusLine $reader")
+                        }
                     }
-                    response.failure = { resp, reader ->
-                        throw new GradleException("Could not create version '$versionName': $resp.statusLine $reader")
+                    if (versionAttributes) {
+                        setAttributes "/packages/$packagePath/versions/$versionName/attributes", versionAttributes,
+                                'version', versionName
                     }
-                }
-                if (versionAttributes) {
-                    setAttributes "/packages/$packagePath/versions/$versionName/attributes", versionAttributes,
-                            'version', versionName
                 }
             }
             setVersionAsCreated(version)
@@ -478,17 +478,14 @@ class BintrayUploadTask extends DefaultTask {
     Package checkPackageAlreadyCreated() {
         Package pkg = new Package(packageName)
         Package p = BintrayUploadTask.packagesCreated.putIfAbsent(packageName, pkg)
-        if (p) {
-            if (!p.created) {
-                synchronized (p) {
-                    if (!p.created) {
-                        p.wait()
-                    }
+        if (p && !p.created) {
+            synchronized (p) {
+                if (!p.created) {
+                    p.wait()
                 }
             }
-            return null
         }
-        return pkg
+        return p ? p : pkg
     }
 
     Version checkVersionAlreadyCreated() {
@@ -497,20 +494,17 @@ class BintrayUploadTask extends DefaultTask {
             throw new IllegalStateException(
                 "Attempted checking and creating version, before checking and creating the package.")
         }
-        Version version = new Version(
+        Version v = new Version(
             versionName, signVersion, gpgPassphrase, publish, shouldSyncToMavenCentral())
-        Version v = pkg.addVersionIfAbsent(version)
-        if (v) {
-            if (!v.created) {
-                synchronized (v) {
-                    if (!v.created) {
-                        v.wait()
-                    }
+        Version version = pkg.addVersionIfAbsent(v)
+        if (version && !version.created) {
+            synchronized (version) {
+                if (!version.created) {
+                    version.wait()
                 }
             }
-            return null
         }
-        return version
+        return version ? version : v
     }
 
     void setPackageAsCreated(Package pkg) {
@@ -706,6 +700,20 @@ class BintrayUploadTask extends DefaultTask {
                 this.mavenCentralSync = this.mavenCentralSync || version.mavenCentralSync
                 this.gpgPassphrase = gpgPassphrase ?: this.gpgPassphrase
             }
+        }
+
+        boolean equals(o) {
+            if (this.is(o)) {
+                return true
+            }
+            if (getClass() != o.class || name != version.name) {
+                return false
+            }
+            return true
+        }
+
+        int hashCode() {
+            name != null ? name.hashCode() : 0
         }
     }
 }

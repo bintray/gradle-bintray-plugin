@@ -165,7 +165,7 @@ class GradleBintrayPluginSpec extends Specification {
 
         when:
         exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks,
-                savedVersion, true)
+            savedVersion, true)
 
         then:
         // Gradle build finished successfully:

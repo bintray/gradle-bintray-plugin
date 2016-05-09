@@ -5,9 +5,8 @@ bintray {
     publications = ['mavenJava']
     publish = true
 
-    def shouldOverride = project.property("shouldOverride")
-    if (shouldOverride) {
-        override = shouldOverride
+    if (project.hasProperty("override")) {
+        override = project.property("override")
     }
 
     pkg {
