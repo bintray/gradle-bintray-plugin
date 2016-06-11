@@ -65,8 +65,8 @@ Mandatory parameters:
 
 1. repo - existing repository in bintray to add the artifacts to (for example: 'generic', 'maven' etc)
 2. name - package name
-3. licenses - your package licenses (mandatory if the package doesn't exist yet and must be created; optional otherwise)
-4. vcsUrl - your VCS URL (mandatory if the package doesn't exist yet and must be created; optional otherwise)
+3. licenses - your package licenses (mandatory if the package doesn't exist yet and must be created, and if the package is an OSS package; optional otherwise)
+4. vcsUrl - your VCS URL (mandatory if the package doesn't exist yet and must be created, and if the package is an OSS package; optional otherwise)
 
 Optional parameters:
 
@@ -211,9 +211,11 @@ The plugin allows using Bintray supports for files GPG signing. To have your Ver
 
 # Maven Central Sync
 The plugin allows using Bintray's interface with Maven Central. You can have the artifacts of a Version sent to Maven Central, by adding the adding the *mavenCentralSync* closure inside the *version* closure, as shown in the below *Plugin DSL* section.
+If that closure is omitted, the version will not be sent to Maven central.
+
 In order for this functionality to be enabled, you first must verify the following:
 * The Version belongs to a Repository whose type is Maven and the Version belongs to a Package that is [included in JCenter](https://bintray.com/docs/usermanual/uploads/uploads_includingyourpackagesinacentralrepository.html).
-* Your package must comply with the requirement of Maven Central (click [here](http://central.sonatype.org/pages/requirements.html) for more information).
+* Your package must comply with the requirement of Maven Central (click [here](http://central.sonatype.org/pages/requirements.html) for more information). In particular, files must be signed to be sent to Maven Central. So GPG file signing should also be enabled (see above) if Maven Central sync is enabled.
 
 # Plugin DSL
 The Gradle Bintray plugin can be configured using its own Convention DSL inside the build.gradle script of your root project.
@@ -268,8 +270,8 @@ bintray {
             //Optional configuration for Maven Central sync of the version
             mavenCentralSync {
                 sync = true //Optional (true by default). Determines whether to sync the version to Maven Central.
-                user = 'userToken' //OSS user token
-                password = 'paasword' //OSS user password
+                user = 'userToken' //OSS user token: mandatory
+                password = 'paasword' //OSS user password: mandatory
                 close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
             }            
         }
