@@ -199,11 +199,11 @@ bintray {
 
 # Creating Repositories, Packages and Versions
 ## General
-*  When uploading files to Bintray, you need to specify the Repository, Package and Version to which files are uploaded. The plugin checks whether the specified Package already exists in the specified Repository and if it does not, it will create it. The same is done for the specified version, so you don't need to worry about having your builds deploy your artifacts into new Packages and Versions. The plugin however expects the Repository to exist already and it will not try to create if it does not exist. 
-* The plugin uses the specified Package and Version details, for example the Package VCS URL, only for creating the Package and Version. It will not attempt to update those properties if the Package or Version already exist.
+*  When uploading files to Bintray, you need to specify the Repository, Package and Version to which files are uploaded. The plugin checks whether the specified Package already exists in the specified Repository. If the specified Package does not exist, the plugin will create it. The same is done for the specified version, so you don't need to worry about having your builds deploy your artifacts into new Packages and Versions. The plugin, however, expects the Repository to exist already and the plugin will not try to create the Repository if it does not exist. 
+* The plugin uses the specified Package and Version details, for example, the Package VCS URL, only for creating the Package and Version. The plugin will not attempt to update those properties if the Package or Version already exist.
 
 ## Mandatory properties
-* For the *pkg* closure, If the package already exists, the only mandatiry property is *name*. If the package does not exist, the *licenses* and *vcsUrl properties are manadatory for OSS packages.
+* For the *pkg* closure, if the package already exists, the only mandatiry property is *name*. If the package does not exist, the *licenses* and *vcsUrl properties are manadatory for OSS packages.
 * For the *version* closure, the only mandatiry property is *name*.
 
 # GPF File Signing
@@ -212,7 +212,7 @@ The plugin allows using Bintray supports for files GPG signing. To have your Ver
 # Maven Central Sync
 The plugin allows using Bintray's interface with Maven Central. You can have the artifacts of a Version sent to Maven Central, by adding the adding the *mavenCentralSync* closure inside the *version* closure, as shown in the below *Plugin DSL* section.
 In order for this functionality to be enabled, you first must verify the following:
-* The Version belongs to a Repository whose type is Maven and that it belongs to a Package that is [included in JCenter](https://bintray.com/docs/usermanual/uploads/uploads_includingyourpackagesinacentralrepository.html).
+* The Version belongs to a Repository whose type is Maven and the Version belongs to a Package that is [included in JCenter](https://bintray.com/docs/usermanual/uploads/uploads_includingyourpackagesinacentralrepository.html).
 * Your package must comply with the requirement of Maven Central (click [here](http://central.sonatype.org/pages/requirements.html) for more information).
 
 # Plugin DSL
