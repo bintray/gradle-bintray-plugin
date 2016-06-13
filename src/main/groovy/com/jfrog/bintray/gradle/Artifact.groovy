@@ -14,7 +14,7 @@ class Artifact {
     def getPath() {
         path ?: (groupId?.replaceAll('\\.', '/') ?: "") + "/$name/$version/$name-$version" +
                 (classifier ? "-$classifier" : "") +
-                (signedExtension ? "-$signedExtension" : "") +
+                (signedExtension ? ".$signedExtension" : "") +
                 (extension ? ".$extension" : "")
     }
 
