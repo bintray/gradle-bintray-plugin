@@ -28,7 +28,7 @@ class BintrayUploadTask extends DefaultTask {
     static final String API_URL_DEFAULT = 'https://api.bintray.com'
 
     List<BintrayUploadTask> bintrayUploadTasks = null
-    private static ConcurrentHashMap<String, Package> packagesCreated = new ConcurrentHashMap<>()
+    private static ConcurrentHashMap<String, Repository> repositories = new ConcurrentHashMap<>()
 
     @Input
     @Optional
@@ -208,8 +208,8 @@ class BintrayUploadTask extends DefaultTask {
 
         // Upload the files
         HTTPBuilder http = BintrayHttpClientFactory.create(apiUrl, user, apiKey)
-        def repoPath = "${userOrg ?: user}/$repoName"
-        def packagePath = "$repoPath/$packageName"
+        def subject = "${userOrg ?: user}"
+        def packagePath = "$subject/$repoName/$packageName"
 
         def setAttributes = { attributesPath, attributes, entity, entityName ->
             http.request(POST, JSON) {
@@ -255,7 +255,7 @@ class BintrayUploadTask extends DefaultTask {
                 } else {
                     http.request(POST, JSON) {
                         addHeaders(headers)
-                        uri.path = "/packages/$repoPath"
+                        uri.path = "/packages/$subject/$repoName"
                         body = [name: packageName, desc: packageDesc,
                                 licenses: packageLicenses,
                                 labels: packageLabels,
@@ -324,8 +324,8 @@ class BintrayUploadTask extends DefaultTask {
             setVersionAsCreated(version)
         }
 
-        def gpgSignVersion = { pkg, version ->
-            def pkgPath = "$repoPath/$pkg.name"
+        def gpgSignVersion = { repo, pkg, version ->
+            def pkgPath = "$subject/$repo.name/$pkg.name"
             def versionName = version.name
             if (dryRun) {
                 logger.info("(Dry run) Signed version '$pkgPath/$versionName'.")
@@ -384,8 +384,8 @@ class BintrayUploadTask extends DefaultTask {
             }
         }
 
-        def publishVersion = { pkg, version ->
-            def pkgPath = "$repoPath/$pkg.name"
+        def publishVersion = { repo, pkg, version ->
+            def pkgPath = "$subject/$repo.name/$pkg.name"
             def versionName = version.name
             def publishUri = "/content/$pkgPath/$versionName/publish"
             if (dryRun) {
@@ -404,8 +404,8 @@ class BintrayUploadTask extends DefaultTask {
             }
         }
 
-        def mavenCentralSync = { pkg, version ->
-            def pkgPath = "$repoPath/$pkg.name"
+        def mavenCentralSync = { repo, pkg, version ->
+            def pkgPath = "$subject/$repo.name/$pkg.name"
             def versionName = version.name
             if (dryRun) {
                 logger.info("(Dry run) Sync to Maven Central performed for '$pkgPath/$versionName'.")
@@ -428,18 +428,21 @@ class BintrayUploadTask extends DefaultTask {
         }
 
         def signPublishAndSync = {
-            Collection<Package> packages = BintrayUploadTask.packagesCreated.values()
-            for (Package p : packages) {
-                Collection<Version> versions = p.versions.values()
-                for (Version v : versions) {
-                    if (v.gpgSign) {
-                        gpgSignVersion(p, v)
-                    }
-                    if (v.publish) {
-                        publishVersion(p, v)
-                    }
-                    if (v.mavenCentralSync) {
-                        mavenCentralSync(p, v)
+            Collection<Repository> repositories = BintrayUploadTask.repositories.values()
+            for (Repository r : repositories) {
+                Collection<Package> packages = r.packages.values()
+                for (Package p : packages) {
+                    Collection<Version> versions = p.versions.values()
+                    for (Version v : versions) {
+                        if (v.gpgSign) {
+                            gpgSignVersion(r, p, v)
+                        }
+                        if (v.publish) {
+                            publishVersion(r, p, v)
+                        }
+                        if (v.mavenCentralSync) {
+                            mavenCentralSync(r, p, v)
+                        }
                     }
                 }
             }
@@ -477,7 +480,7 @@ class BintrayUploadTask extends DefaultTask {
 
     Package checkPackageAlreadyCreated() {
         Package pkg = new Package(packageName)
-        Package p = BintrayUploadTask.packagesCreated.putIfAbsent(packageName, pkg)
+        Package p = getRepository().packages.putIfAbsent(packageName, pkg)
         if (p && !p.created) {
             synchronized (p) {
                 if (!p.created) {
@@ -489,7 +492,7 @@ class BintrayUploadTask extends DefaultTask {
     }
 
     Version checkVersionAlreadyCreated() {
-        Package pkg = BintrayUploadTask.packagesCreated.get(packageName)
+        Package pkg = getRepository().packages.get(packageName)
         if (!pkg) {
             throw new IllegalStateException(
                 "Attempted checking and creating version, before checking and creating the package.")
@@ -627,6 +630,38 @@ class BintrayUploadTask extends DefaultTask {
         artifacts
     }
 
+    private Repository getRepository() {
+        Repository repository = new Repository(repoName)
+        Repository r = BintrayUploadTask.repositories.putIfAbsent(repoName, repository)
+        if (!r) {
+            return repository
+        }
+        return r
+    }
+
+    class Repository {
+        private String name
+        private ConcurrentHashMap<String, Package> packages = new ConcurrentHashMap<String, Package>()
+
+        Repository(String name) {
+            this.name = name
+        }
+
+        boolean equals(o) {
+            if (this.is(o)) {
+                return true
+            }
+            if (getClass() != o.class || name != ((Repository)o).name) {
+                return false
+            }
+            return true
+        }
+
+        int hashCode() {
+            name != null ? name.hashCode() : 0
+        }
+    }
+
     class Package {
         private String name
         private boolean created
@@ -650,6 +685,20 @@ class BintrayUploadTask extends DefaultTask {
                 v.merge(version)
             }
             return v
+        }
+
+        boolean equals(o) {
+            if (this.is(o)) {
+                return true
+            }
+            if (getClass() != o.class || name != ((Package)o).name) {
+                return false
+            }
+            return true
+        }
+
+        int hashCode() {
+            name != null ? name.hashCode() : 0
         }
     }
 
@@ -706,7 +755,7 @@ class BintrayUploadTask extends DefaultTask {
             if (this.is(o)) {
                 return true
             }
-            if (getClass() != o.class || name != version.name) {
+            if (getClass() != o.class || name != ((Version)o).name) {
                 return false
             }
             return true
