@@ -236,8 +236,9 @@ bintray {
         into 'standalone_files/level1'
         rename '(.+)\\.(.+)', '$1-suffix.$2'
     }
-    dryRun = false //Whether to run this as dry-run, without deploying
-    publish = true //If version should be auto published after an upload
+    dryRun = false //[Default: false] Whether to run this as dry-run, without deploying
+    publish = true //[Default: false] Whether version should be auto published after an upload    
+    override = false //[Default: false] Whether to override version artifacts already published    
     //Package configuration. The plugin will use the repo and name properties to check if the package already exists. In that case, there's no need to configure the other package properties (like userOrg, desc, etc).
     pkg {
         repo = 'myrepo'
@@ -269,7 +270,7 @@ bintray {
             }
             //Optional configuration for Maven Central sync of the version
             mavenCentralSync {
-                sync = true //Optional (true by default). Determines whether to sync the version to Maven Central.
+                sync = true //[Default: true] Determines whether to sync the version to Maven Central.
                 user = 'userToken' //OSS user token: mandatory
                 password = 'paasword' //OSS user password: mandatory
                 close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
