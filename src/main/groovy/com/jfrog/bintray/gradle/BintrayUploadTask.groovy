@@ -349,9 +349,6 @@ class BintrayUploadTask extends DefaultTask {
         def uploadArtifact = { artifact ->
             def versionPath = packagePath + '/' + versionName ?: artifact.version
             def uploadUri = "/content/$versionPath/${artifact.path}"
-            if (override) {
-                uploadUri += "?override=1"
-            }
 
             if (!artifact.file.exists()) {
                 logger.error("Skipping upload for missing file '$artifact.file'.")
@@ -367,6 +364,9 @@ class BintrayUploadTask extends DefaultTask {
                     return
                 }
                 http.request(PUT) {
+                    if (override) {
+                        uri.query = [override: "1"]
+                    }
                     addHeaders(headers)
                     // Set the requestContentType to BINARY, so that HTTPBuilder can encode the uploaded file:
                     requestContentType = BINARY
