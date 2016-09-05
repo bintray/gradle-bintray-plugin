@@ -35,9 +35,11 @@ class BintrayUploadTask extends DefaultTask {
     String apiUrl
 
     @Input
+    @Optional
     String user
 
     @Input
+    @Optional
     String apiKey
 
     @Input
@@ -66,9 +68,11 @@ class BintrayUploadTask extends DefaultTask {
     String userOrg
 
     @Input
+    @Optional
     String repoName
 
     @Input
+    @Optional
     String packageName
 
     @Input
@@ -169,6 +173,10 @@ class BintrayUploadTask extends DefaultTask {
     @TaskAction
     void bintrayUpload() {
         logger.info("Gradle Bintray Plugin version: $pluginVersion");
+        if (shouldSkip()) {
+            logger.info("Skipping task {}", this.project.name);
+            return
+        }
 
         //TODO: [by yl] replace with findResults for Gradle 2.x
         configurationUploads = configurations.collect {
@@ -465,6 +473,10 @@ class BintrayUploadTask extends DefaultTask {
         }
     }
 
+    boolean shouldSkip() {
+        return (user == null || apiKey == null)
+    }
+
     String getPluginVersion() {
         if (!releaseProps) {
             Properties tempProps = new Properties()
@@ -550,7 +562,9 @@ class BintrayUploadTask extends DefaultTask {
             List<BintrayUploadTask> tasks = new ArrayList<BintrayUploadTask>()
             for (Task task : getProject().getGradle().getTaskGraph().getAllTasks()) {
                 if (task instanceof BintrayUploadTask) {
-                    tasks.add(task);
+                    if (!task.shouldSkip()) {
+                        tasks.add(task);
+                    }
                 }
             }
             bintrayUploadTasks = tasks
