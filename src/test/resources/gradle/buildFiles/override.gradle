@@ -13,6 +13,7 @@ bintray {
         repo = repoName
         name = pkgName
         desc =  pkgDesc
+        vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
         licenses = ['Apache-2.0']
         version {
             name = versionName

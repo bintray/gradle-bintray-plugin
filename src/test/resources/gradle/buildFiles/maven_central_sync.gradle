@@ -5,6 +5,7 @@ bintray {
     pkg {
         repo = repoName
         name = pkgName
+        vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
         version {
             name = versionName
             mavenCentralSync {

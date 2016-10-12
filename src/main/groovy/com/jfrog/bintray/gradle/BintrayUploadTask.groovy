@@ -28,7 +28,7 @@ class BintrayUploadTask extends DefaultTask {
     static final String API_URL_DEFAULT = 'https://api.bintray.com'
 
     List<BintrayUploadTask> bintrayUploadTasks = null
-    private static ConcurrentHashMap<String, Repository> repositories = new ConcurrentHashMap<>()
+    private ConcurrentHashMap<String, Repository> repositories = new ConcurrentHashMap<>()
 
     @Input
     @Optional
@@ -436,7 +436,7 @@ class BintrayUploadTask extends DefaultTask {
         }
 
         def signPublishAndSync = {
-            Collection<Repository> repositories = BintrayUploadTask.repositories.values()
+            Collection<Repository> repositories = getCachedRepositories().values()
             for (Repository r : repositories) {
                 Collection<Package> packages = r.packages.values()
                 for (Package p : packages) {
@@ -644,9 +644,28 @@ class BintrayUploadTask extends DefaultTask {
         artifacts
     }
 
+    public ConcurrentHashMap<String, Repository> getCachedRepositories() {
+        BintrayUploadTask t = ((BintrayUploadTask)project.rootProject.tasks.findByName(NAME))
+        if (t == null) {
+            project.rootProject.getPluginManager().apply(BintrayPlugin.class)
+        }
+        t = ((BintrayUploadTask)project.rootProject.tasks.findByName(NAME))
+        if (t == null) {
+            throw new RuntimeException("Could not find $NAME task in root project")
+        }
+        t.getRepositories()
+    }
+
+    public ConcurrentHashMap<String, Repository> getRepositories() {
+        if (this.project != this.project.rootProject) {
+            throw new IllegalStateException("The getRepositories method can be invoked on the root project$NAME task only")
+        }
+        return repositories
+    }
+
     private Repository getRepository() {
         Repository repository = new Repository(repoName)
-        Repository r = BintrayUploadTask.repositories.putIfAbsent(repoName, repository)
+        Repository r = getCachedRepositories().putIfAbsent(repoName, repository)
         if (!r) {
             return repository
         }
