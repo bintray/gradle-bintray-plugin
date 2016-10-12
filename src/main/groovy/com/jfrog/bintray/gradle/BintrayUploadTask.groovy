@@ -648,8 +648,8 @@ class BintrayUploadTask extends DefaultTask {
         BintrayUploadTask t = ((BintrayUploadTask)project.rootProject.tasks.findByName(NAME))
         if (t == null) {
             project.rootProject.getPluginManager().apply(BintrayPlugin.class)
+            t = ((BintrayUploadTask)project.rootProject.tasks.findByName(NAME))
         }
-        t = ((BintrayUploadTask)project.rootProject.tasks.findByName(NAME))
         if (t == null) {
             throw new RuntimeException("Could not find $NAME task in root project")
         }
