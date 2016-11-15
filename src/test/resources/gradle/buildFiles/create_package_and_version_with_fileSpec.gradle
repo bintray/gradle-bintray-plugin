@@ -12,6 +12,7 @@ bintray {
     pkg {
         repo = repoName
         name = pkgName
+        userOrg = bintrayOrg
         desc =  pkgDesc
         labels = pkgLabels
         licenses = ['Apache-2.0']

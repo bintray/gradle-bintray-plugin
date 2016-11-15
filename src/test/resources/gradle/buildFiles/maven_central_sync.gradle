@@ -5,6 +5,7 @@ bintray {
     pkg {
         repo = repoName
         name = pkgName
+        userOrg = bintrayOrg
         vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
         version {
             name = versionName

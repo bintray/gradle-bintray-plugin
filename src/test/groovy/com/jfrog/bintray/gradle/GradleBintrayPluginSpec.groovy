@@ -38,19 +38,19 @@ class GradleBintrayPluginSpec extends Specification {
 
     def cleanupSpec() {
         if (savedVersion) {
-            if (bintray.currentSubject().repository(config.repo)
+            if (bintray.subject(config.bintrayOrg).repository(config.repo)
                     .pkg(config.pkgName).version(savedVersion).exists()) {
-                bintray.currentSubject().repository(config.repo)
+                bintray.subject(config.bintrayOrg).repository(config.repo)
                         .pkg(config.pkgName).version(savedVersion).delete()
             }
         }
 
-        boolean pkgExists = bintray.currentSubject().repository(config.repo)
+        boolean pkgExists = bintray.subject(config.bintrayOrg).repository(config.repo)
                 .pkg(config.pkgName).exists()
 
         if (pkgExists) {
             // Delete the package:
-            bintray.currentSubject().repository(config.repo)
+            bintray.subject(config.bintrayOrg).repository(config.repo)
                     .pkg(config.pkgName).delete()
         }
     }
@@ -66,16 +66,16 @@ class GradleBintrayPluginSpec extends Specification {
         exitCode == 0
 
         // Package was created:
-        bintray.currentSubject().repository(config.repo)
+        bintray.subject(config.bintrayOrg).repository(config.repo)
                 .pkg(config.pkgName).exists()
 
         // Version was created:
-        bintray.currentSubject().repository(config.repo)
+        bintray.subject(config.bintrayOrg).repository(config.repo)
                 .pkg(config.pkgName).version(version).exists()
 
         when:
         // Get the created package:
-        Pkg pkg = bintray.currentSubject().repository(config.repo)
+        Pkg pkg = bintray.subject(config.bintrayOrg).repository(config.repo)
                 .pkg(config.pkgName).get()
 
         then:
@@ -95,16 +95,16 @@ class GradleBintrayPluginSpec extends Specification {
         exitCode == 0
 
         // Package was created:
-        bintray.currentSubject().repository(config.repo)
+        bintray.subject(config.bintrayOrg).repository(config.repo)
                 .pkg(config.pkgName).exists()
 
         // Version was created:
-        bintray.currentSubject().repository(config.repo)
+        bintray.subject(config.bintrayOrg).repository(config.repo)
                 .pkg(config.pkgName).version(version).exists()
 
         when:
         // Get the created package:
-        Pkg pkg = bintray.currentSubject().repository(config.repo)
+        Pkg pkg = bintray.subject(config.bintrayOrg).repository(config.repo)
                 .pkg(config.pkgName).get()
 
         then:
@@ -125,16 +125,16 @@ class GradleBintrayPluginSpec extends Specification {
         exitCode == 0
 
         // Package was created:
-        bintray.currentSubject().repository(config.repo)
+        bintray.subject(config.bintrayOrg).repository(config.repo)
                 .pkg(config.pkgName).exists()
 
         // Version was created:
-        bintray.currentSubject().repository(config.repo)
+        bintray.subject(config.bintrayOrg).repository(config.repo)
                 .pkg(config.pkgName).version(version).exists()
 
         when:
         // Get the created package:
-        Pkg pkg = bintray.currentSubject().repository(config.repo)
+        Pkg pkg = bintray.subject(config.bintrayOrg).repository(config.repo)
                 .pkg(config.pkgName).get()
 
         then:

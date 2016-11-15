@@ -16,59 +16,13 @@ class TestsConfig {
     private TestsConfig() {
         config = new ConfigSlurper().parse(this.class.getResource('/gradle/config.groovy')).conf
 
-        def bintrayUser = getenv('BINTRAY_USER')
-        if (!bintrayUser) {
-            bintrayUser = System.getProperty('bintrayUser')
-        }
-        if (!bintrayUser) {
-            throwMissingConfProp('Bintray user name', 'BINTRAY_USER', 'bintrayUser')
-        }
-        config.bintrayUser = bintrayUser
-
-        def bintrayKey = getenv('BINTRAY_KEY')
-        if (!bintrayKey) {
-            bintrayKey = System.getProperty('bintrayKey')
-        }
-        if (!bintrayKey) {
-            throwMissingConfProp('Bintray API key', 'BINTRAY_KEY', 'bintrayKey')
-        }
-        config.bintrayKey = bintrayKey
-
-        def bintrayAdminUser = getenv('BINTRAY_ADMIN_USER')
-        if (!bintrayAdminUser) {
-            bintrayAdminUser = System.getProperty('bintrayAdminUser')
-        }
-        if (!bintrayAdminUser) {
-            throwMissingConfProp('Bintray admin user name (used for linking the package to JCenter)', 'BINTRAY_ADMIN_USER', 'bintrayAdminUser')
-        }
-        config.bintrayAdminUser = bintrayAdminUser
-
-        def bintrayAdminKey = getenv('BINTRAY_ADMIN_KEY')
-        if (!bintrayAdminKey) {
-            bintrayAdminKey = System.getProperty('bintrayAdminKey')
-        }
-        if (!bintrayAdminKey) {
-            throwMissingConfProp('Bintray admin API key (used for linking the package to JCenter)', 'BINTRAY_ADMIN_KEY', 'bintrayAdminKey')
-        }
-        config.bintrayAdminKey = bintrayAdminKey
-
-        def mavenCentralUser = getenv('MAVEN_CENTRAL_USER')
-        if (!mavenCentralUser) {
-            mavenCentralUser = System.getProperty('mavenCentralUser')
-        }
-        if (!mavenCentralUser) {
-            throwMissingConfProp('Maven Central user', 'MAVEN_CENTRAL_USER', 'mavenCentralUser')
-        }
-        config.mavenCentralUser = mavenCentralUser
-
-        def mavenCentralPassword = getenv('MAVEN_CENTRAL_PASSWORD')
-        if (!mavenCentralPassword) {
-            mavenCentralPassword = System.getProperty('mavenCentralPassword')
-        }
-        if (!mavenCentralPassword) {
-            throwMissingConfProp('Maven Central password', 'MAVEN_CENTRAL_PASSWORD', 'mavenCentralPassword')
-        }
-        config.mavenCentralPassword = mavenCentralPassword
+        config.bintrayUser = readValue('Bintray user name', 'BINTRAY_USER', 'bintrayUser')
+        config.bintrayKey = readValue('Bintray API key', 'BINTRAY_KEY', 'bintrayKey')
+        config.bintrayOrg = readValue('Bintray organization', 'BINTRAY_ORG', 'bintrayOrg')
+        config.bintrayAdminUser = readValue('Bintray admin user name (used for linking the package to JCenter)', 'BINTRAY_ADMIN_USER', 'bintrayAdminUser')
+        config.bintrayAdminKey = readValue('Bintray admin API key (used for linking the package to JCenter)', 'BINTRAY_ADMIN_KEY', 'bintrayAdminKey')
+        config.mavenCentralUser = readValue('Maven Central user', 'MAVEN_CENTRAL_USER', 'mavenCentralUser')
+        config.mavenCentralPassword = readValue('Maven Central password', 'MAVEN_CENTRAL_PASSWORD', 'mavenCentralPassword')
 
         def bintrayApiUrl = getenv('BINTRAY_API_URL')
         if (!bintrayApiUrl) {
@@ -90,6 +44,17 @@ class TestsConfig {
         if (config.pkgLabels == [:]) {
             config.pkgLabels = ['a','b','c']
         }
+    }
+
+    private String readValue(String displayName, String envVarName, String sysPropName) {
+        String value = getenv(envVarName)
+        if (!value) {
+            value = System.getProperty(sysPropName)
+        }
+        if (!value) {
+            throwMissingConfProp(displayName, envVarName, sysPropName)
+        }
+        value
     }
 
     private throwMissingConfProp(String name, String envVarName, String sysPropName) {

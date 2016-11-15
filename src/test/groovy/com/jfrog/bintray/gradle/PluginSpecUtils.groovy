@@ -41,6 +41,7 @@ class PluginSpecUtils {
             .addEnvVar("bintrayApiUrl", config.url)
             .addEnvVar("bintrayUser", config.bintrayUser)
             .addEnvVar("bintrayKey", config.bintrayKey)
+            .addEnvVar("bintrayOrg", config.bintrayOrg)
             .addEnvVar("repoName", config.repo)
             .addEnvVar("pkgName", config.pkgName)
             .addEnvVar("pkgDesc", config.pkgDesc)
