@@ -140,6 +140,32 @@ publishing {
 }
 ```
 
+Note that you should add `artifact sourcesJar` in order to be able to sync with JCenter.
+If you want to sent to Maven Central, then add also `javadocJar` and `pom`:
+```groovy
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            groupId 'org.jfrog.gradle.sample'
+            artifactId 'gradle-project'
+            version '1.1'
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'Your description of the lib')
+                root.appendNode('name', 'Your name of the lib')
+                root.appendNode('url', 'https://site_for_lib.tld')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+```
+See [build.gradle](https://github.com/bintray/gradle-bintray-plugin/blob/master/build.gradle) of this project for example of `sourcesJar`/`javadocJar` tasks and `pomConfig`; 
+also check that your pomConfig contains all information [required by Maven Central](http://central.sonatype.org/pages/requirements.html). 
+
 This Publication should be referenced from the bintray closure as follows:
 
 ```groovy
@@ -215,7 +241,9 @@ If that closure is omitted, the version will not be sent to Maven central.
 
 In order for this functionality to be enabled, you first must verify the following:
 * The Version belongs to a Repository whose type is Maven and the Version belongs to a Package that is [included in JCenter](https://bintray.com/docs/usermanual/uploads/uploads_includingyourpackagesinacentralrepository.html).
-* Your package must comply with the requirement of Maven Central (click [here](http://central.sonatype.org/pages/requirements.html) for more information). In particular, files must be signed to be sent to Maven Central. So GPG file signing should also be enabled (see above) if Maven Central sync is enabled.
+* Your package must comply with the requirement of Maven Central (click [here](http://central.sonatype.org/pages/requirements.html) for more information). 
+In particular, `sourcesJar`, `javadocsJar` and valid `pom.xml` must be included (see above); 
+also files must be signed to be sent to Maven Central, so GPG file signing should be enabled (see above) if Maven Central sync is enabled.
 
 # Plugin DSL
 The Gradle Bintray plugin can be configured using its own Convention DSL inside the build.gradle script of your root project.
