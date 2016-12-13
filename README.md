@@ -155,9 +155,9 @@ def pomConfig = {
     }
     developers {
         developer {
-            id "yoav"
-            name "Yoav Landman"
-            email "yoavl@jfrog.com"
+            id "developer-id"
+            name "developer-name"
+            email "dev@d.com"
         }
     }
 }
