@@ -139,10 +139,30 @@ publishing {
     }
 }
 ```
+Here's another publication example, which adds sourcesJar, javadocJar and configures the generated pom.xml.
+You need the sourcesJar in case you'd like your package to be linked to JCenter.
+In case you'd also like Bintray to sync your package to Maven Central, you'll need sourcesJar, javadocJar and the generated pom.xml must comply with [Maven Cenral's requirements](http://central.sonatype.org/pages/requirements.html).
 
-Note that you should add `artifact sourcesJar` in order to be able to sync with JCenter.
-If you want to sent to Maven Central, then add also `javadocJar` and `pom`:
 ```groovy
+// Create the pom configuration:
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            id "yoav"
+            name "Yoav Landman"
+            email "yoavl@jfrog.com"
+        }
+    }
+}
+
+// Create the publication with the pom configuration:
 publishing {
     publications {
         MyPublication(MavenPublication) {
@@ -163,10 +183,8 @@ publishing {
     }
 }
 ```
-See [build.gradle](https://github.com/bintray/gradle-bintray-plugin/blob/master/build.gradle) of this project for example of `sourcesJar`/`javadocJar` tasks and `pomConfig`; 
-also check that your pomConfig contains all information [required by Maven Central](http://central.sonatype.org/pages/requirements.html). 
 
-This Publication should be referenced from the bintray closure as follows:
+The Publication should be referenced from the bintray closure as follows:
 
 ```groovy
 bintray {
