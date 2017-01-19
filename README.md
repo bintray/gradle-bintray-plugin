@@ -141,7 +141,7 @@ publishing {
 ```
 Here's another publication example, which adds sourcesJar, javadocJar and configures the generated pom.xml.
 You need the sourcesJar in case you'd like your package to be linked to JCenter.
-In case you'd also like Bintray to sync your package to Maven Central, you'll need sourcesJar, javadocJar and the generated pom.xml must comply with [Maven Cenral's requirements](http://central.sonatype.org/pages/requirements.html).
+In case you'd also like Bintray to sync your package to Maven Central, you'll need sourcesJar, javadocJar and the generated pom.xml must comply with [Maven Central's requirements](http://central.sonatype.org/pages/requirements.html).
 
 ```groovy
 // Create the pom configuration:
