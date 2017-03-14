@@ -35,6 +35,10 @@ apply plugin: 'com.jfrog.bintray'
 ```
 * If you have a multi project build make sure to apply the plugin and the plugin configuration to every project which its artifacts you wish to publish to bintray.
 
+* It is recommened to use Gradle >= 3.4 and add line `apply plugin: 'java-library'` (even if you use Scala) in order to get correct scopes for your dependencies; 
+otherwise transitive dependencies of your published JARs may be not included, see [this issue](https://github.com/gradle/gradle/issues/1118) for more details.
+If you can't use Gradle >= 3.4, you may find useful [this workaround](https://gist.github.com/bugs84/b7887fb5d7f9f2d484b8). 
+
 #### Step 3: Add the `bintray` configuration closure to your `build.gradle` file
 
 Add the below "bintray" closure with your bintray user name and key.
