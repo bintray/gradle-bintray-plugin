@@ -124,7 +124,7 @@ The plugin supports three methods to create groups of artifacts: Configurations,
 
 * Maven Publications should be added to the Gradle script, outside of the bintray closure. They should however be referenced from inside the bintray closure.
 * Applying the *maven-publish* plugin is required when using Maven Publications.
-* To avoid [this](https://github.com/gradle/gradle/issues/1118) issue in the *maven-publish* plugin, make sure to apply the *java-library* plugin to your build script. Applying the plugin resolves the issue for Gradle version 3.4 and above. The above issue also includes a workaround for older Gradle versions.
+* To avoid [this](https://github.com/gradle/gradle/issues/1118) issue, which can cause transitive dependencies of your published artifacts not to be included, make sure to apply the *java-library* plugin to your build script. Applying the plugin resolves the issue for Gradle version 3.4 and above. For Gradle versions below 3.4, you can use [this](https://gist.github.com/bugs84/b7887fb5d7f9f2d484b8) workaround. 
 * Ivy Publications are not supported.
 
 Below you can find an example for Maven Publication that can be added to your Gradle script:
