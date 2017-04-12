@@ -174,7 +174,7 @@ class BintrayUploadTask extends DefaultTask {
     void bintrayUpload() {
         logger.info("Gradle Bintray Plugin version: $pluginVersion");
         if (shouldSkip()) {
-            logger.info("Skipping task {}, user or apiKey is null.", this.project.name);
+            logger.info("Skipping task '{}:bintrayUpload' because user or apiKey is null.", this.project.name);
             return
         }
 
