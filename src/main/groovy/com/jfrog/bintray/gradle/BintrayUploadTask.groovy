@@ -552,7 +552,8 @@ class BintrayUploadTask extends DefaultTask {
         List<BintrayUploadTask> tasks = allBintrayUploadTasks
         int currentTaskIndex = tasks.indexOf(this);
         if (currentTaskIndex == -1) {
-            throw new Exception("Could not find the current task {} in the task graph", getPath());
+            String path = getPath()
+            throw new Exception("Could not find the current task \"$path\" in the task graph");
         }
         currentTaskIndex
     }
