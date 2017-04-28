@@ -2,6 +2,7 @@ package com.jfrog.bintray.gradle
 
 import groovy.json.JsonBuilder
 import groovyx.net.http.HTTPBuilder
+import org.apache.http.impl.client.AutoRetryHttpClient
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Task
@@ -400,6 +401,10 @@ class BintrayUploadTask extends DefaultTask {
                 logger.info("(Dry run) Published version '$pkgPath/$versionName'.")
                 return
             }
+
+            // If there are a lot of big artifacts, synchronous publishing can time out. Retrying that is perfectly fine.
+            http.client = new AutoRetryHttpClient(http.client, new CustomizableServiceUnavailableRetryStrategy(408, 10, 0))
+
             http.request(POST, JSON) {
                 addHeaders(headers)
                 uri.path = publishUri
