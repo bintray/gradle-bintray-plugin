@@ -164,7 +164,7 @@ def pomConfig = {
     }
     
     scm {
-       url https://github.com/yourgithubaccount/example
+       url "https://github.com/yourgithubaccount/example"
     }
 }
 
