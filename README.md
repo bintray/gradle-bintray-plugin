@@ -162,6 +162,10 @@ def pomConfig = {
             email "dev@d.com"
         }
     }
+    
+    scm {
+       url https://github.com/yourgithubaccount/example
+    }
 }
 
 // Create the publication with the pom configuration:
