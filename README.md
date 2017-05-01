@@ -118,7 +118,7 @@ pkg {
 
 #### Step 6: Define artifacts to be uploaded to Bintray
 
-The plugin supports three methods to create groups of artifacts: Configurations, Publications and Copying specific files using filesSpec. One of the methods should be used to group artifacts to be uploaded to Bintray.
+The plugin supports three methods to create groups of artifacts: Configurations, Publications and Copying specific files using filesSpec.  One of the methods should be used to group artifacts to be uploaded to Bintray.  Using the Configurations approach is the easiest, since this option attempts to infer what artifacts to upload based on the Gradle project and dependencies that are defined.  Publications gives more fine-grained control, especially when needing to publish metadata for publishing to Maven Central.  Copying specific files can be used as a last option, which provides the ability to define custom rules using the Gradle's [CopySpec](https://docs.gradle.org/current/javadoc/org/gradle/api/file/CopySpec.html) task.  In general, the first two options should be sufficient for your needs.
 
 ##### [Maven Publications](https://docs.gradle.org/current/dsl/org.gradle.api.publish.maven.MavenPublication.html)
 
