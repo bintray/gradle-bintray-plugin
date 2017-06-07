@@ -479,7 +479,7 @@ class BintrayUploadTask extends DefaultTask {
             errors.add("key is not configured")
         }
         if(!errors.isEmpty()) {
-            def message = "Failing task '${this.project.name}:bintrayUpload' because ${errors.join(" and ")}"
+            def message = "Failing task '${path}:bintrayUpload' because ${errors.join(" and ")}"
             throw new GradleException(message)
         }
     }

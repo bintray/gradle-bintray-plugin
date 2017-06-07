@@ -19,7 +19,7 @@ class BintrayUploadTaskTest extends Specification {
 
         then:
         def ex = thrown(GradleException)
-        ex.message == "Failing task 'test:bintrayUpload' because user is not configured"
+        ex.message == "Failing task ':bintrayUploadTask:bintrayUpload' because user is not configured"
     }
 
     def "should throw an exception when api key is not configured"() {
@@ -32,7 +32,7 @@ class BintrayUploadTaskTest extends Specification {
 
         then:
         def ex = thrown(GradleException)
-        ex.message == "Failing task 'test:bintrayUpload' because key is not configured"
+        ex.message == "Failing task ':bintrayUploadTask:bintrayUpload' because key is not configured"
     }
 
     def "should throw an exception when user and api key is not configured"() {
@@ -45,6 +45,6 @@ class BintrayUploadTaskTest extends Specification {
 
         then:
         def ex = thrown(GradleException)
-        ex.message == "Failing task 'test:bintrayUpload' because user is not configured and key is not configured"
+        ex.message == "Failing task ':bintrayUploadTask:bintrayUpload' because user is not configured and key is not configured"
     }
 }
