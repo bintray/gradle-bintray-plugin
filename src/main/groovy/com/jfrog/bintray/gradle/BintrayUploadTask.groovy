@@ -173,10 +173,7 @@ class BintrayUploadTask extends DefaultTask {
     @TaskAction
     void bintrayUpload() {
         logger.info("Gradle Bintray Plugin version: $pluginVersion");
-        if (shouldSkip()) {
-            logger.info("Skipping task '{}:bintrayUpload' because user or apiKey is null.", this.project.name);
-            return
-        }
+        assertUploadConfiguration()
 
         //TODO: [by yl] replace with findResults for Gradle 2.x
         configurationUploads = configurations.collect {
@@ -470,6 +467,20 @@ class BintrayUploadTask extends DefaultTask {
         }
         if (lastTask) {
             signPublishAndSync()
+        }
+    }
+
+    def assertUploadConfiguration() {
+        def errors = []
+        if(user == null) {
+            errors.add("user is not configured")
+        }
+        if(apiKey == null) {
+            errors.add("key is not configured")
+        }
+        if(!errors.isEmpty()) {
+            def message = "Failing task '${path}:bintrayUpload' because ${errors.join(" and ")}"
+            throw new GradleException(message)
         }
     }
 
