@@ -1,17 +1,23 @@
 def pkgLabels = [label1, label2, label3]
+def debianDir = new File(projectDir.getParentFile().getParentFile().getParentFile(), 'debian').getCanonicalPath()
 
 bintray {
     apiUrl = bintrayApiUrl
     user = bintrayUser
     key = bintrayKey
     filesSpec {
-        from 'build/libs'
-        into "standalone_files/v$versionName"
+        from debianDir
+        into '.'
     }
     publish = true
     pkg {
-        repo = mavenRepoName
+        repo = debianRepoName
         name = pkgName
+        debian {
+            distribution = 'squeeze'
+            component = 'main'
+            architecture = 'i386,noarch,amd64'
+        }
         userOrg = bintrayOrg
         desc =  pkgDesc
         labels = pkgLabels

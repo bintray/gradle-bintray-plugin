@@ -1,9 +1,5 @@
 package com.jfrog.bintray.gradle
 
-import com.beust.jcommander.internal.Maps
-import com.google.common.collect.Lists
-import com.google.common.collect.Sets
-
 /**
  * Created by Eyal BM on 19/11/2014.
  */
@@ -12,10 +8,10 @@ class GradleLauncher {
     private def gradleProjectFilePath
     private def cmd
 
-    private List<String> tasks = Lists.newArrayList()
-    private Set<String> switches = Sets.newHashSet()
-    private Map<String, Object> envVars = Maps.newHashMap()
-    private Map<String, Object> systemProps = Maps.newHashMap()
+    private List<String> tasks = new ArrayList<String>()
+    private Set<String> switches = new HashSet<String>()
+    private Map<String, Object> envVars = new HashMap<String, Object>()
+    private Map<String, Object> systemProps = new HashMap<String, Object>()
 
     GradleLauncher(gradleCommandPath, gradleProjectFilePath) {
         this.gradleCommandPath = gradleCommandPath

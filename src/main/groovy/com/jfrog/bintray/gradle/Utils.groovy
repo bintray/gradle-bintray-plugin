@@ -8,6 +8,16 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 
 class Utils {
+    public static void addHeaders(Map<?,?> headers) {
+        headers.put("User-Agent","gradle-bintray-plugin/${new Utils().pluginVersion}")
+    }
+
+    public String getPluginVersion() {
+        Properties props = new Properties()
+        props.load(getClass().classLoader.getResource("bintray.plugin.release.properties").openStream())
+        props.get('version')
+    }
+
     /**
      * The method converts a date string in the format of java.util.date toString() into a string in the following format:
      * yyyy-MM-dd'T'HH:mm:ss.SSSZZ

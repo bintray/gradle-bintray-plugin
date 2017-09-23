@@ -58,10 +58,20 @@ class BintrayExtension {
         Map attributes
 
         VersionConfig version = new VersionConfig()
-
         def version(Closure closure) {
             ConfigureUtil.configure(closure, version)
         }
+
+        DebianConfig debian = new DebianConfig()
+        def debian(Closure closure) {
+            ConfigureUtil.configure(closure, debian)
+        }
+    }
+
+    class DebianConfig {
+        String distribution
+        String component
+        String architecture
     }
 
     class VersionConfig {
@@ -72,13 +82,11 @@ class BintrayExtension {
         Map attributes
 
         GpgConfig gpg = new GpgConfig()
-
         def gpg(Closure closure) {
             ConfigureUtil.configure(closure, gpg)
         }
 
         MavenCentralSyncConfig mavenCentralSync = new MavenCentralSyncConfig()
-
         def mavenCentralSync(Closure closure) {
             ConfigureUtil.configure(closure, mavenCentralSync)
         }

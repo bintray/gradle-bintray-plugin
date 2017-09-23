@@ -30,10 +30,13 @@ class TestsConfig {
         }
 
         if (config.url == [:]) {
-            config.url = bintrayApiUrl ?: "https://api.bintray.net"
+            config.url = bintrayApiUrl ?: "https://api.bintray.com"
         }
-        if (config.repo == [:]) {
-            config.repo = "maven"
+        if (config.mavenRepo == [:]) {
+            config.mavenRepo = "maven"
+        }
+        if (config.debianRepo == [:]) {
+            config.debianRepo = "debian"
         }
         if (config.pkgName == [:]) {
             config.pkgName = "gradle.tests.pkg.name5"

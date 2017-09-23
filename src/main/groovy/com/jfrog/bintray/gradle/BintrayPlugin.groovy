@@ -51,6 +51,9 @@ class BintrayPlugin implements Plugin<Project> {
                         packageLabels = extension.pkg.labels
                         packageAttributes = extension.pkg.attributes
                         packagePublicDownloadNumbers = extension.pkg.publicDownloadNumbers
+                        debianDistribution = extension.pkg.debian.distribution
+                        debianComponent = extension.pkg.debian.component
+                        debianArchitecture = extension.pkg.debian.architecture
                         versionName = extension.pkg.version.name ?: project.version
                         versionDesc = extension.pkg.version.desc
                         versionReleased = extension.pkg.version.released

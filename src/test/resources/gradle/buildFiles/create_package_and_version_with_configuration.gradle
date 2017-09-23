@@ -7,7 +7,7 @@ bintray {
     configurations = ['archives']
     publish = true
     pkg {
-        repo = repoName
+        repo = mavenRepoName
         name = pkgName
         userOrg = bintrayOrg
         desc =  pkgDesc

@@ -3,7 +3,7 @@ bintray {
     user = bintrayUser
     key = bintrayKey
     pkg {
-        repo = repoName
+        repo = mavenRepoName
         name = pkgName
         userOrg = bintrayOrg
         vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'

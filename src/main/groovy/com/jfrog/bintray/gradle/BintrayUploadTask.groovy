@@ -117,6 +117,18 @@ class BintrayUploadTask extends DefaultTask {
 
     @Input
     @Optional
+    String debianDistribution
+
+    @Input
+    @Optional
+    String debianComponent
+
+    @Input
+    @Optional
+    String debianArchitecture
+
+    @Input
+    @Optional
     String versionName
 
     @Input
@@ -163,8 +175,6 @@ class BintrayUploadTask extends DefaultTask {
     Artifact[] publicationUploads
     Artifact[] fileUploads
 
-    Properties releaseProps
-
     {
         group = GROUP
         description = DESCRIPTION
@@ -172,11 +182,12 @@ class BintrayUploadTask extends DefaultTask {
 
     @TaskAction
     void bintrayUpload() {
-        logger.info("Gradle Bintray Plugin version: $pluginVersion");
+        logger.info("Gradle Bintray Plugin version: ${new Utils().pluginVersion}");
         if (shouldSkip()) {
             logger.info("Skipping task '{}:bintrayUpload' because user or apiKey is null.", this.project.name);
             return
         }
+        validateDebianDefinition()
 
         //TODO: [by yl] replace with findResults for Gradle 2.x
         configurationUploads = configurations.collect {
@@ -221,7 +232,7 @@ class BintrayUploadTask extends DefaultTask {
 
         def setAttributes = { attributesPath, attributes, entity, entityName ->
             http.request(POST, JSON) {
-                addHeaders(headers)
+                Utils.addHeaders(headers)
                 uri.path = attributesPath
                 def builder = new JsonBuilder()
                 builder.content = attributes.collect {
@@ -247,7 +258,7 @@ class BintrayUploadTask extends DefaultTask {
             }
             def create
             http.request(HEAD) {
-                addHeaders(headers)
+                Utils.addHeaders(headers)
                 uri.path = "/packages/$packagePath"
                 response.success = { resp ->
                     logger.debug("Package '$packageName' exists.")
@@ -262,7 +273,7 @@ class BintrayUploadTask extends DefaultTask {
                     logger.info("(Dry run) Created package '$packagePath'.")
                 } else {
                     http.request(POST, JSON) {
-                        addHeaders(headers)
+                       Utils.addHeaders(headers)
                         uri.path = "/packages/$subject/$repoName"
                         body = [name: packageName, desc: packageDesc,
                                 licenses: packageLicenses,
@@ -297,7 +308,7 @@ class BintrayUploadTask extends DefaultTask {
             }
             def create
             http.request(HEAD) {
-                addHeaders(headers)
+                Utils.addHeaders(headers)
                 uri.path = "/packages/$packagePath/versions/$versionName"
                 response.success = { resp ->
                     logger.debug("Version '$packagePath/$versionName' exists.")
@@ -312,7 +323,7 @@ class BintrayUploadTask extends DefaultTask {
                     logger.info("(Dry run) Created version '$packagePath/$versionName'.")
                 } else {
                     http.request(POST, JSON) {
-                        addHeaders(headers)
+                        Utils.addHeaders(headers)
                         uri.path = "/packages/$packagePath/versions"
                         versionReleased = Utils.toIsoDateFormat(versionReleased)
                         body = [name: versionName, desc: versionDesc, released: versionReleased, vcs_tag: versionVcsTag]
@@ -340,7 +351,7 @@ class BintrayUploadTask extends DefaultTask {
                 return
             }
             http.request(POST, JSON) {
-                addHeaders(headers)
+                Utils.addHeaders(headers)
                 uri.path = "/gpg/$pkgPath/versions/$versionName"
                 if (version.gpgPassphrase) {
                     body = [passphrase: gpgPassphrase]
@@ -375,7 +386,7 @@ class BintrayUploadTask extends DefaultTask {
                     if (override) {
                         uri.query = [override: "1"]
                     }
-                    addHeaders(headers)
+                    addUploadHeaders(headers)
                     // Set the requestContentType to BINARY, so that HTTPBuilder can encode the uploaded file:
                     requestContentType = BINARY
                     // Set the Content-Type to '*/*' to enable Bintray to set it on its own:
@@ -401,7 +412,7 @@ class BintrayUploadTask extends DefaultTask {
                 return
             }
             http.request(POST, JSON) {
-                addHeaders(headers)
+                Utils.addHeaders(headers)
                 uri.path = publishUri
                 response.success = { resp ->
                     logger.info("Published '$pkgPath/$versionName'.")
@@ -420,7 +431,7 @@ class BintrayUploadTask extends DefaultTask {
                 return
             }
             http.request(POST, JSON) {
-                addHeaders(headers)
+                Utils.addHeaders(headers)
                 uri.path = "/maven_central_sync/$pkgPath/versions/$versionName"
                 body = [username: ossUser, password: ossPassword]
                 if (ossCloseRepo != null) {
@@ -473,21 +484,25 @@ class BintrayUploadTask extends DefaultTask {
         }
     }
 
+    void validateDebianDefinition() {
+        if ((debianDistribution && !debianArchitecture) ||
+                (!debianDistribution && debianArchitecture)) {
+            throw new GradleException("Both 'distribution' and 'architecture' are mandatory in the gradle.debian closure.")
+        }
+    }
+
     boolean shouldSkip() {
         return (user == null || apiKey == null)
     }
 
-    String getPluginVersion() {
-        if (!releaseProps) {
-            Properties tempProps = new Properties()
-            tempProps.load(getClass().classLoader.getResource("bintray.plugin.release.properties").openStream())
-            releaseProps = tempProps
+    void addUploadHeaders(Map<?,?> headers) {
+        Utils.addHeaders(headers)
+        if (debianDistribution) {
+            String component = debianComponent ? debianComponent : "main"
+            headers.put("X-Bintray-Debian-Distribution", debianDistribution)
+            headers.put("X-Bintray-Debian-Component", component)
+            headers.put("X-Bintray-Debian-Architecture", debianArchitecture)
         }
-        releaseProps.get('version')
-    }
-
-    void addHeaders(Map<?,?> headers) {
-        headers.put("User-Agent","gradle-bintray-plugin/$pluginVersion")
     }
 
     Package checkPackageAlreadyCreated() {

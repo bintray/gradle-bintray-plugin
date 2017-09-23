@@ -154,8 +154,10 @@ bintray {
     }
 }
 
-task install(dependsOn: 'publishMavenJavaPublicationToMavenLocal') << {
-    logger.info "Installing $project.name"
+task install(dependsOn: 'publishMavenJavaPublicationToMavenLocal') {
+    doLast {
+        logger.info "Installing $project.name"
+    }
 }
 
 task wrapper(type: Wrapper, description: 'Gradle Wrapper task') {

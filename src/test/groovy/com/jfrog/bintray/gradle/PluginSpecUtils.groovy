@@ -42,7 +42,8 @@ class PluginSpecUtils {
             .addEnvVar("bintrayUser", config.bintrayUser)
             .addEnvVar("bintrayKey", config.bintrayKey)
             .addEnvVar("bintrayOrg", config.bintrayOrg)
-            .addEnvVar("repoName", config.repo)
+            .addEnvVar("mavenRepoName", config.mavenRepo)
+            .addEnvVar("debianRepoName", config.debianRepo)
             .addEnvVar("pkgName", config.pkgName)
             .addEnvVar("pkgDesc", config.pkgDesc)
             .addEnvVar("mavenCentralUser", config.mavenCentralUser)
@@ -64,7 +65,7 @@ class PluginSpecUtils {
     }
 
     def static launchGradle(String testMethodName, String[] tasks,
-        String version = null, Boolean override = null) {
+        String version, Boolean override = null) {
 
         String[] projectAndMethod = extractFromTestMethodName(testMethodName)
         String projectName = projectAndMethod[0]
@@ -72,9 +73,8 @@ class PluginSpecUtils {
 
         GradleLauncher launcher = createGradleLauncher(projectName, tasks)
             .addEnvVar("testName", testFileName)
-        if (version) {
-            launcher.addEnvVar("versionName", version)
-        }
+            .addEnvVar("versionName", version)
+
         if (override) {
             launcher.addEnvVar("override", override.toString())
         }

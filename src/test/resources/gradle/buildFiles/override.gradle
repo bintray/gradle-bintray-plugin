@@ -10,7 +10,7 @@ bintray {
     }
 
     pkg {
-        repo = repoName
+        repo = mavenRepoName
         name = pkgName
         userOrg = bintrayOrg
         desc =  pkgDesc
