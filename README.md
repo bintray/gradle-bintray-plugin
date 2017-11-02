@@ -58,7 +58,6 @@ bintray {
 }
 ```
 
-
 #### Step 4: Add your Bintray package information to the `bintray` closure
 
 Mandatory parameters:
@@ -86,8 +85,27 @@ bintray {
 }
 ```
 
+#### Step 5: If you're uploading a Debian package, configure its details
+If your Gradle build deploys a Debian package to a Debian repository, you need to specify the Distribution, Component and Architecture for the package.
+You do this by adding the *debian* closure into the *pkg* closure.
 
-#### Step 5: Add version information to the `pkg` closure
+```groovy
+    pkg {
+        repo = 'generic'
+        name = 'gradle-project'
+        userOrg = 'bintray_user'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
+        debian {
+            distribution = 'squeeze'
+            component = 'main'
+            architecture = 'i386,noarch,amd64'
+        }
+    }
+```
+The *component* property is optional and has *main* as its default value.
+
+#### Step 6: Add version information to the `pkg` closure
 
 Mandatory parameters:
 
@@ -116,7 +134,7 @@ pkg {
 ```
 
 
-#### Step 6: Define artifacts to be uploaded to Bintray
+#### Step 7: Define artifacts to be uploaded to Bintray
 
 The plugin supports three methods to create groups of artifacts: Configurations, Publications and Copying specific files using filesSpec.  One of the methods should be used to group artifacts to be uploaded to Bintray.  Using the Configurations approach is the easiest, since this option attempts to infer what artifacts to upload based on the Gradle project and dependencies that are defined.  Publications gives more fine-grained control, especially when needing to publish metadata for publishing to Maven Central.  Copying specific files can be used as a last option, which provides the ability to define custom rules using the Gradle's [CopySpec](https://docs.gradle.org/current/javadoc/org/gradle/api/file/CopySpec.html) task.  In general, the first two options should be sufficient for your needs.
 
@@ -264,7 +282,7 @@ bintray {
 * [Example project](https://github.com/bintray/bintray-examples/tree/master/gradle-bintray-plugin-examples/filesSpec-example) for using filesSpec.
 
 
-#### Step 7: Run the build
+#### Step 8: Run the build
 
 > gradle bintrayUpload
 
@@ -328,7 +346,13 @@ bintray {
 
         githubRepo = 'bintray/gradle-bintray-plugin' //Optional Github repository
         githubReleaseNotesFile = 'README.md' //Optional Github readme file
-                
+
+        //Optional Debian details
+        debian {
+            distribution = 'squeeze'
+            component = 'main'
+            architecture = 'i386,noarch,amd64'
+        }
         //Optional version descriptor
         version {
             name = '1.3-Final' //Bintray logical version name
@@ -377,7 +401,9 @@ bintray {
     key = property('key')
 }
 ```
-
+# Code Contributions
+We welcome code contributions through pull requests.
+Please join our contributors community and help us make this plugin even better!
 
 # License
 This plugin is available under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
