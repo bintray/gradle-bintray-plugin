@@ -210,7 +210,7 @@ publishing {
 
 If you are trying to publish an Android project, specifying the `from components.java` line in the above example is not applicable.  Also, the POM file generated does not include the dependency chain so it must be explicitly added using this [workaround](https://discuss.gradle.org/t/maven-publish-doesnt-include-dependencies-in-the-project-pom-file/8544).
 
-```grovy
+```groovy
 publishing {
     publications {
         MyPublication(MavenPublication) {
@@ -222,6 +222,29 @@ publishing {
                dependencyNode.appendNode('groupId', it.group)
                dependencyNode.appendNode('artifactId', it.name)
                dependencyNode.appendNode('version', it.version)
+            }
+          }
+        }
+    }
+}     
+```
+Note, if you are using the Android Plugin for Gradle 3.0.0 and the [new `implementation` dependency configuration](https://developer.android.com/studio/build/gradle-plugin-3-0-0-migration.html#new_configurations) then you will need the following instead:
+
+```groovy
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+        
+          pom.withXml {
+            // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
+            configurations.implementation.allDependencies.each {
+               // Ensure dependencies such as fileTree are not included.
+               if (it.name != 'unspecified') {
+                  def dependencyNode = dependenciesNode.appendNode('dependency')
+                  dependencyNode.appendNode('groupId', it.group)
+                  dependencyNode.appendNode('artifactId', it.name)
+                  dependencyNode.appendNode('version', it.version)
+               }
             }
           }
         }
