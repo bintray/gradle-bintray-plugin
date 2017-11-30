@@ -401,6 +401,10 @@ bintray {
     key = property('key')
 }
 ```
+
+# Release Notes
+The release notes are available on [Bintray](https://bintray.com/jfrog/jfrog-jars/gradle-bintray-plugin#release).
+
 # Code Contributions
 We welcome code contributions through pull requests.
 Please join our contributors community and help us make this plugin even better!
