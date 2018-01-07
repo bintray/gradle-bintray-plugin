@@ -1,7 +1,7 @@
 package com.jfrog.bintray.gradle
 
-import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.util.ConfigureUtil
 
 class BintrayExtension {
 
@@ -31,13 +31,13 @@ class BintrayExtension {
         this.project = project
     }
 
-    def pkg(Action<? super PackageConfig> action) {
-        action.execute(pkg)
+    def pkg(Closure closure) {
+        ConfigureUtil.configure(closure, pkg)
     }
 
-    def filesSpec(Action<? super RecordingCopyTask> action) {
-        filesSpec = project.tasks.create(RecordingCopyTask.NAME, RecordingCopyTask)
-        action.execute(filesSpec)
+    def filesSpec(Closure closure) {
+        filesSpec = project.task(type: RecordingCopyTask, RecordingCopyTask.NAME)
+        ConfigureUtil.configure(closure, filesSpec)
         filesSpec.outputs.upToDateWhen { false }
     }
 
@@ -58,13 +58,13 @@ class BintrayExtension {
         Map attributes
 
         VersionConfig version = new VersionConfig()
-        def version(Action<? super VersionConfig> action) {
-            action.execute(version)
+        def version(Closure closure) {
+            ConfigureUtil.configure(closure, version)
         }
 
         DebianConfig debian = new DebianConfig()
-        def debian(Action<? super DebianConfig> action) {
-            action.execute(debian)
+        def debian(Closure closure) {
+            ConfigureUtil.configure(closure, debian)
         }
     }
 
@@ -82,13 +82,13 @@ class BintrayExtension {
         Map attributes
 
         GpgConfig gpg = new GpgConfig()
-        def gpg(Action<? super GpgConfig> action) {
-            action.execute(gpg)
+        def gpg(Closure closure) {
+            ConfigureUtil.configure(closure, gpg)
         }
 
         MavenCentralSyncConfig mavenCentralSync = new MavenCentralSyncConfig()
-        def mavenCentralSync(Action<? super MavenCentralSyncConfig> action) {
-            action.execute(mavenCentralSync)
+        def mavenCentralSync(Closure closure) {
+            ConfigureUtil.configure(closure, mavenCentralSync)
         }
     }
 
