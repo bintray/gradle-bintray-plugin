@@ -40,10 +40,10 @@ class Utils {
     }
 
     public static String readArtifactIdFromPom(File pom) {
-        FileReader reader = new FileReader(pom);
-        MavenXpp3Reader mavenreader = new MavenXpp3Reader();
-        Model model = mavenreader.read(reader);
-        MavenProject project = new MavenProject(model);
-        return project.getArtifactId();
+        FileReader reader = new FileReader(pom)
+        MavenXpp3Reader mavenreader = new MavenXpp3Reader()
+        Model model = mavenreader.read(reader)
+        MavenProject project = new MavenProject(model)
+        return project.getArtifactId()
     }
 }

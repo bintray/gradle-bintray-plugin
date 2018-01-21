@@ -40,7 +40,7 @@ class GradleLauncher {
 
     private def tasksToString() {
         StringBuilder sb = new StringBuilder()
-        int c = 0;
+        int c = 0
         for(task in tasks) {
             sb.append(task)
             if (c++ < tasks.size()-1) {
@@ -52,7 +52,7 @@ class GradleLauncher {
 
     private def switchesToString() {
         StringBuilder sb = new StringBuilder()
-        int c = 0;
+        int c = 0
         for(gradleSwitch in switches) {
             gradleSwitch = gradleSwitch.startsWith("--") ? gradleSwitch : "--${gradleSwitch}"
             sb.append(gradleSwitch)
@@ -65,7 +65,7 @@ class GradleLauncher {
 
     private def envVarsToString() {
         StringBuilder sb = new StringBuilder()
-        int c = 0;
+        int c = 0
         for(var in envVars) {
             def key = var.key.startsWith("-P") ? var.key : "-P${var.key}"
             sb.append(key).append("=").append(var.value)
@@ -78,7 +78,7 @@ class GradleLauncher {
 
     private def systemPropsToString() {
         StringBuilder sb = new StringBuilder()
-        int c = 0;
+        int c = 0
         for(var in systemProps) {
             def key = var.key.startsWith("-D") ? var.key : "-D${var.key}"
             sb.append(key).append("=").append(var.value)
