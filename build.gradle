@@ -112,7 +112,7 @@ publishing {
 
 task createReleasePropertiesFile(type:Exec) {
     String fileName = 'bintray.plugin.release.properties'
-    println 'Creating $fileName'
+    println "Creating $fileName"
     String fileContent = "version=$currentVersion"
     (new File("$rootDir/src/main/resources/$fileName")).write(fileContent)
 }
