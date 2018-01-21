@@ -25,7 +25,7 @@ class BintrayHttpClientFactory {
     static HTTPBuilder create(apiUrl, user, apiKey) {
         def assertNotEmpty = { String name, String val ->
             if (val?.isEmpty()) {
-                throw new IllegalArgumentException("Bintray $name cannot be empty!");
+                throw new IllegalArgumentException("Bintray $name cannot be empty!")
             }
         }
         assertNotEmpty('apiUrl', apiUrl)
@@ -80,7 +80,7 @@ class BintrayHttpClientFactory {
 
         if (System.getProperty('http.proxyHost')) {
             String proxyHost = System.getProperty('http.proxyHost')
-            Integer proxyPort = Integer.parseInt(System.getProperty('http.proxyPort', '80'));
+            Integer proxyPort = Integer.parseInt(System.getProperty('http.proxyPort', '80'))
             String proxyUser = System.getProperty('http.proxyUser')
             String proxyPassword = System.getProperty('http.proxyPassword', '')
             logger.info "Using proxy ${proxyUser}:${proxyPassword}@${proxyHost}:${proxyPort}"

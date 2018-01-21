@@ -182,9 +182,9 @@ class BintrayUploadTask extends DefaultTask {
 
     @TaskAction
     void bintrayUpload() {
-        logger.info("Gradle Bintray Plugin version: ${new Utils().pluginVersion}");
+        logger.info("Gradle Bintray Plugin version: ${new Utils().pluginVersion}")
         if (shouldSkip()) {
-            logger.info("Skipping task '{}:bintrayUpload' because user or apiKey is null.", this.project.name);
+            logger.info("Skipping task '{}:bintrayUpload' because user or apiKey is null.", this.project.name)
             return
         }
         validateDebianDefinition()
@@ -212,7 +212,7 @@ class BintrayUploadTask extends DefaultTask {
                 if (publication != null) {
                     return collectArtifacts(publication)
                 } else {
-                    logger.error("{}: Could not find publication: {}.", path, it);
+                    logger.error("{}: Could not find publication: {}.", path, it)
                 }
             } else if (conf instanceof MavenPublication) {
                 return collectArtifacts((Configuration) it)
@@ -254,7 +254,7 @@ class BintrayUploadTask extends DefaultTask {
             // Check if the package has already been created by another BintrayUploadTask.
             Package pkg = checkPackageAlreadyCreated()
             if (pkg && pkg.isCreated()) {
-                return;
+                return
             }
             def create
             http.request(HEAD) {
@@ -304,7 +304,7 @@ class BintrayUploadTask extends DefaultTask {
             // Check if the version has already been created by another BintrayUploadTask.
             Version version = checkVersionAlreadyCreated()
             if (version && version.isCreated()) {
-                return;
+                return
             }
             def create
             http.request(HEAD) {
@@ -565,9 +565,9 @@ class BintrayUploadTask extends DefaultTask {
      */
     int getCurrentTaskIndex() {
         List<BintrayUploadTask> tasks = allBintrayUploadTasks
-        int currentTaskIndex = tasks.indexOf(this);
+        int currentTaskIndex = tasks.indexOf(this)
         if (currentTaskIndex == -1) {
-            throw new Exception("Could not find the current task {} in the task graph", getPath());
+            throw new Exception("Could not find the current task {} in the task graph", getPath())
         }
         currentTaskIndex
     }
@@ -578,7 +578,7 @@ class BintrayUploadTask extends DefaultTask {
             for (Task task : getProject().getGradle().getTaskGraph().getAllTasks()) {
                 if (task instanceof BintrayUploadTask) {
                     if (!task.shouldSkip()) {
-                        tasks.add(task);
+                        tasks.add(task)
                     }
                 }
             }
@@ -605,10 +605,10 @@ class BintrayUploadTask extends DefaultTask {
                     name: it.name, groupId: project.group, version: project.version, extension: it.extension,
                     type: it.type, classifier: it.classifier, file: it.file, signedExtension: signedExtension
             )
-        }.unique();
+        }.unique()
 
         // Add pom file per config
-        Upload installTask = project.tasks.withType(Upload).findByName('install');
+        Upload installTask = project.tasks.withType(Upload).findByName('install')
         if (!installTask) {
             logger.info "maven plugin was not applied, no pom will be uploaded."
         } else if (!pomArtifact) {

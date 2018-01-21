@@ -11,7 +11,7 @@ class BintrayPlugin implements Plugin<Project> {
     private Project project
 
     public void apply(Project project) {
-        this.project = project;
+        this.project = project
 
         //Create and configure the task
         BintrayUploadTask bintrayUpload = project.task(type: BintrayUploadTask, BintrayUploadTask.NAME)
