@@ -101,11 +101,11 @@ class BintrayUploadTask extends DefaultTask {
 
     @Input
     @Optional
-    String[] packageLicenses
+    List<String> packageLicenses
 
     @Input
     @Optional
-    String[] packageLabels
+    List<String> packageLabels
 
     @Input
     @Optional

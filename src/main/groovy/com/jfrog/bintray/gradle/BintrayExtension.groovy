@@ -15,9 +15,9 @@ class BintrayExtension {
 
     PackageConfig pkg = new PackageConfig()
 
-    String[] configurations
+    List<String> configurations = new ArrayList<>()
 
-    String[] publications
+    List<String> publications = new ArrayList<>()
 
     RecordingCopyTask filesSpec
 
@@ -53,9 +53,9 @@ class BintrayExtension {
         String githubRepo
         String githubReleaseNotesFile
         boolean publicDownloadNumbers
-        String[] licenses
-        String[] labels
-        Map attributes
+        List<String> licenses = new ArrayList<>()
+        List<String> labels = new ArrayList<>()
+        Map attributes = new HashMap()
 
         VersionConfig version = new VersionConfig()
         def version(Closure closure) {
