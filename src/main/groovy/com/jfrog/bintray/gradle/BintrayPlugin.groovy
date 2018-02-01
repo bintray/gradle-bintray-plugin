@@ -68,7 +68,7 @@ class BintrayPlugin implements Plugin<Project> {
                     ossPassword = extension.pkg.version.mavenCentralSync.password
                     ossCloseRepo = extension.pkg.version.mavenCentralSync.close
                 }
-                if (extension.configurations?.length) {
+                if (!extension.configurations.isEmpty()) {
                     extension.configurations.each {
                         def configuration = project.configurations.findByName(it)
                         if (!configuration) {
@@ -86,7 +86,7 @@ class BintrayPlugin implements Plugin<Project> {
                                 project.path
                     }
                 }
-                if (extension.publications?.length) {
+                if (!extension.publications.isEmpty()) {
                     def publicationExt = project.extensions.findByType(PublishingExtension)
                     if (!publicationExt) {
                         project.logger.warn "Publications(s) specified but no publications exist in project {}.",
