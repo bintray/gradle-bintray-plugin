@@ -1,14 +1,9 @@
+def pkgLabels = [label1, label2, label3]
+
 bintray {
     apiUrl = bintrayApiUrl
-    user = bintrayUser
-    key = bintrayKey
-    publications = ['mavenJava']
+    configurations = ['archives']
     publish = true
-
-    if (project.hasProperty("override")) {
-        override = project.property("override")
-    }
-
     pkg {
         repo = mavenRepoName
         name = pkgName
@@ -16,8 +11,11 @@ bintray {
             userOrg = bintrayOrg
         }
         desc = pkgDesc
-        vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
+        labels = pkgLabels
         licenses = ['Apache-2.0']
+        websiteUrl = 'https://github.com/bintray/gradle-bintray-plugin'
+        issueTrackerUrl = 'https://github.com/bintray/gradle-bintray-plugin/issues'
+        vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
         version {
             name = versionName
         }

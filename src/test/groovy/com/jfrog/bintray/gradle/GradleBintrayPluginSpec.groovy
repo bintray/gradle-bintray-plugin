@@ -49,20 +49,21 @@ class GradleBintrayPluginSpec extends Specification {
     }
 
     def cleanupRepo(String repoName) {
+        String bintraySubject = getSubject()
         for (String v : versions) {
-            if (bintray.subject(config.bintrayOrg).repository(repoName)
+            if (bintray.subject(bintraySubject).repository(repoName)
                     .pkg(config.pkgName).version(v).exists()) {
-                bintray.subject(config.bintrayOrg).repository(repoName)
+                bintray.subject(bintraySubject).repository(repoName)
                         .pkg(config.pkgName).version(v).delete()
             }
         }
 
-        boolean pkgExists = bintray.subject(config.bintrayOrg).repository(repoName)
+        boolean pkgExists = bintray.subject(bintraySubject).repository(repoName)
                 .pkg(config.pkgName).exists()
 
         if (pkgExists) {
             // Delete the package:
-            bintray.subject(config.bintrayOrg).repository(repoName)
+            bintray.subject(bintraySubject).repository(repoName)
                     .pkg(config.pkgName).delete()
         }
     }
@@ -78,17 +79,12 @@ class GradleBintrayPluginSpec extends Specification {
         // Gradle build finished successfully:
         exitCode == 0
 
-        // Package was created:
-        bintray.subject(config.bintrayOrg).repository(config.debianRepo)
-                .pkg(config.pkgName).exists()
-
-        // Version was created:
-        bintray.subject(config.bintrayOrg).repository(config.debianRepo)
-                .pkg(config.pkgName).version(version).exists()
+        String bintraySubject = getSubject()
+        checkExistence(bintraySubject, config.debianRepo as String, config.pkgName as String, version)
 
         when:
         // Get the created package:
-        Pkg pkg = bintray.subject(config.bintrayOrg).repository(config.debianRepo)
+        Pkg pkg = bintray.subject(bintraySubject).repository(config.debianRepo)
                 .pkg(config.pkgName).get()
 
         then:
@@ -108,17 +104,12 @@ class GradleBintrayPluginSpec extends Specification {
         // Gradle build finished successfully:
         exitCode == 0
 
-        // Package was created:
-        bintray.subject(config.bintrayOrg).repository(config.mavenRepo)
-                .pkg(config.pkgName).exists()
-
-        // Version was created:
-        bintray.subject(config.bintrayOrg).repository(config.mavenRepo)
-                .pkg(config.pkgName).version(version).exists()
+        String bintraySubject = getSubject()
+        checkExistence(bintraySubject, config.mavenRepo as String, config.pkgName as String, version)
 
         when:
         // Get the created package:
-        Pkg pkg = bintray.subject(config.bintrayOrg).repository(config.mavenRepo)
+        Pkg pkg = bintray.subject(bintraySubject).repository(config.mavenRepo)
                 .pkg(config.pkgName).get()
 
         then:
@@ -138,17 +129,62 @@ class GradleBintrayPluginSpec extends Specification {
         // Gradle build finished successfully:
         exitCode == 0
 
-        // Package was created:
-        bintray.subject(config.bintrayOrg).repository(config.mavenRepo)
-                .pkg(config.pkgName).exists()
-
-        // Version was created:
-        bintray.subject(config.bintrayOrg).repository(config.mavenRepo)
-                .pkg(config.pkgName).version(version).exists()
+        String bintraySubject = getSubject()
+        checkExistence(bintraySubject, config.mavenRepo as String, config.pkgName as String, version)
 
         when:
         // Get the created package:
-        Pkg pkg = bintray.subject(config.bintrayOrg).repository(config.mavenRepo)
+        Pkg pkg = bintray.subject(bintraySubject).repository(config.mavenRepo)
+                .pkg(config.pkgName).get()
+
+        then:
+        pkg.name() == config.pkgName
+        pkg.description() == config.pkgDesc
+        pkg.labels().sort() == config.pkgLabels.sort()
+    }
+
+    def "[configurationWithSubModules]create package and version with configuration"() {
+        when:
+        String version = PluginSpecUtils.createVersion()
+        versions.add(version)
+        String[] tasks = ["clean", "install", "bintrayUpload"]
+        def exitCode = PluginSpecUtils.launchGradle(testName.methodName + " without username", tasks, version)
+
+        then:
+        // Gradle build finished with error:
+        exitCode != 0
+
+        when:
+        version = PluginSpecUtils.createVersion()
+        versions.add(version)
+        tasks = ["clean", "install", "bintrayUpload"]
+        exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks, version)
+
+        then:
+        // Gradle build finished successfully:
+        exitCode == 0
+
+        String bintraySubject = getSubject()
+        checkExistence(bintraySubject, config.mavenRepo as String, config.pkgName as String, version)
+
+        // Check that the jar file was uploaded with the right artifactId
+        HTTPBuilder httpBuilder = BintrayHttpClientFactory.create("https://dl.bintray.com/", config.bintrayUser, config.bintrayKey)
+        String path = "/$bintraySubject/${config.mavenRepo}/bintray/gradle/test/android-maven-example/0.1/android-maven-example-0.1.jar"
+
+        def response = httpBuilder.request(HEAD) {
+            Utils.addHeaders(headers)
+            uri.path = path
+            response.success = { resp ->
+                return resp
+            }
+            response.failure = { resp ->
+                return resp
+            }
+        }
+        response.status == 200
+        when:
+        // Get the created package:
+        Pkg pkg = bintray.subject(bintraySubject).repository(config.mavenRepo)
                 .pkg(config.pkgName).get()
 
         then:
@@ -169,17 +205,12 @@ class GradleBintrayPluginSpec extends Specification {
         // Gradle build finished successfully:
         exitCode == 0
 
-        // Package was created:
-        bintray.subject(config.bintrayOrg).repository(config.mavenRepo)
-                .pkg(config.pkgName).exists()
-
-        // Version was created:
-        bintray.subject(config.bintrayOrg).repository(config.mavenRepo)
-                .pkg(config.pkgName).version(version).exists()
+        String bintraySubject = getSubject()
+        checkExistence(bintraySubject, config.mavenRepo as String, config.pkgName as String, version)
 
         when:
         // Get the created package:
-        Pkg pkg = bintray.subject(config.bintrayOrg).repository(config.mavenRepo)
+        Pkg pkg = bintray.subject(bintraySubject).repository(config.mavenRepo)
                 .pkg(config.pkgName).get()
 
         then:
@@ -225,17 +256,18 @@ class GradleBintrayPluginSpec extends Specification {
         // therefore the following path should exist on Bintray.
 
         expect:
-        fileExistsOnBintray(config.bintrayOrg as String, config.debianRepo as String,
+        String bintraySubject = getSubject()
+        fileExistsOnBintray(bintraySubject, config.debianRepo as String,
                 '/dists/squeeze/main/binary-amd64/Packages')
     }
 
-    private boolean fileExistsOnBintray(String org, String repo, String path) {
+    private boolean fileExistsOnBintray(String bintraySubject, String repo, String path) {
         HTTPBuilder http = BintrayHttpClientFactory.create('https://dl.bintray.com',
                 config.bintrayUser, config.bintrayKey)
         boolean exists
         http.request(HEAD) {
             Utils.addHeaders(headers)
-            uri.path = "/$org/$repo/$path"
+            uri.path = "/$bintraySubject/$repo/$path"
             response.success = { resp ->
                 exists = true
             }
@@ -248,5 +280,24 @@ class GradleBintrayPluginSpec extends Specification {
             }
         }
         return exists
+    }
+
+    private String getSubject() {
+        return config.bintrayOrg ?: config.bintrayUser
+    }
+
+    private boolean checkExistence(String bintraySubject, String repo, String pkgName, String version) {
+        // Package was created:
+        if (!bintray.subject(bintraySubject).repository(repo)
+                .pkg(pkgName).exists()) {
+            return false
+        }
+
+        // Version was created:
+        if (!bintray.subject(bintraySubject).repository(repo)
+                .pkg(pkgName).version(version).exists()) {
+            return false
+        }
+        return true
     }
 }

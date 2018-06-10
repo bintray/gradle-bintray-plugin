@@ -1,0 +1,49 @@
+group = 'bintray.gradle.test'
+version = '0.1'
+
+dependencies {
+    compile(group: 'commons-lang', name: 'commons-lang', version: '2.4')
+    compile group: 'org.apache.wicket', name: 'wicket', version: '1.3.7'
+}
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            name 'Bintray test'
+            description 'A test for the Bintray Gradle plugin'
+            url 'https://github.com/bintray/bintray-examples'
+            inceptionYear '2015'
+
+            packaging 'aar'
+            groupId 'bintray.gradle.test'
+            artifactId 'android-maven-example'
+            version '0.1'
+
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    distribution 'repo'
+                }
+            }
+            scm {
+                connection 'https://github.com/bintray/bintray-examples.git'
+                url 'https://github.com/bintray/bintray-examples'
+
+            }
+        }
+    }
+}
+
+def rootProjectDir = projectDir
+def testsDir = new File(rootProjectDir.getParentFile().getParentFile().getParentFile(), 'buildFiles')
+
+def getTestFile = { fileName ->
+    testsDir.toString() + '/' + fileName
+}
+
+apply from: getTestFile("${testName}.gradle")
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.4'
+}

@@ -1,5 +1,6 @@
 package com.jfrog.bintray.gradle
 
+import com.jfrog.bintray.gradle.tasks.RecordingCopyTask
 import org.gradle.api.Project
 import org.gradle.util.ConfigureUtil
 

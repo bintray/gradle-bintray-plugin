@@ -1,5 +1,6 @@
-package com.jfrog.bintray.gradle
+package com.jfrog.bintray.gradle.tasks
 
+import com.jfrog.bintray.gradle.tasks.entities.Artifact
 import org.gradle.api.internal.file.copy.CopyAction
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal

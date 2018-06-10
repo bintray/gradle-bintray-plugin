@@ -1,4 +1,4 @@
-package com.jfrog.bintray.gradle
+package com.jfrog.bintray.gradle.tasks.entities
 
 class Artifact {
     String name
