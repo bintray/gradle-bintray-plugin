@@ -16,13 +16,9 @@ class TestsConfig {
     private TestsConfig() {
         config = new ConfigSlurper().parse(this.class.getResource('/gradle/config.groovy')).conf
 
-        config.bintrayUser = readValue('Bintray user name', 'BINTRAY_USER', 'bintrayUser')
-        config.bintrayKey = readValue('Bintray API key', 'BINTRAY_KEY', 'bintrayKey')
-        config.bintrayOrg = readValue('Bintray organization', 'BINTRAY_ORG', 'bintrayOrg')
-        config.bintrayAdminUser = readValue('Bintray admin user name (used for linking the package to JCenter)', 'BINTRAY_ADMIN_USER', 'bintrayAdminUser')
-        config.bintrayAdminKey = readValue('Bintray admin API key (used for linking the package to JCenter)', 'BINTRAY_ADMIN_KEY', 'bintrayAdminKey')
-        config.mavenCentralUser = readValue('Maven Central user', 'MAVEN_CENTRAL_USER', 'mavenCentralUser')
-        config.mavenCentralPassword = readValue('Maven Central password', 'MAVEN_CENTRAL_PASSWORD', 'mavenCentralPassword')
+        config.bintrayUser = readValue('Bintray user name', 'BINTRAY_USER', 'bintrayUser', true)
+        config.bintrayKey = readValue('Bintray API key', 'BINTRAY_KEY', 'bintrayKey', true)
+        config.bintrayOrg = readValue('Bintray organization', 'BINTRAY_ORG', 'bintrayOrg', false)
 
         def bintrayApiUrl = getenv('BINTRAY_API_URL')
         if (!bintrayApiUrl) {
@@ -49,12 +45,12 @@ class TestsConfig {
         }
     }
 
-    private String readValue(String displayName, String envVarName, String sysPropName) {
+    private String readValue(String displayName, String envVarName, String sysPropName, boolean mandatory) {
         String value = getenv(envVarName)
         if (!value) {
             value = System.getProperty(sysPropName)
         }
-        if (!value) {
+        if (!value && mandatory) {
             throwMissingConfProp(displayName, envVarName, sysPropName)
         }
         value

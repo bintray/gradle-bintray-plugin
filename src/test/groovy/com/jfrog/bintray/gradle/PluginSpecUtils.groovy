@@ -46,8 +46,6 @@ class PluginSpecUtils {
             .addEnvVar("debianRepoName", config.debianRepo)
             .addEnvVar("pkgName", config.pkgName)
             .addEnvVar("pkgDesc", config.pkgDesc)
-            .addEnvVar("mavenCentralUser", config.mavenCentralUser)
-            .addEnvVar("mavenCentralPassword", config.mavenCentralPassword)
             .addSwitch("info")
             .addSwitch("stacktrace")
 

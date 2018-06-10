@@ -425,6 +425,30 @@ bintray {
 }
 ```
 
+# Tests
+
+#### Pre condition
+The profile that performs the tests (user or organization) must have the following two repositories:
+1. maven - For performing the java tests
+2. debian - For performing the debian tests
+
+#### Running the tests
+To run the tests, we need to provide a few variables. Those variables can be created as environment variables:
+
+| Environment variable | Description 
+| --- | --- |
+| `BINTRAY_USER` | [Mandatory] Bintray user name. |
+| `BINTRAY_KEY` | [Mandatory] Bintray API key. |
+| `BINTRAY_ORG` | [Optional] Bintray organization. |
+
+To run the tests, please perform the following:
+
+````
+1. Clone the project
+2. Configure the environment variables or configure within the build.gradle file.
+3. Run the following: gradle test
+````
+
 # Release Notes
 The release notes are available on [Bintray](https://bintray.com/jfrog/jfrog-jars/gradle-bintray-plugin#release).
 

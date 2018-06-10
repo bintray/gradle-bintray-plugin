@@ -9,17 +9,21 @@ bintray {
     pkg {
         repo = mavenRepoName
         name = pkgName
-        userOrg = bintrayOrg
-        desc =  pkgDesc
+        if (!isNull(bintrayOrg)) {
+            userOrg = bintrayOrg
+        }
+        desc = pkgDesc
         labels = pkgLabels
         licenses = ['Apache-2.0']
         websiteUrl = 'https://github.com/bintray/gradle-bintray-plugin'
         issueTrackerUrl = 'https://github.com/bintray/gradle-bintray-plugin/issues'
         vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
-        githubRepo = 'bintray/gradle-bintray-plugin'
-        githubReleaseNotesFile = 'README.md'
         version {
             name = versionName
         }
     }
+}
+
+boolean isNull(String value) {
+    return value == null || value == "" || value == 'null'
 }
