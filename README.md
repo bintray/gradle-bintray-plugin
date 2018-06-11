@@ -490,6 +490,7 @@ To build the code without running the tests, add to the "clean build" command th
 The release notes are available on [Bintray](https://bintray.com/jfrog/jfrog-jars/gradle-bintray-plugin#release).
 
 <a name="Code_Contributions"/>
+
 # Code Contributions
 We welcome code contributions through pull requests.
 Please join our contributors community and help us make this plugin even better!
