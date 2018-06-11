@@ -325,6 +325,7 @@ bintray {
 > gradle bintrayUpload
 
 <a name="Creating_Repositories,_Packages_and_Versions"/>
+
 # Creating Repositories, Packages and Versions
 ## General
 *  When uploading files to Bintray, you need to specify the Repository, Package and Version to which files are uploaded. The plugin checks whether the specified Package already exists in the specified Repository. If the specified Package does not exist, the plugin will create it. The same is done for the specified version, so you don't need to worry about having your builds deploy your artifacts into new Packages and Versions. The plugin, however, expects the Repository to exist already and the plugin will not try to create the Repository if it does not exist. 
@@ -335,10 +336,12 @@ bintray {
 * For the *version* closure, the only mandatory property is *name*.
 
 <a name="GPG_File_Signing"/>
+
 # GPG File Signing
 The plugin allows using Bintray supports for files GPG signing. To have your Version files signed by Bintray, you first need to [configure your public and private GPG keys](https://bintray.com/docs/usermanual/interacting/interacting_editingyouruserprofile.html#anchorMANAGINGGPGKEYS) in Bintray, and then add the *gpg* closure inside the *version* closure as shown in the below *Plugin DSL* section. If your GPG keys are not configured in Bintray and `sign` is true, then the files will be signed using Bintray's internal keys.
 
 <a name="Maven_Central_Sync"/>
+
 # Maven Central Sync
 The plugin allows using Bintray's interface with Maven Central. You can have the artifacts of a Version sent to Maven Central, by adding the adding the *mavenCentralSync* closure inside the *version* closure, as shown in the below *Plugin DSL* section.
 If that closure is omitted, the version will not be sent to Maven central.
@@ -350,6 +353,7 @@ In particular, `sourcesJar`, `javadocsJar` and valid `pom.xml` must be included 
 also files must be signed to be sent to Maven Central, so GPG file signing should be enabled (see above) if Maven Central sync is enabled.
 
 <a name="Plugin_DSL"/>
+
 # Plugin DSL
 The Gradle Bintray plugin can be configured using its own Convention DSL inside the build.gradle script of your root project.
 The syntax of the Convention DSL is described below:
