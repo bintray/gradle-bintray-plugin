@@ -463,7 +463,7 @@ export BINTRAY_KEY=<Your Bintray API Key>
 export BINTRAY_ORG=<Your Bintray organization name>
 ```
 
-## Running the build with or without the tests
+## Running the build with or without tests
 To build the code using the gradle wrapper in Unix run:
 ```
 > ./gradlew clean build
