@@ -4,6 +4,21 @@ The Gradle Bintray Plugin allows you to publish artifacts to Bintray.
 
 [ ![Download](https://api.bintray.com/packages/jfrog/jfrog-jars/gradle-bintray-plugin/images/download.svg) ](https://bintray.com/jfrog/jfrog-jars/gradle-bintray-plugin/_latestVersion)
 
+# Table of Contents  
+[Getting Started Using the Plugin](#Getting_Started_Using_the_Plugin)<br>
+[Building and Testing the Sources](#Building_and_Testing_the_Sources)<br>
+[Creating Repositories, Packages and Versions](#Creating_Repositories,_Packages_and_Versions)<br>
+[GPG File Signing](#GPG_File_Signing)<br>
+[Maven Central Sync](#Maven_Central_Sync)<br>
+[Plugin DSL](#Plugin_DSL)<br>
+[Example Projects](#Example_Projects)<br>
+[Building and Testing the Sources](#Building_and_Testing_the_Sources)<br>
+[Release Notes](#Release_Notes)<br>
+[Code Contributions](#Code_Contributions)<br>
+[License](#License)<br>
+
+<a name="Getting_Started_Using_the_Plugin"/>
+
 # Getting Started Using the Plugin
 Please follow the below steps to add the Gradle Bintray Plugin to your Gradle build script.
 
@@ -309,6 +324,7 @@ bintray {
 
 > gradle bintrayUpload
 
+<a name="Creating_Repositories,_Packages_and_Versions"/>
 # Creating Repositories, Packages and Versions
 ## General
 *  When uploading files to Bintray, you need to specify the Repository, Package and Version to which files are uploaded. The plugin checks whether the specified Package already exists in the specified Repository. If the specified Package does not exist, the plugin will create it. The same is done for the specified version, so you don't need to worry about having your builds deploy your artifacts into new Packages and Versions. The plugin, however, expects the Repository to exist already and the plugin will not try to create the Repository if it does not exist. 
@@ -318,9 +334,11 @@ bintray {
 * For the *pkg* closure, if the package already exists, the only mandatory properties are *repo* and *name*. If the package does not exist, the *licenses* and *vcsUrl properties are manadatory for OSS packages.
 * For the *version* closure, the only mandatory property is *name*.
 
+<a name="GPG_File_Signing"/>
 # GPG File Signing
 The plugin allows using Bintray supports for files GPG signing. To have your Version files signed by Bintray, you first need to [configure your public and private GPG keys](https://bintray.com/docs/usermanual/interacting/interacting_editingyouruserprofile.html#anchorMANAGINGGPGKEYS) in Bintray, and then add the *gpg* closure inside the *version* closure as shown in the below *Plugin DSL* section. If your GPG keys are not configured in Bintray and `sign` is true, then the files will be signed using Bintray's internal keys.
 
+<a name="Maven_Central_Sync"/>
 # Maven Central Sync
 The plugin allows using Bintray's interface with Maven Central. You can have the artifacts of a Version sent to Maven Central, by adding the adding the *mavenCentralSync* closure inside the *version* closure, as shown in the below *Plugin DSL* section.
 If that closure is omitted, the version will not be sent to Maven central.
@@ -331,6 +349,7 @@ In order for this functionality to be enabled, you first must verify the followi
 In particular, `sourcesJar`, `javadocsJar` and valid `pom.xml` must be included (see above); 
 also files must be signed to be sent to Maven Central, so GPG file signing should be enabled (see above) if Maven Central sync is enabled.
 
+<a name="Plugin_DSL"/>
 # Plugin DSL
 The Gradle Bintray plugin can be configured using its own Convention DSL inside the build.gradle script of your root project.
 The syntax of the Convention DSL is described below:
@@ -407,10 +426,9 @@ When using Gradle publications or when using `filesSpec` for direct file uploads
 **JVM Compatibility:**
 Java 6 and above.
 
+<a name="Example_Projects"/>
 # Example Projects
 As an example, you can also refer to these [sample projects](https://github.com/bintray/bintray-examples/tree/master/gradle-bintray-plugin-examples).
-
-
 
 You can use the `-P` command line option to pass user and key as command line argument:
 
@@ -425,37 +443,52 @@ bintray {
 }
 ```
 
-# Tests
+<a name="Building_and_Testing_the_Sources"/>
 
-#### Pre condition
-The profile that performs the tests (user or organization) must have the following two repositories:
-1. maven - For performing the java tests
-2. debian - For performing the debian tests
+# Building and Testing the Sources
+The code is built using Gradle and includes integration tests. The tests use real repositories in your Bintray organization.
+## Before running the tests
+Make sure you have the following repositories in your Bintray organization:
+* A Maven repository named **maven**.
+* A Debian repository named **debian**.
+Also, the following environment variable should be set:
+```
+export BINTRAY_USER=<Your Bintray user name>
+export BINTRAY_KEY=<Your Bintray API Key>
+export BINTRAY_ORG=<Your Bintray organization name>
+```
 
-#### Running the tests
-To run the tests, we need to provide a few variables. Those variables can be created as environment variables:
+## Running the build with or without the tests
+To build the code using the gradle wrapper in Unix run:
+```
+> ./gradlew clean build
+```
 
-| Environment variable | Description 
-| --- | --- |
-| `BINTRAY_USER` | [Mandatory] Bintray user name. |
-| `BINTRAY_KEY` | [Mandatory] Bintray API key. |
-| `BINTRAY_ORG` | [Optional] Bintray organization. |
+To build the code using the gradle wrapper in Windows run:
+```
+> gradlew clean build
+```
 
-To run the tests, please perform the following:
+To build the code using the environment gradle run:
+```
+> gradle clean build
+```
 
-````
-1. Clone the project
-2. Configure the environment variables or configure within the build.gradle file.
-3. Run the following: gradle test
-````
+To build the code without running the tests, add to the "clean build" command the "-x test" option, for example:
+```
+> ./gradlew clean build -x test
+```
 
+<a name="Release_Notes"/>
 # Release Notes
 The release notes are available on [Bintray](https://bintray.com/jfrog/jfrog-jars/gradle-bintray-plugin#release).
 
+<a name="Code_Contributions"/>
 # Code Contributions
 We welcome code contributions through pull requests.
 Please join our contributors community and help us make this plugin even better!
 
+<a name="License"/>
 # License
 This plugin is available under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
