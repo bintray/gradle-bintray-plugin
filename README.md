@@ -431,6 +431,7 @@ When using Gradle publications or when using `filesSpec` for direct file uploads
 Java 6 and above.
 
 <a name="Example_Projects"/>
+
 # Example Projects
 As an example, you can also refer to these [sample projects](https://github.com/bintray/bintray-examples/tree/master/gradle-bintray-plugin-examples).
 
@@ -484,6 +485,7 @@ To build the code without running the tests, add to the "clean build" command th
 ```
 
 <a name="Release_Notes"/>
+
 # Release Notes
 The release notes are available on [Bintray](https://bintray.com/jfrog/jfrog-jars/gradle-bintray-plugin#release).
 
@@ -493,6 +495,7 @@ We welcome code contributions through pull requests.
 Please join our contributors community and help us make this plugin even better!
 
 <a name="License"/>
+
 # License
 This plugin is available under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
