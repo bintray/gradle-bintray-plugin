@@ -219,6 +219,32 @@ class GradleBintrayPluginSpec extends Specification {
         pkg.labels().sort() == config.pkgLabels.sort()
     }
 
+  def "[publicationWithJavaGradlePlugin]create package and version with publication"() {
+        when:
+        String version = PluginSpecUtils.createVersion()
+        versions.add(version)
+        savedVersion = version
+        String[] tasks = ["clean", "build", "bintrayUpload"]
+        def exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks, version)
+
+        then:
+        // Gradle build finished successfully:
+        exitCode == 0
+
+        String bintraySubject = getSubject()
+        checkExistence(bintraySubject, config.mavenRepo as String, config.pkgName as String, version)
+
+        when:
+        // Get the created package:
+        Pkg pkg = bintray.subject(bintraySubject).repository(config.mavenRepo)
+                .pkg(config.pkgName).get()
+
+        then:
+        pkg.name() == config.pkgName
+        pkg.description() == config.pkgDesc
+        pkg.labels().sort() == config.pkgLabels.sort()
+    }
+
     def "[publication]override"() {
         setup:
         String[] tasks = ["clean", "build", "bintrayUpload"]

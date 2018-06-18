@@ -2,25 +2,27 @@ package com.jfrog.bintray.gradle
 
 import com.jfrog.bintray.gradle.tasks.BintrayPublishTask
 import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
+import org.gradle.BuildAdapter
 import org.gradle.api.Project
 import org.gradle.api.ProjectEvaluationListener
 import org.gradle.api.ProjectState
 import org.gradle.api.Task
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.publish.Publication
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.Upload
 
-class ProjectsEvaluatedBuildListener implements ProjectEvaluationListener {
-    private Project project
-    private BintrayUploadTask bintrayUpload
-    private BintrayExtension extension
+import java.util.concurrent.ConcurrentHashMap
 
-    ProjectsEvaluatedBuildListener(Project project, BintrayUploadTask bintrayUpload) {
-        this.project = project
+class ProjectsEvaluatedBuildListener extends BuildAdapter implements ProjectEvaluationListener {
+    private BintrayUploadTask bintrayUpload
+    private final Set<BintrayUploadTask> bintrayUploadTasks = Collections.newSetFromMap(new ConcurrentHashMap<Task, Boolean>());
+
+    ProjectsEvaluatedBuildListener(BintrayUploadTask bintrayUpload) {
         this.bintrayUpload = bintrayUpload
-        extension = project.extensions.create("bintray", BintrayExtension, project)
-        extension.with {
+        this.bintrayUpload.extension = bintrayUpload.project.extensions.create("bintray", BintrayExtension, bintrayUpload.project)
+        this.bintrayUpload.extension.with {
             apiUrl = BintrayUploadTask.API_URL_DEFAULT
         }
     }
@@ -72,60 +74,67 @@ class ProjectsEvaluatedBuildListener implements ProjectEvaluationListener {
             ossCloseRepo = extension.pkg.version.mavenCentralSync.close
         }
 
-        if (extension.configurations?.length) {
-            extension.configurations.each {
-                def configuration = project.configurations.findByName(it)
-                if (!configuration) {
-                    project.logger.warn "Configuration ${it} specified but does not exist in project {}.",
-                            project.path
-                } else {
-                    bintrayUpload.dependsOn(configuration.allArtifacts)
-                }
-            }
-            Upload installTask = project.tasks.withType(Upload)?.findByName('install')
-            if (installTask) {
-                bintrayUpload.dependsOn(installTask)
-            } else {
-                project.logger.warn "Configuration(s) specified but the install task does not exist in project {}.",
-                        project.path
-            }
-        }
-        if (extension.publications?.length) {
-            def publicationExt = project.extensions.findByType(PublishingExtension)
-            if (!publicationExt) {
-                project.logger.warn "Publications(s) specified but no publications exist in project {}.",
-                        project.path
-            } else {
-                extension.publications.each {
-                    Publication publication = publicationExt?.publications?.findByName(it)
-                    if (!publication) {
-                        project.logger.warn 'Publication {} not found in project {}.', it, project.path
-                    } else if (publication instanceof MavenPublication) {
-                        def taskName =
-                                "publish${it[0].toUpperCase()}${it.substring(1)}PublicationToMavenLocal"
-                        bintrayUpload.dependsOn(taskName)
-                    } else {
-                        project.logger.warn "{} can only use maven publications - skipping {}.",
-                                bintrayUpload.path, publication.name
-                    }
-                }
-            }
-        }
+        bintrayUploadTasks.add(bintrayUpload)
 
-        Task deployTask = project.getRootProject().getTasks().findByName(BintrayPublishTask.TASK_NAME)
-        if (deployTask == null) {
+        Task bintrayPublish = bintrayUpload.project.getRootProject().getTasks().findByName(BintrayPublishTask.TASK_NAME)
+        if (bintrayPublish == null) {
             throw new IllegalStateException(String.format("Could not find %s in the root project", BintrayPublishTask.TASK_NAME))
         }
-        bintrayUpload.finalizedBy(deployTask)
+        bintrayUpload.finalizedBy(bintrayPublish)
         // Depend on tasks in sub-projects
-        project.subprojects.each {
+        bintrayUpload.project.subprojects.each {
             Task subTask = it.tasks.findByName(BintrayUploadTask.TASK_NAME)
             if (subTask) {
                 bintrayUpload.dependsOn(subTask)
             }
         }
-        if (extension.filesSpec) {
-            bintrayUpload.dependsOn(extension.filesSpec)
+        if (bintrayUpload.extension.filesSpec) {
+            bintrayUpload.dependsOn(bintrayUpload.extension.filesSpec)
+        }
+    }
+
+    @Override
+    void projectsEvaluated(Gradle gradle) {
+        for (BintrayUploadTask bintrayUpload : bintrayUploadTasks) {
+            if (bintrayUpload.extension.configurations?.length) {
+                bintrayUpload.extension.configurations.each {
+                    def configuration = bintrayUpload.project.configurations.findByName(it)
+                    if (!configuration) {
+                        bintrayUpload.project.logger.warn "Configuration ${it} specified but does not exist in project {}.",
+                                bintrayUpload.project.path
+                    } else {
+                        bintrayUpload.dependsOn(configuration.allArtifacts)
+                    }
+                }
+                Upload installTask = bintrayUpload.project.tasks.withType(Upload)?.findByName('install')
+                if (installTask) {
+                    bintrayUpload.dependsOn(installTask)
+                } else {
+                    bintrayUpload.project.logger.warn "Configuration(s) specified but the install task does not exist in project {}.",
+                            bintrayUpload.project.path
+                }
+            }
+            if (bintrayUpload.extension.publications?.length) {
+                def publicationExt = bintrayUpload.project.extensions.findByType(PublishingExtension)
+                if (!publicationExt) {
+                    bintrayUpload.project.logger.warn "Publications(s) specified but no publications exist in project {}.",
+                            bintrayUpload.project.path
+                } else {
+                    bintrayUpload.extension.publications.each {
+                        Publication publication = publicationExt?.publications?.findByName(it)
+                        if (!publication) {
+                            bintrayUpload.project.logger.warn 'Publication {} not found in project {}.', it, bintrayUpload.project.path
+                        } else if (publication instanceof MavenPublication) {
+                            def taskName =
+                                    "publish${it[0].toUpperCase()}${it.substring(1)}PublicationToMavenLocal"
+                            bintrayUpload.dependsOn(taskName)
+                        } else {
+                            bintrayUpload.project.logger.warn "{} can only use maven publications - skipping {}.",
+                                    bintrayUpload.path, publication.name
+                        }
+                    }
+                }
+            }
         }
     }
 }

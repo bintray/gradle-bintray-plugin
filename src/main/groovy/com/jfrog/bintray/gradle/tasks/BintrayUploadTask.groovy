@@ -1,5 +1,6 @@
 package com.jfrog.bintray.gradle.tasks
 
+import com.jfrog.bintray.gradle.BintrayExtension
 import com.jfrog.bintray.gradle.BintrayHttpClientFactory
 import com.jfrog.bintray.gradle.BintrayPlugin
 import com.jfrog.bintray.gradle.Utils
@@ -11,6 +12,7 @@ import groovy.json.JsonBuilder
 import groovyx.net.http.HTTPBuilder
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.CopySpec
 import org.gradle.api.publish.Publication
@@ -31,6 +33,8 @@ class BintrayUploadTask extends DefaultTask {
     static final String GROUP = 'publishing'
     static final String DESCRIPTION = 'Publishes artifacts to bintray.com.'
     static final String API_URL_DEFAULT = 'https://api.bintray.com'
+    public BintrayExtension extension
+    public Project project
 
     private ConcurrentHashMap<String, Repository> repositories = new ConcurrentHashMap<>()
     private HTTPBuilder httpBuilder

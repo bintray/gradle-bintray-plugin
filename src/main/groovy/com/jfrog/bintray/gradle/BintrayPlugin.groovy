@@ -10,7 +10,8 @@ class BintrayPlugin implements Plugin<Project> {
         if (project.getTasks().findByName(BintrayUploadTask.TASK_NAME) == null) {
             //Create and configure the task
             BintrayUploadTask bintrayUpload = project.task(type: BintrayUploadTask, BintrayUploadTask.TASK_NAME)
-            project.gradle.addListener(new ProjectsEvaluatedBuildListener(project, bintrayUpload))
+            bintrayUpload.project = project
+            project.gradle.addListener(new ProjectsEvaluatedBuildListener(bintrayUpload))
         }
 
         addBintrayUploadTask(project)
@@ -21,7 +22,8 @@ class BintrayPlugin implements Plugin<Project> {
                 // Reached this state means that the plugin is not enabled on the root project
                 BintrayUploadTask bintrayUploadRoot = project.getRootProject().task(type: BintrayUploadTask, BintrayUploadTask.TASK_NAME)
                 bintrayUploadRoot.setEnabled(false)
-                project.getRootProject().gradle.addListener(new ProjectsEvaluatedBuildListener(project.getRootProject(), bintrayUploadRoot))
+                bintrayUploadRoot.project = project.getRootProject()
+                project.getRootProject().gradle.addListener(new ProjectsEvaluatedBuildListener(bintrayUploadRoot))
                 project.getRootProject().getPluginManager().apply(BintrayPlugin.class)
             }
         }
