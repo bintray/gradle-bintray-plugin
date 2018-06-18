@@ -19,6 +19,7 @@ def getTestFile = { fileName ->
 
 allprojects {
     apply plugin: 'idea'
+    apply plugin: 'java-gradle-plugin'
 
     group = pkgName
     version = versionName
