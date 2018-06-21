@@ -16,8 +16,10 @@ class PluginSpecUtils {
     private static def config = TestsConfig.getInstance().config
     public static final OS_NAME = System.getProperty("os.name")
 
-    def static String createVersion() {
-        System.currentTimeMillis().toString()
+    def static String createVersion(List<String> versions) {
+        String version = System.currentTimeMillis().toString()
+        versions.add(version)
+        version
     }
 
     def static getGradleCommandPath() {
