@@ -33,49 +33,7 @@ class ProjectsEvaluatedBuildListener extends BuildAdapter implements ProjectEval
 
     @Override
     void afterEvaluate(Project proj, ProjectState state) {
-
-        bintrayUpload.with {
-            apiUrl = extension.apiUrl
-            user = extension.user
-            apiKey = extension.key
-            configurations = extension.configurations
-            publications = extension.publications
-            filesSpec = extension.filesSpec
-            publish = extension.publish
-            override = extension.override
-            dryRun = extension.dryRun
-            userOrg = extension.pkg.userOrg ?: extension.user
-            repoName = extension.pkg.repo
-            packageName = extension.pkg.name
-            packageDesc = extension.pkg.desc
-            packageWebsiteUrl = extension.pkg.websiteUrl
-            packageIssueTrackerUrl = extension.pkg.issueTrackerUrl
-            packageVcsUrl = extension.pkg.vcsUrl
-            packageGithubRepo = extension.pkg.githubRepo
-            packageGithubReleaseNotesFile = extension.pkg.githubReleaseNotesFile
-            packageLicenses = extension.pkg.licenses
-            packageLabels = extension.pkg.labels
-            packageAttributes = extension.pkg.attributes
-            packagePublicDownloadNumbers = extension.pkg.publicDownloadNumbers
-            debianDistribution = extension.pkg.debian.distribution
-            debianComponent = extension.pkg.debian.component
-            debianArchitecture = extension.pkg.debian.architecture
-            versionName = extension.pkg.version.name ?: project.version
-            versionDesc = extension.pkg.version.desc
-            versionReleased = extension.pkg.version.released
-            versionVcsTag = extension.pkg.version.vcsTag ?: project.version
-            versionAttributes = extension.pkg.version.attributes
-            signVersion = extension.pkg.version.gpg.sign
-            gpgPassphrase = extension.pkg.version.gpg.passphrase
-            syncToMavenCentral = extension.pkg.version.mavenCentralSync.sync == null ?
-                    true : extension.pkg.version.mavenCentralSync.sync
-            ossUser = extension.pkg.version.mavenCentralSync.user
-            ossPassword = extension.pkg.version.mavenCentralSync.password
-            ossCloseRepo = extension.pkg.version.mavenCentralSync.close
-        }
-
         bintrayUploadTasks.add(bintrayUpload)
-
         Task bintrayPublish = bintrayUpload.project.getRootProject().getTasks().findByName(BintrayPublishTask.TASK_NAME)
         if (bintrayPublish == null) {
             throw new IllegalStateException(String.format("Could not find %s in the root project", BintrayPublishTask.TASK_NAME))
@@ -96,6 +54,46 @@ class ProjectsEvaluatedBuildListener extends BuildAdapter implements ProjectEval
     @Override
     void projectsEvaluated(Gradle gradle) {
         for (BintrayUploadTask bintrayUpload : bintrayUploadTasks) {
+            bintrayUpload.with {
+                apiUrl = extension.apiUrl
+                user = extension.user
+                apiKey = extension.key
+                configurations = extension.configurations
+                publications = extension.publications
+                filesSpec = extension.filesSpec
+                publish = extension.publish
+                override = extension.override
+                dryRun = extension.dryRun
+                userOrg = extension.pkg.userOrg ?: extension.user
+                repoName = extension.pkg.repo
+                packageName = extension.pkg.name
+                packageDesc = extension.pkg.desc
+                packageWebsiteUrl = extension.pkg.websiteUrl
+                packageIssueTrackerUrl = extension.pkg.issueTrackerUrl
+                packageVcsUrl = extension.pkg.vcsUrl
+                packageGithubRepo = extension.pkg.githubRepo
+                packageGithubReleaseNotesFile = extension.pkg.githubReleaseNotesFile
+                packageLicenses = extension.pkg.licenses
+                packageLabels = extension.pkg.labels
+                packageAttributes = extension.pkg.attributes
+                packagePublicDownloadNumbers = extension.pkg.publicDownloadNumbers
+                debianDistribution = extension.pkg.debian.distribution
+                debianComponent = extension.pkg.debian.component
+                debianArchitecture = extension.pkg.debian.architecture
+                versionName = extension.pkg.version.name ?: project.version
+                versionDesc = extension.pkg.version.desc
+                versionReleased = extension.pkg.version.released
+                versionVcsTag = extension.pkg.version.vcsTag ?: project.version
+                versionAttributes = extension.pkg.version.attributes
+                signVersion = extension.pkg.version.gpg.sign
+                gpgPassphrase = extension.pkg.version.gpg.passphrase
+                syncToMavenCentral = extension.pkg.version.mavenCentralSync.sync == null ?
+                        true : extension.pkg.version.mavenCentralSync.sync
+                ossUser = extension.pkg.version.mavenCentralSync.user
+                ossPassword = extension.pkg.version.mavenCentralSync.password
+                ossCloseRepo = extension.pkg.version.mavenCentralSync.close
+            }
+
             if (bintrayUpload.extension.configurations?.length) {
                 bintrayUpload.extension.configurations.each {
                     def configuration = bintrayUpload.project.configurations.findByName(it)
