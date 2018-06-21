@@ -3,6 +3,7 @@ package com.jfrog.bintray.gradle
 import com.jfrog.bintray.client.api.handle.Bintray
 import com.jfrog.bintray.client.api.model.Pkg
 import groovyx.net.http.HTTPBuilder
+import org.apache.http.HttpResponse
 import org.gradle.api.GradleException
 import org.junit.Rule
 import org.junit.rules.TestName
@@ -70,8 +71,7 @@ class GradleBintrayPluginSpec extends Specification {
 
     def "[fileSpec]create debian package and version with fileSpec"() {
         when:
-        String version = PluginSpecUtils.createVersion()
-        versions.add(version)
+        String version = PluginSpecUtils.createVersion(versions)
         String[] tasks = ["clean", "build", "bintrayUpload"]
         def exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks, version)
 
@@ -95,8 +95,7 @@ class GradleBintrayPluginSpec extends Specification {
 
     def "[fileSpec]create package and version with fileSpec"() {
         when:
-        String version = PluginSpecUtils.createVersion()
-        versions.add(version)
+        String version = PluginSpecUtils.createVersion(versions)
         String[] tasks = ["clean", "build", "bintrayUpload"]
         def exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks, version)
 
@@ -120,8 +119,7 @@ class GradleBintrayPluginSpec extends Specification {
 
     def "[configuration]create package and version with configuration"() {
         when:
-        String version = PluginSpecUtils.createVersion()
-        versions.add(version)
+        String version = PluginSpecUtils.createVersion(versions)
         String[] tasks = ["clean", "install", "bintrayUpload"]
         def exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks, version)
 
@@ -145,8 +143,7 @@ class GradleBintrayPluginSpec extends Specification {
 
     def "[configurationWithSubModules]create package and version with configuration"() {
         when:
-        String version = PluginSpecUtils.createVersion()
-        versions.add(version)
+        String version = PluginSpecUtils.createVersion(versions)
         String[] tasks = ["clean", "install", "bintrayUpload"]
         def exitCode = PluginSpecUtils.launchGradle(testName.methodName + " without username", tasks, version)
 
@@ -155,8 +152,7 @@ class GradleBintrayPluginSpec extends Specification {
         exitCode != 0
 
         when:
-        version = PluginSpecUtils.createVersion()
-        versions.add(version)
+        version = PluginSpecUtils.createVersion(versions)
         tasks = ["clean", "install", "bintrayUpload"]
         exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks, version)
 
@@ -168,20 +164,12 @@ class GradleBintrayPluginSpec extends Specification {
         checkExistence(bintraySubject, config.mavenRepo as String, config.pkgName as String, version)
 
         // Check that the jar file was uploaded with the right artifactId
-        HTTPBuilder httpBuilder = BintrayHttpClientFactory.create("https://dl.bintray.com/", config.bintrayUser, config.bintrayKey)
-        String path = "/$bintraySubject/${config.mavenRepo}/bintray/gradle/test/android-maven-example/0.1/android-maven-example-0.1.jar"
+        String pathApi = "/$bintraySubject/${config.mavenRepo}/bintray/gradle/test/android-maven-api/0.1/android-maven-api-0.1.jar"
+        checkExistenceOnBintray(pathApi)
 
-        def response = httpBuilder.request(HEAD) {
-            Utils.addHeaders(headers)
-            uri.path = path
-            response.success = { resp ->
-                return resp
-            }
-            response.failure = { resp ->
-                return resp
-            }
-        }
-        response.status == 200
+        String pathShared = "/$bintraySubject/${config.mavenRepo}/bintray/gradle/test/android-maven-shared/0.1/android-maven-shared-0.1.jar"
+        checkExistenceOnBintray(pathShared)
+
         when:
         // Get the created package:
         Pkg pkg = bintray.subject(bintraySubject).repository(config.mavenRepo)
@@ -191,12 +179,28 @@ class GradleBintrayPluginSpec extends Specification {
         pkg.name() == config.pkgName
         pkg.description() == config.pkgDesc
         pkg.labels().sort() == config.pkgLabels.sort()
+
+        // Remove the previously created version
+        bintray.subject(bintraySubject).repository(config.mavenRepo)
+                .pkg(config.pkgName).version(version).delete()
+
+        when:
+        version = PluginSpecUtils.createVersion(versions)
+        // Run only the api project
+        tasks = ["clean", "install", ":api:bintrayUpload"]
+        exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks, version)
+
+        then:
+        // Gradle build finished successfully:
+        exitCode == 0
+
+        // Check that the jar file wasn't uploaded for the shared and root
+        !checkExistenceOnBintray(pathShared)
     }
 
     def "[publication]create package and version with publication"() {
         when:
-        String version = PluginSpecUtils.createVersion()
-        versions.add(version)
+        String version = PluginSpecUtils.createVersion(versions)
         savedVersion = version
         String[] tasks = ["clean", "build", "bintrayUpload"]
         def exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks, version)
@@ -221,8 +225,7 @@ class GradleBintrayPluginSpec extends Specification {
 
   def "[publicationWithJavaGradlePlugin]create package and version with publication"() {
         when:
-        String version = PluginSpecUtils.createVersion()
-        versions.add(version)
+        String version = PluginSpecUtils.createVersion(versions)
         savedVersion = version
         String[] tasks = ["clean", "build", "bintrayUpload"]
         def exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks, version)
@@ -283,29 +286,7 @@ class GradleBintrayPluginSpec extends Specification {
 
         expect:
         String bintraySubject = getSubject()
-        fileExistsOnBintray(bintraySubject, config.debianRepo as String,
-                '/dists/squeeze/main/binary-amd64/Packages')
-    }
-
-    private boolean fileExistsOnBintray(String bintraySubject, String repo, String path) {
-        HTTPBuilder http = BintrayHttpClientFactory.create('https://dl.bintray.com',
-                config.bintrayUser, config.bintrayKey)
-        boolean exists
-        http.request(HEAD) {
-            Utils.addHeaders(headers)
-            uri.path = "/$bintraySubject/$repo/$path"
-            response.success = { resp ->
-                exists = true
-            }
-            response.'404' = { resp ->
-                exists = false
-            }
-            response.failure = { resp, reader ->
-                throw new GradleException(
-                        "Received unexpected response from Bintray while trying to determine if $path exists.: $resp.statusLine $reader")
-            }
-        }
-        return exists
+        checkExistenceOnBintray("/$bintraySubject/${config.debianRepo}/dists/squeeze/main/binary-amd64/Packages")
     }
 
     private String getSubject() {
@@ -325,5 +306,31 @@ class GradleBintrayPluginSpec extends Specification {
             return false
         }
         return true
+    }
+
+    private boolean checkExistenceOnBintray(String path) {
+        HTTPBuilder httpBuilder = BintrayHttpClientFactory.create("https://dl.bintray.com/", config.bintrayUser, config.bintrayKey)
+
+        HttpResponse httpResponse = httpBuilder.request(HEAD) {
+            Utils.addHeaders(headers)
+            uri.path = path
+            response.success = { resp ->
+                return resp
+            }
+            response.failure = { resp ->
+                return resp
+            }
+        }
+
+        switch (httpResponse.getStatusLine().getStatusCode()) {
+            case 200:
+                return true
+            case 404:
+                return false
+            default:
+                throw new GradleException(
+                        "Received unexpected response from Bintray while trying to determine if $path exists.: "
+                                + httpResponse.getStatusLine())
+        }
     }
 }
