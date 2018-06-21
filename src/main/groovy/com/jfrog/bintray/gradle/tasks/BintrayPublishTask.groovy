@@ -24,7 +24,7 @@ class BintrayPublishTask extends DefaultTask {
     private void signPublishAndSync() {
         HashSet<BintrayUploadTask> tasks = project.getTasksByName(BintrayUploadTask.TASK_NAME, true)
         for (BintrayUploadTask task : tasks) {
-            if (task.getEnabled()) {
+            if (task.getEnabled() && task.getDidWork()) {
                 if (task.getSignVersion()) {
                     gpgSignVersion(task.repoName, task.packageName, task.versionName, task)
                 }

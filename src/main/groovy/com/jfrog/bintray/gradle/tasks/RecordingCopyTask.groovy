@@ -4,10 +4,10 @@ import com.jfrog.bintray.gradle.tasks.entities.Artifact
 import org.gradle.api.internal.file.copy.CopyAction
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal
-import org.gradle.api.internal.tasks.SimpleWorkResult
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.SkipWhenEmpty
+import org.gradle.api.tasks.WorkResults
 
 class RecordingCopyTask extends Copy {
 
@@ -37,7 +37,7 @@ class RecordingCopyTask extends Copy {
                             didWork = true
                         }
                 }
-                new SimpleWorkResult(true)
+                WorkResults.didWork(true)
         }
     }
 }

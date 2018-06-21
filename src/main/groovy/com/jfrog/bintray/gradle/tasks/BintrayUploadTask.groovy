@@ -193,41 +193,41 @@ class BintrayUploadTask extends DefaultTask {
         logger.info("Gradle Bintray Plugin version: ${new Utils().pluginVersion}");
         if (getEnabled()) {
             validateDebianDefinition()
-        //TODO: [by yl] replace with findResults for Gradle 2.x
-        configurationUploads = configurations.collect {
-            if (it instanceof CharSequence) {
-                Configuration configuration = project.configurations.findByName(it)
-                if (configuration != null) {
-                    return collectArtifacts(configuration)
+            //TODO: [by yl] replace with findResults for Gradle 2.x
+            configurationUploads = configurations.collect {
+                if (it instanceof CharSequence) {
+                    Configuration configuration = project.configurations.findByName(it)
+                    if (configuration != null) {
+                        return collectArtifacts(configuration)
+                    } else {
+                        logger.error("{}: Could not find configuration: {}.", path, it)
+                    }
+                } else if (conf instanceof Configuration) {
+                    return collectArtifacts((Configuration) it)
                 } else {
-                    logger.error("{}: Could not find configuration: {}.", path, it)
+                    logger.error("{}: Unsupported configuration type: {}.", path, it.class)
                 }
-            } else if (conf instanceof Configuration) {
-                return collectArtifacts((Configuration) it)
-            } else {
-                logger.error("{}: Unsupported configuration type: {}.", path, it.class)
-            }
-            []
-        }.flatten() as Artifact[]
+                []
+            }.flatten() as Artifact[]
 
-        publicationUploads = publications.collect {
-            if (it instanceof CharSequence) {
-                Publication publication = project.extensions.getByType(PublishingExtension).publications.findByName(it)
-                if (publication != null) {
-                    return collectArtifacts(publication)
+            publicationUploads = publications.collect {
+                if (it instanceof CharSequence) {
+                    Publication publication = project.extensions.getByType(PublishingExtension).publications.findByName(it)
+                    if (publication != null) {
+                        return collectArtifacts(publication)
+                    } else {
+                        logger.error("{}: Could not find publication: {}.", path, it);
+                    }
+                } else if (conf instanceof MavenPublication) {
+                    return collectArtifacts((Configuration) it)
                 } else {
-                    logger.error("{}: Could not find publication: {}.", path, it);
+                    logger.error("{}: Unsupported publication type: {}.", path, it.class)
                 }
-            } else if (conf instanceof MavenPublication) {
-                return collectArtifacts((Configuration) it)
-            } else {
-                logger.error("{}: Unsupported publication type: {}.", path, it.class)
-            }
-            []
-        }.flatten() as Artifact[]
+                []
+            }.flatten() as Artifact[]
 
-        RecordingCopyTask recordingCopyTask = getDependsOn().find { it instanceof RecordingCopyTask }
-        fileUploads = (recordingCopyTask ? recordingCopyTask.fileUploads : []) as Artifact[]
+            RecordingCopyTask recordingCopyTask = getDependsOn().find { it instanceof RecordingCopyTask }
+            fileUploads = (recordingCopyTask ? recordingCopyTask.fileUploads : []) as Artifact[]
 
             if (repoName == null || versionName == null || packageName == null) {
                 logger.warn("Repository name, package name or version name are null for project: " + project.getDisplayName())
@@ -399,10 +399,10 @@ class BintrayUploadTask extends DefaultTask {
         Package pkg = getRepository().packages.get(packageName)
         if (!pkg) {
             throw new IllegalStateException(
-                "Attempted checking and creating version, before checking and creating the package.")
+                    "Attempted checking and creating version, before checking and creating the package.")
         }
         Version v = new Version(
-            versionName, signVersion, gpgPassphrase, publish, shouldSyncToMavenCentral())
+                versionName, signVersion, gpgPassphrase, publish, shouldSyncToMavenCentral())
         Version version = pkg.addVersionIfAbsent(v)
         if (version && !version.created) {
             synchronized (version) {

@@ -1,1 +1,1 @@
-include ':api'
+include ':api', ':shared'

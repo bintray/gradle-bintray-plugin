@@ -16,7 +16,7 @@ install {
 
             packaging 'aar'
             groupId 'bintray.gradle.test'
-            artifactId 'android-maven-api'
+            artifactId 'android-maven-shared'
             version '0.1'
 
             licenses {
