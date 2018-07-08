@@ -27,6 +27,12 @@ class Package {
         return v
     }
 
+    // Returns the version of the Map if exists
+    // Null if there is no such version in the map
+    Version getVersionIfExists(Version v) {
+        return versions.get(v)
+    }
+
     boolean equals(o) {
         if (this.is(o)) {
             return true

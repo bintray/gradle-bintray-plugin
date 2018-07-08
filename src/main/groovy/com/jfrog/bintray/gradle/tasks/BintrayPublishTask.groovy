@@ -1,6 +1,9 @@
 package com.jfrog.bintray.gradle.tasks
 
 import com.jfrog.bintray.gradle.Utils
+import com.jfrog.bintray.gradle.tasks.entities.Repository
+import com.jfrog.bintray.gradle.tasks.entities.Package
+import com.jfrog.bintray.gradle.tasks.entities.Version
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
@@ -15,6 +18,7 @@ import static groovyx.net.http.Method.POST
  */
 class BintrayPublishTask extends DefaultTask {
     static final String TASK_NAME = "bintrayPublish"
+    private HashMap<String, Repository> repositories = new HashMap<>()
 
     @TaskAction
     void taskAction() throws IOException {
@@ -25,14 +29,36 @@ class BintrayPublishTask extends DefaultTask {
         HashSet<BintrayUploadTask> tasks = project.getTasksByName(BintrayUploadTask.TASK_NAME, true)
         for (BintrayUploadTask task : tasks) {
             if (task.getEnabled() && task.getDidWork()) {
-                if (task.getSignVersion()) {
-                    gpgSignVersion(task.repoName, task.packageName, task.versionName, task)
+                Package pkg = new Package(task.packageName)
+                Repository repository = new Repository(task.repoName)
+                Repository existingRepo = repositories.putIfAbsent(task.repoName, repository)
+                if (!existingRepo) {
+                    existingRepo = repository
                 }
-                if (task.publish) {
-                    publishVersion(task.repoName, task.packageName, task.versionName, task)
+
+                Package existingPackage = existingRepo.packages.putIfAbsent(task.packageName, pkg)
+                if (!existingPackage) {
+                    existingPackage = pkg
                 }
-                if (task.shouldSyncToMavenCentral()) {
-                    mavenCentralSync(task.repoName, task.packageName, task.versionName, task)
+
+                Version v = new Version(
+                        task.versionName, task.signVersion, task.gpgPassphrase, task.publish, task.shouldSyncToMavenCentral())
+                Version existingVersion = existingPackage.getVersionIfExists(v)
+
+                if (existingVersion == null) {
+                    existingPackage.addVersionIfAbsent(v)
+                    existingVersion = new Version(v.name, false, v.gpgPassphrase, false, false)
+                }
+                if (existingVersion.shouldGpgSign(v.gpgSign)) {
+                    gpgSignVersion(existingRepo.name, existingPackage.name, existingVersion.name, task)
+                }
+
+                if (existingVersion.shouldPerformPublish(v.publish)) {
+                    publishVersion(existingRepo.name, existingPackage.name, existingVersion.name, task)
+                }
+
+                if (existingVersion.shouldPerformMavenSync(v.mavenCentralSync)) {
+                    mavenCentralSync(existingRepo.name, existingPackage.name, existingVersion.name, task)
                 }
             }
         }
