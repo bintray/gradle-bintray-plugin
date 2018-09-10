@@ -35,6 +35,7 @@ plugins {
 }
 ```
 * Currently the "plugins" notation cannot be used for applying the plugin for sub projects, when used from the root build script.
+* In newest Gradle versions you need to specify exactly the version you want to use like `1.x.y` and not use wildcard like `1.+`.
 
 ###### Gradle < 2.1
 ```groovy
