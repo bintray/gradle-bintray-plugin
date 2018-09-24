@@ -219,7 +219,7 @@ class BintrayUploadTask extends DefaultTask {
                         logger.error("{}: Could not find publication: {}.", path, it);
                     }
                 } else if (it instanceof MavenPublication) {
-                    return collectArtifacts((Configuration) it)
+                    return collectArtifacts((MavenPublication) it)
                 } else {
                     logger.error("{}: Unsupported publication type: {}.", path, it.class)
                 }
