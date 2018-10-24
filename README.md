@@ -343,7 +343,7 @@ The plugin allows using Bintray supports for files GPG signing. To have your Ver
 <a name="Maven_Central_Sync"/>
 
 # Maven Central Sync
-The plugin allows using Bintray's interface with Maven Central. You can have the artifacts of a Version sent to Maven Central, by adding the adding the *mavenCentralSync* closure inside the *version* closure, as shown in the below *Plugin DSL* section.
+The plugin allows using Bintray's interface with Maven Central. You can have the artifacts of a Version sent to Maven Central, by adding the *mavenCentralSync* closure inside the *version* closure, as shown in the below *Plugin DSL* section.
 If that closure is omitted, the version will not be sent to Maven central.
 
 In order for this functionality to be enabled, you first must verify the following:
