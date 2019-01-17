@@ -203,7 +203,7 @@ class BintrayUploadTask extends DefaultTask {
                     } else {
                         logger.error("{}: Could not find configuration: {}.", path, it)
                     }
-                } else if (conf instanceof Configuration) {
+                } else if (it instanceof Configuration) {
                     return collectArtifacts((Configuration) it)
                 } else {
                     logger.error("{}: Unsupported configuration type: {}.", path, it.class)
@@ -220,7 +220,7 @@ class BintrayUploadTask extends DefaultTask {
                         logger.error("{}: Could not find publication: {}.", path, it);
                     }
                 } else if (it instanceof MavenPublicationInternal) {
-                    return collectArtifacts((Configuration) it)
+                    return collectArtifacts((MavenPublicationInternal) it)
                 } else {
                     logger.error("{}: Unsupported publication type: {}.", path, it.class)
                 }
@@ -560,18 +560,16 @@ class BintrayUploadTask extends DefaultTask {
         }
 
         def mavenPublication = (MavenPublicationInternal)publication
-        if (mavenPublication.canPublishModuleMetadata()) {
-            def moduleFile = mavenPublication.publishableFiles.find{ it.name == 'module.json'}
-            if (moduleFile != null) {
-                artifacts << new Artifact(
-                        name: identity.artifactId,
-                        groupId: identity.groupId,
-                        version: identity.version,
-                        extension: 'module',
-                        type: 'module',
-                        file: moduleFile
-                )
-            }
+        def moduleFile = mavenPublication.publishableFiles.find{ it.name == 'module.json'}
+        if (moduleFile != null) {
+            artifacts new Artifact(
+                    name: publication.artifactId,
+                    groupId: publication.groupId,
+                    version: publication.version,
+                    extension: 'module',
+                    type: 'module',
+                    file: moduleFile
+            )
         }
 
 
