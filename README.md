@@ -243,13 +243,15 @@ publishing {
     }
 }     
 ```
-Note, if you are using the Android Plugin for Gradle 3.0.0 and the [new `implementation` dependency configuration](https://developer.android.com/studio/build/gradle-plugin-3-0-0-migration.html#new_configurations) then you will need the following instead:
+Note, if you are using the Android Plugin for Gradle 3.0.0 and the [new `implementation` or `api` dependency configuration](https://developer.android.com/studio/build/gradle-plugin-3-0-0-migration.html#new_configurations) then you will need the following instead:
 
 ```groovy
 publishing {
     publications {
         MyPublication(MavenPublication) {
-        
+          // Define this explicitly if using implementation or api configurations
+          def dependenciesNode = asNode().getAt('dependencies')[0] ?: asNode().appendNode('dependencies')
+          
           pom.withXml {
             // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
             configurations.implementation.allDependencies.each {
