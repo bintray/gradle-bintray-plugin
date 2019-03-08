@@ -18,6 +18,7 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.publish.Publication
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.internal.publication.MavenPublicationInternal
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
@@ -202,7 +203,7 @@ class BintrayUploadTask extends DefaultTask {
                     } else {
                         logger.error("{}: Could not find configuration: {}.", path, it)
                     }
-                } else if (conf instanceof Configuration) {
+                } else if (it instanceof Configuration) {
                     return collectArtifacts((Configuration) it)
                 } else {
                     logger.error("{}: Unsupported configuration type: {}.", path, it.class)
@@ -218,8 +219,8 @@ class BintrayUploadTask extends DefaultTask {
                     } else {
                         logger.error("{}: Could not find publication: {}.", path, it);
                     }
-                } else if (conf instanceof MavenPublication) {
-                    return collectArtifacts((Configuration) it)
+                } else if (it instanceof MavenPublicationInternal) {
+                    return collectArtifacts((MavenPublicationInternal) it)
                 } else {
                     logger.error("{}: Unsupported publication type: {}.", path, it.class)
                 }
@@ -539,7 +540,7 @@ class BintrayUploadTask extends DefaultTask {
     }
 
     Artifact[] collectArtifacts(Publication publication) {
-        if (!publication instanceof MavenPublication) {
+        if (!publication instanceof MavenPublicationInternal) {
             logger.info "{} can only use maven publications - skipping {}.", path, publication.name
             return []
         }
@@ -557,6 +558,20 @@ class BintrayUploadTask extends DefaultTask {
                     signedExtension: signedExtension
             )
         }
+
+        def mavenPublication = (MavenPublicationInternal)publication
+        def moduleFile = mavenPublication.publishableFiles.find{ it.name == 'module.json'}
+        if (moduleFile != null) {
+            artifacts new Artifact(
+                    name: publication.artifactId,
+                    groupId: publication.groupId,
+                    version: publication.version,
+                    extension: 'module',
+                    type: 'module',
+                    file: moduleFile
+            )
+        }
+
 
         // Add the pom file
         artifacts << new Artifact(
