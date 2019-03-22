@@ -5,7 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.9.0"
     }
 }
 
@@ -19,6 +19,7 @@ def getTestFile = { fileName ->
 
 allprojects {
     apply plugin: 'idea'
+    apply plugin: 'java-gradle-plugin'
 
     group = pkgName
     version = versionName
@@ -106,4 +107,3 @@ subprojects {
 
     apply from: getTestFile("${testName}.gradle")
 }
-

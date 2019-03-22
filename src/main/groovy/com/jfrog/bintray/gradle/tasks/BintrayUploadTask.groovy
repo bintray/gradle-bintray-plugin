@@ -18,6 +18,8 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.publish.Publication
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.internal.publication.MavenPublicationInternal
+import org.gradle.plugins.signing.Signature
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
@@ -202,7 +204,7 @@ class BintrayUploadTask extends DefaultTask {
                     } else {
                         logger.error("{}: Could not find configuration: {}.", path, it)
                     }
-                } else if (conf instanceof Configuration) {
+                } else if (it instanceof Configuration) {
                     return collectArtifacts((Configuration) it)
                 } else {
                     logger.error("{}: Unsupported configuration type: {}.", path, it.class)
@@ -218,7 +220,7 @@ class BintrayUploadTask extends DefaultTask {
                     } else {
                         logger.error("{}: Could not find publication: {}.", path, it);
                     }
-                } else if (conf instanceof MavenPublication) {
+                } else if (it instanceof MavenPublication) {
                     return collectArtifacts((Configuration) it)
                 } else {
                     logger.error("{}: Unsupported publication type: {}.", path, it.class)
@@ -510,7 +512,7 @@ class BintrayUploadTask extends DefaultTask {
                 logger.error("{}: file {} could not be found.", path, it.file.getAbsolutePath())
                 return null
             }
-            boolean signedArtifact = (it instanceof org.gradle.plugins.signing.Signature)
+            boolean signedArtifact = (it instanceof Signature)
             def signedExtension = signedArtifact ? it.toSignArtifact.getExtension() : null
             String name = artifactId == null ? it.name : artifactId
             artifacts << new Artifact(
@@ -543,9 +545,9 @@ class BintrayUploadTask extends DefaultTask {
             logger.info "{} can only use maven publications - skipping {}.", path, publication.name
             return []
         }
-        def artifacts = publication.artifacts.findResults {
-            boolean signedArtifact = (it instanceof org.gradle.plugins.signing.Signature)
-            def signedExtension = signedArtifact ? it.toSignArtifact.getExtension() : null
+
+        Collection<Artifact> artifacts = publication.artifacts.findResults {
+            String signedExtension = (it instanceof Signature) ? it.toSignArtifact.getExtension() : null
             new Artifact(
                     name: publication.artifactId,
                     groupId: publication.groupId,
@@ -567,6 +569,21 @@ class BintrayUploadTask extends DefaultTask {
                 type: 'pom',
                 file: publication.asNormalisedPublication().pomFile
         )
+
+        //If gradle metadata file is present, add it to artifacts
+        MavenPublicationInternal mavenPublication = (MavenPublicationInternal) publication
+        File gradleMetadataFile = mavenPublication.publishableFiles.find { it.name == 'module.json' }
+        if (gradleMetadataFile) {
+            artifacts << new Artifact(
+                    name: publication.artifactId,
+                    groupId: publication.groupId,
+                    version: publication.version,
+                    extension: 'module',
+                    type: 'module',
+                    file: gradleMetadataFile
+            )
+        }
+
         artifacts
     }
 

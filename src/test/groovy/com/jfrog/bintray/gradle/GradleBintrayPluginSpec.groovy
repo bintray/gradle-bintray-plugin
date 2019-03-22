@@ -7,6 +7,7 @@ import org.apache.http.HttpResponse
 import org.gradle.api.GradleException
 import org.junit.Rule
 import org.junit.rules.TestName
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -277,6 +278,8 @@ class GradleBintrayPluginSpec extends Specification {
         exitCode == 0
     }
 
+
+
     def "debian package indexed"() {
         // Check that the file uploaded in the
         // "[fileSpec]create debian package and version with fileSpec" test
@@ -287,6 +290,27 @@ class GradleBintrayPluginSpec extends Specification {
         expect:
         String bintraySubject = getSubject()
         checkExistenceOnBintray("/$bintraySubject/${config.debianRepo}/dists/squeeze/main/binary-amd64/Packages")
+    }
+
+    @Ignore("This requires 1.9.0 to be available with support for gradle metadata")
+    def "[publicationWithGradleMetadata]publish package with gradle metadata file"() {
+        when:
+        String version = PluginSpecUtils.createVersion(versions)
+        savedVersion = version
+        String[] tasks = ["clean", "build", "bintrayUpload"]
+        def exitCode = PluginSpecUtils.launchGradle(testName.methodName, tasks, version)
+
+        then:
+        // Gradle build finished successfully:
+        exitCode == 0
+
+        String bintraySubject = getSubject()
+
+        when:
+        String pathApi = "/$bintraySubject/${config.mavenRepo}/gradle/tests/pkg/name5/shared/${savedVersion}/shared-${savedVersion}.module"
+
+        then:
+        checkExistenceOnBintray(pathApi)
     }
 
     private String getSubject() {

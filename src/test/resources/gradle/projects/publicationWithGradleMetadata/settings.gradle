@@ -1,1 +1,2 @@
 include "shared", "api", "services:webservice"
+enableFeaturePreview("GRADLE_METADATA")

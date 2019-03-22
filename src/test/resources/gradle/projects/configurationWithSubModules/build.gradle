@@ -29,6 +29,3 @@ allprojects {
 
 apply from: getTestFile("${testName}.gradle")
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '1.10'
-}
