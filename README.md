@@ -22,7 +22,7 @@ The Gradle Bintray Plugin allows you to publish artifacts to Bintray.
 # Getting Started Using the Plugin
 Please follow the below steps to add the Gradle Bintray Plugin to your Gradle build script.
 
-#### Step 1: [Sign up](https://bintray.com/docs/usermanual/working/working_allaboutjoiningbintraysigningupandloggingin.html) to [Bintray](https://bintray.com/) and locate your API Key under Edit Your Profile -> API Key
+#### Step 1: [Sign up](https://bintray.com/login?forwardedFrom=%2F) to [Bintray](https://bintray.com/) and locate your API Key under Edit Your Profile -> API Key
 
 #### Step 2: Apply the plugin to your Gradle build script
 
