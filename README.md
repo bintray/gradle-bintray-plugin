@@ -229,26 +229,6 @@ If you are trying to publish an Android project, specifying the `from components
 publishing {
     publications {
         MyPublication(MavenPublication) {
-        
-          pom.withXml {
-            // Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
-            configurations.compile.allDependencies.each {
-               def dependencyNode = dependenciesNode.appendNode('dependency')
-               dependencyNode.appendNode('groupId', it.group)
-               dependencyNode.appendNode('artifactId', it.name)
-               dependencyNode.appendNode('version', it.version)
-            }
-          }
-        }
-    }
-}     
-```
-Note, if you are using the Android Plugin for Gradle 3.0.0 and the [new `implementation` or `api` dependency configuration](https://developer.android.com/studio/build/gradle-plugin-3-0-0-migration.html#new_configurations) then you will need the following instead:
-
-```groovy
-publishing {
-    publications {
-        MyPublication(MavenPublication) {
           // Define this explicitly if using implementation or api configurations
           def dependenciesNode = asNode().getAt('dependencies')[0] ?: asNode().appendNode('dependencies')
           
