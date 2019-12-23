@@ -9,3 +9,8 @@
 build
 
 gradle.properties
+
+build/
+.gradle/
+
+.idea/
