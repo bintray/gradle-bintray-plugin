@@ -43,7 +43,3 @@ def getTestFile = { fileName ->
 }
 
 apply from: getTestFile("${testName}.gradle")
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.4'
-}
