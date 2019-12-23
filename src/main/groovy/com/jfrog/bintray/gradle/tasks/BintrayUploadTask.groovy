@@ -18,6 +18,7 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.publish.Publication
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.internal.publication.MavenPublicationInternal
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
@@ -539,13 +540,11 @@ class BintrayUploadTask extends DefaultTask {
     }
 
     Artifact[] collectArtifacts(Publication publication) {
-        if (!publication instanceof MavenPublication) {
+        if (!publication instanceof MavenPublicationInternal) {
             logger.info "{} can only use maven publications - skipping {}.", path, publication.name
             return []
         }
-        def artifacts = publication.artifacts.findResults {
-            boolean signedArtifact = (it instanceof org.gradle.plugins.signing.Signature)
-            def signedExtension = signedArtifact ? it.toSignArtifact.getExtension() : null
+        def artifacts = publication.asNormalisedPublication().allArtifacts.findResults {
             new Artifact(
                     name: publication.artifactId,
                     groupId: publication.groupId,
@@ -553,20 +552,9 @@ class BintrayUploadTask extends DefaultTask {
                     extension: it.extension,
                     type: it.extension,
                     classifier: it.classifier,
-                    file: it.file,
-                    signedExtension: signedExtension
+                    file: it.file
             )
         }
-
-        // Add the pom file
-        artifacts << new Artifact(
-                name: publication.artifactId,
-                groupId: publication.groupId,
-                version: publication.version,
-                extension: 'pom',
-                type: 'pom',
-                file: publication.asNormalisedPublication().pomFile
-        )
         artifacts
     }
 
