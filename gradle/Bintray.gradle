@@ -32,7 +32,7 @@ class BintrayRepositoriesExtension {
     MavenArtifactRepository jcenter() {
         return repositories.maven { MavenArtifactRepository repository ->
             repository.name = 'BintrayJCenter'
-            repository.url = 'http://jcenter.bintray.com'
+            repository.url = 'https://jcenter.bintray.com'
         }
     }
 
@@ -90,7 +90,7 @@ class BintrayRepositoriesExtension {
     }
 
     String determineRepositoryUrl(String repoOwner, String repoName) {
-        return "http://dl.bintray.com/content/${repoOwner}/${repoName}"
+        return "https://dl.bintray.com/content/${repoOwner}/${repoName}"
     }
 
     String separatorsToCaps(String string) {
