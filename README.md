@@ -233,6 +233,8 @@ publishing {
           def dependenciesNode = asNode().getAt('dependencies')[0] ?: asNode().appendNode('dependencies')
           
           pom.withXml {
+            def dependenciesNode = asNode().appendNode('dependencies')
+
             // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
             configurations.implementation.allDependencies.each {
                // Ensure dependencies such as fileTree are not included.
