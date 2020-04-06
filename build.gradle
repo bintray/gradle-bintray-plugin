@@ -8,7 +8,7 @@ buildscript {
     }
     dependencies {
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:3.1.1"
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5"
     }
 }
 
@@ -158,8 +158,4 @@ task install(dependsOn: 'publishMavenJavaPublicationToMavenLocal') {
     doLast {
         logger.info "Installing $project.name"
     }
-}
-
-task wrapper(type: Wrapper, description: 'Gradle Wrapper task') {
-    gradleVersion = '2.4'
 }

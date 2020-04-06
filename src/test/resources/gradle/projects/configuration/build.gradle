@@ -4,7 +4,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5"
     }
 }
 
@@ -28,7 +28,3 @@ allprojects {
 }
 
 apply from: getTestFile("${testName}.gradle")
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '1.10'
-}
