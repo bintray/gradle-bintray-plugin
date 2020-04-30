@@ -404,6 +404,77 @@ bintray {
     }
 }
 ```
+
+## build.gradle.kts
+```kotlin
+import com.jfrog.bintray.gradle.* 
+
+    bintray {
+        user = "bintray_user"
+        key = "bintray_api_key"
+
+        configurations("deployables") //When uploading configuration files
+        // - OR -
+        publications("mavenStuff") //When uploading Maven-based publication files
+
+        fileSpec {
+            from("arbitrary-files")
+            into("standalone_files/level1")
+            rename("(.+)\\.(.+)", "$1-suffix.$2")
+        }
+
+        dryRun = false //[Default: false] Whether to run this as dry-run, without deploying
+        publish = true //[Default: false] Whether version should be auto published after an upload
+        override = false //[Default: false] Whether to override version artifacts already published
+
+        pkg {
+            repo = "myrepo"
+            name = "mypkg"
+            userOrg = "myorg" //An optional organization name when the repo belongs to one of the user"s orgs
+            desc = "what a fantastic package indeed!"
+            websiteUrl = "https://github.com/bintray/gradle-bintray-plugin"
+            issueTrackerUrl = "https://github.com/bintray/gradle-bintray-plugin/issues"
+            vcsUrl = "https://github.com/bintray/gradle-bintray-plugin.git"
+            licenses("Apache-2.0")
+            labels("gear", "gore", "gorilla")
+            publicDownloadNumbers = true
+            attributes("a" to arrayOf("ay1", "ay2", "b" to arrayOf("bee"), "c" to "cee")) //Optional package-level attributes
+
+            githubRepo = "bintray/gradle-bintray-plugin" //Optional Github repository
+            githubReleaseNotesFile = "README.md" //Optional Github readme file
+
+            //Optional Debian details
+            debian {
+                distribution = "squeeze"
+                component = "main"
+                architecture = "i386,noarch,amd64"
+            }
+
+            //Optional version descriptor
+            version {
+                name = "1.3-Final" //Bintray logical version name
+                desc = ""//Optional - Version-specific description"
+                released = ""//Optional - Date of the version release. 2 possible values: date in the format of "yyyy-MM-dd"T"HH:mm:ss.SSSZZ" OR a java.util.Date instance
+                vcsTag = "1.3.0"
+                attributes("gradle-plugin" to "com.use.less:com.use.less.gradle:gradle-useless-plugin") //Optional version-level attributes
+
+                //Optional configuration for GPG signing
+                gpg {
+                    sign = true //Determines whether to GPG sign the files. The default is false
+                    passphrase = "passphrase" //Optional. The passphrase for GPG signing"
+                }
+
+                //Optional configuration for Maven Central sync of the version
+                mavenCentralSync {
+                    sync = true //[Default: true] Determines whether to sync the version to Maven Central.
+                    user = "userToken" //OSS user token: mandatory
+                    password = "paasword" //OSS user password: mandatory
+                    close = "1" //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
+                }
+            }
+        }
+    }
+```
 * As an example, you can also refer to these [sample projects](https://github.com/bintray/bintray-examples/tree/master/gradle-bintray-plugin-examples).
 
 **Gradle Compatibility:**

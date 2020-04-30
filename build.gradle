@@ -9,6 +9,7 @@ buildscript {
     dependencies {
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:3.1.1"
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.72"
     }
 }
 
@@ -17,13 +18,17 @@ apply plugin: 'maven-publish'
 apply plugin: 'idea'
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'kotlin'
 
 repositories {
     jcenter()
+    maven { url "https://kotlin.bintray.com/kotlinx/" }
+    maven { url "https://repo.gradle.org/gradle/libs-releases-local/" }
 }
 
 dependencies {
     compile gradleApi()
+    compile('org.gradle:gradle-kotlin-dsl:1.0.4')
     compile('org.codehaus.groovy.modules.http-builder:http-builder:0.7.2') {
         exclude(module: 'groovy')
     }
@@ -36,6 +41,7 @@ dependencies {
     testCompile('com.jfrog.bintray.client:bintray-client-java-impl:0.1.1')
     testCompile('org.codehaus.gpars:gpars:1.2.1')
     testCompile('org.codehaus.groovy.modules.http-builder:http-builder:0.7.1')
+
 }
 
 test {
@@ -47,10 +53,10 @@ test {
         }
     }
     systemProperties = [
-        'http.proxyHost': System.getProperty('http.proxyHost'),
-        'http.proxyPort': System.getProperty('http.proxyPort'),
-        'http.proxyUser': System.getProperty('http.proxyUser'),
-        'http.proxyPassword': System.getProperty('http.proxyPassword')
+            'http.proxyHost'    : System.getProperty('http.proxyHost'),
+            'http.proxyPort'    : System.getProperty('http.proxyPort'),
+            'http.proxyUser'    : System.getProperty('http.proxyUser'),
+            'http.proxyPassword': System.getProperty('http.proxyPassword')
     ]
 }
 
@@ -110,7 +116,7 @@ publishing {
     }
 }
 
-task createReleasePropertiesFile(type:Exec) {
+task createReleasePropertiesFile(type: Exec) {
     String fileName = 'bintray.plugin.release.properties'
     println 'Creating $fileName'
     String fileContent = "version=$currentVersion"
@@ -158,4 +164,15 @@ task install(dependsOn: 'publishMavenJavaPublicationToMavenLocal') {
     doLast {
         logger.info "Installing $project.name"
     }
+}
+
+// Required in order to support building a mixed kotlin/groovy project. With out this,
+// we would get a cyclic dependency error, since both compileKotlin and compileGroovy
+// depend on compileJava.
+// https://discuss.gradle.org/t/kotlin-groovy-and-java-compilation/14903/10
+project.afterEvaluate {
+    compileGroovy.dependsOn = compileGroovy.taskDependencies.mutableValues - 'compileJava'
+    compileKotlin.dependsOn compileGroovy
+    compileKotlin.classpath += files(compileGroovy.destinationDir)
+    classes.dependsOn compileKotlin
 }
