@@ -7,8 +7,8 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:3.1.1"
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5"
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.15.2"
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:+"
     }
 }
 
@@ -27,6 +27,7 @@ dependencies {
     compile('org.codehaus.groovy.modules.http-builder:http-builder:0.7.2') {
         exclude(module: 'groovy')
     }
+    compile('org.apache.maven:maven-ant-tasks:2.1.3')
     compile('org.apache.maven.resolver:maven-resolver-ant-tasks:1.2.0')
     // provided by Gradle
     compileOnly('org.apache.maven:maven-project:2.0.11')
