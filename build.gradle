@@ -23,22 +23,21 @@ repositories {
 }
 
 dependencies {
-    compile gradleApi()
-    compile('org.codehaus.groovy.modules.http-builder:http-builder:0.7.2') {
+    implementation gradleApi()
+    implementation('org.codehaus.groovy.modules.http-builder:http-builder:0.7.2') {
         exclude(module: 'groovy')
     }
-    compile('org.apache.maven.resolver:maven-resolver-ant-tasks:1.2.0')
-    // provided by Gradle
-    compileOnly('org.apache.maven:maven-project:2.0.11')
-    testRuntime('org.apache.maven:maven-project:2.0.11')
-    testCompile('org.spockframework:spock-core:0.7-groovy-2.0') {
+    implementation('org.apache.maven.resolver:maven-resolver-ant-tasks:1.2.0')
+    implementation('org.apache.maven:maven-core:3.0.5')
+
+    testImplementation('org.spockframework:spock-core:0.7-groovy-2.0') {
         exclude(module: 'groovy-all')
     }
-    testCompile('com.jfrog.bintray.client:bintray-client-java-api:0.4')
-    testCompile('com.jfrog.bintray.client:bintray-client-java-service:0.4')
-    testCompile('com.jfrog.bintray.client:bintray-client-java-impl:0.1.1')
-    testCompile('org.codehaus.gpars:gpars:1.2.1')
-    testCompile('org.codehaus.groovy.modules.http-builder:http-builder:0.7.1')
+    testImplementation('com.jfrog.bintray.client:bintray-client-java-api:0.4')
+    testImplementation('com.jfrog.bintray.client:bintray-client-java-service:0.4')
+    testImplementation('com.jfrog.bintray.client:bintray-client-java-impl:0.1.1')
+    testImplementation('org.codehaus.gpars:gpars:1.2.1')
+    testImplementation('org.codehaus.groovy.modules.http-builder:http-builder:0.7.1')
 }
 
 test {
