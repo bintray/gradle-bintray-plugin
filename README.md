@@ -444,27 +444,51 @@ export BINTRAY_USER=<Your Bintray user name>
 export BINTRAY_KEY=<Your Bintray API Key>
 export BINTRAY_ORG=<Your Bintray organization name>
 ```
+## Publish the modified plugin to Maven local
+
+In order to test the modified plugin, it must be published to Maven local where the tests will resolve it.
+
+The publication can be done by running:
+```
+> ./gradlew publishtToMavenLocal
+```
+
+---
+**NOTE**
+
+If you have changed the plugin version in `gradle.properties`, you will need to change it in the test projects.
+See `src/test/resources/gradle/projects` for this.
+
+---
 
 ## Running the build with or without tests
 To build the code using the gradle wrapper in Unix run:
 ```
-> ./gradlew clean build
+> ./gradlew build
 ```
 
 To build the code using the gradle wrapper in Windows run:
 ```
-> gradlew clean build
+> gradlew build
 ```
 
 To build the code using the environment gradle run:
 ```
-> gradle clean build
+> gradle build
 ```
 
 To build the code without running the tests, add to the "clean build" command the "-x test" option, for example:
 ```
-> ./gradlew clean build -x test
+> ./gradlew build -x test
 ```
+
+---
+**NOTE**
+
+The tests will use the Gradle version pointed at by `GRADLE_HOME`.
+If not set, it will use the wrapper of this project.
+
+---
 
 <a name="Release_Notes"/>
 
