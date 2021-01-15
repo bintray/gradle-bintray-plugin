@@ -32,12 +32,12 @@ class BintrayExtension {
         this.project = project
     }
 
-    def pkg(Closure closure) {
+    def pkg(Closure<PackageConfig> closure) {
         ConfigureUtil.configure(closure, pkg)
     }
 
-    def filesSpec(Closure closure) {
-        filesSpec = project.task(type: RecordingCopyTask, RecordingCopyTask.NAME)
+    def filesSpec(Closure<RecordingCopyTask> closure) {
+        filesSpec = (RecordingCopyTask) project.task(type: RecordingCopyTask, RecordingCopyTask.NAME)
         ConfigureUtil.configure(closure, filesSpec)
         filesSpec.outputs.upToDateWhen { false }
     }
@@ -59,12 +59,12 @@ class BintrayExtension {
         Map attributes
 
         VersionConfig version = new VersionConfig()
-        def version(Closure closure) {
+        def version(Closure<VersionConfig> closure) {
             ConfigureUtil.configure(closure, version)
         }
 
         DebianConfig debian = new DebianConfig()
-        def debian(Closure closure) {
+        def debian(Closure<DebianConfig> closure) {
             ConfigureUtil.configure(closure, debian)
         }
     }
@@ -83,12 +83,12 @@ class BintrayExtension {
         Map attributes
 
         GpgConfig gpg = new GpgConfig()
-        def gpg(Closure closure) {
+        def gpg(Closure<GpgConfig> closure) {
             ConfigureUtil.configure(closure, gpg)
         }
 
         MavenCentralSyncConfig mavenCentralSync = new MavenCentralSyncConfig()
-        def mavenCentralSync(Closure closure) {
+        def mavenCentralSync(Closure<MavenCentralSyncConfig> closure) {
             ConfigureUtil.configure(closure, mavenCentralSync)
         }
     }

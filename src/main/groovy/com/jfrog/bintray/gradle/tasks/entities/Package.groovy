@@ -19,7 +19,7 @@ class Package {
         this.created = true
     }
 
-    public Version addVersionIfAbsent(Version version) {
+    Version addVersionIfAbsent(Version version) {
         Version v = versions.putIfAbsent(version.name, version)
         if (v) {
             v.merge(version)
