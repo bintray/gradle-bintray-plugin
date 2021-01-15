@@ -190,7 +190,7 @@ class BintrayUploadTask extends DefaultTask {
 
     @TaskAction
     void bintrayUpload() {
-        logger.info("Gradle Bintray Plugin version: ${new Utils().pluginVersion}");
+        logger.info("Gradle Bintray Plugin version: ${new Utils().pluginVersion}")
         if (getEnabled()) {
             validateDebianDefinition()
             //TODO: [by yl] replace with findResults for Gradle 2.x
@@ -414,14 +414,14 @@ class BintrayUploadTask extends DefaultTask {
         return version ? version : v
     }
 
-    void setPackageAsCreated(Package pkg) {
+    static void setPackageAsCreated(Package pkg) {
         pkg.setAsCreated()
         synchronized (pkg) {
             pkg.notifyAll()
         }
     }
 
-    void setVersionAsCreated(Version version) {
+    static void setVersionAsCreated(Version version) {
         version.setAsCreated()
         synchronized (version) {
             version.notifyAll()

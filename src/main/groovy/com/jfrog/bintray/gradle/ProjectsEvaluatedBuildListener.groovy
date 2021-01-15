@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 class ProjectsEvaluatedBuildListener extends BuildAdapter implements ProjectEvaluationListener {
     private BintrayUploadTask bintrayUpload
-    private final Set<BintrayUploadTask> bintrayUploadTasks = Collections.newSetFromMap(new ConcurrentHashMap<Task, Boolean>());
+    private final Set<BintrayUploadTask> bintrayUploadTasks = Collections.newSetFromMap(new ConcurrentHashMap<BintrayUploadTask, Boolean>())
 
     ProjectsEvaluatedBuildListener(BintrayUploadTask bintrayUpload) {
         this.bintrayUpload = bintrayUpload
